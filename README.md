@@ -15,7 +15,7 @@
 ## Features
 
 - [x] Version auto completion
-- [ ] Features auto completion
+- [x] Features auto completion
 - [ ] Crate name auto completion
 - [ ] Version check
 - [ ] Open source

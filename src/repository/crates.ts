@@ -1,3 +1,4 @@
+import { addQuotes } from '@entity'
 import { Metadata } from '@entity/crates'
 import ky from "ky"
 
@@ -30,17 +31,20 @@ export async function sparseIndexMetadata(name: string, url: string = DEFAULT_SP
 	for (let d of jsonLinesArr) {
 		let j = JSON.parse(d)
 		if (j.yanked === false) {
-			versions.push(j.vers)
+			const quotedVersion = addQuotes(j.vers)
+			versions.push(quotedVersion)
 			if (j.rust_version) {
 				rustVersion[j.vers] = j.rust_version
 			}
-			features[j.vers] = Object.keys(j.features).filter(f => {
-				if (f === "default") {
-					defaultFeatures = j.features[f]
-					return false
-				}
-				return true
-			})
+			features[quotedVersion] = Object.keys(j.features)
+				.filter(f => {
+					if (f === "default") {
+						defaultFeatures = j.features["default"].map(f => addQuotes(f))
+						return false
+					}
+					return true
+				})
+				.map(f => addQuotes(f))
 		}
 	}
 	//reverse versions array

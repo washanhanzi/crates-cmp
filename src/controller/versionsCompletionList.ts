@@ -3,7 +3,7 @@ import { versionCmp } from "@usecase"
 import { async } from "@washanhanzi/result-enum"
 import { window, CompletionItem, CompletionItemKind, CompletionList, ExtensionContext, Range } from "vscode"
 
-export async function versionsCompletionList(ctx: ExtensionContext, crateName: string, range: Range) {
+export async function versionsCompletionList(ctx: ExtensionContext, crateName: string, range?: Range) {
 	const versionsResult = await async(versionCmp(ctx, crateName))
 	if (versionsResult.isErr()) {
 		window.showErrorMessage(versionsResult.unwrapErr().message)

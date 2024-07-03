@@ -1,9 +1,10 @@
 import { sortString } from "@entity"
 import { versionCmp } from "usecase/versionCmp"
 import { CancellationToken, CompletionContext, CompletionItem, CompletionItemKind, CompletionItemProvider, CompletionList, ExtensionContext, Position, ProviderResult, Range, SnippetString, TextDocument, commands, window } from "vscode"
-import { versionsCompletionList } from "./versionCmp"
+import { versionsCompletionList } from "./versionsCompletionList"
 import { executeCommand } from "./promisify"
 import { async } from "@washanhanzi/result-enum"
+import { featuresCompletionList } from "./featuresCompletionList"
 
 type Node = {
 	name: string
@@ -84,48 +85,51 @@ export class CratesCompletions implements CompletionItemProvider {
 		if (!withinDependenciesBlock) {
 			return []
 		}
-		console.log("crateName: ", crateName)
-		console.log("versionNode: ", versionNode)
-		console.log("featuresNode: ", featuresNode)
 
 		if (crateName) {
 			//cursor in version node
 			if (versionNode) {
-				if ((versionNode.range as Range).contains(position)) {
+				if (versionNode.range.contains(position)) {
 					return await versionsCompletionList(
 						this.context,
 						crateName,
-						new Range(
-							versionNode.range?.start.translate(0, 1)!,
-							versionNode.range?.end.translate(0, -1)!,
-						)
-
+						versionNode.range
 					)
 				}
 			}
 
 			//cursor in features node
-			if (featuresNode) {
+			if (featuresNode && featuresNode.children.length !== 0) {
 				if (featuresNode.range.contains(position)) {
-					console.log("you are typing features")
-					return []
+					const version = document.getText(versionNode?.range)
+					let range
+					let existedFeatures: string[] = []
+					for (let f of featuresNode.children) {
+						if (f.range.contains(position)) {
+							range = f.range
+							continue
+						}
+						existedFeatures.push(document.getText(f.range))
+					}
+					return await featuresCompletionList(
+						this.context,
+						crateName,
+						version,
+						existedFeatures,
+						range
+					)
 				}
+				return []
 			}
-			//simple dependency line
-			if (!isComplexDependencyBlock) {
-				return await versionsCompletionList(
-					this.context,
-					crateName,
-					new Range(
-						versionRange?.start.translate(0, 1)!,
-						versionRange?.end.translate(0, -1)!,
-					),
-				)
-			}
-			return []
 		}
-		//in dependencies block but unkown crate name
-		console.log("you are typing crate name")
+		//simple dependency line
+		if (!isComplexDependencyBlock) {
+			return await versionsCompletionList(
+				this.context,
+				crateName!,
+				versionRange
+			)
+		}
 		return []
 	}
 }
