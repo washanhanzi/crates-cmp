@@ -1,5 +1,4 @@
-import { addQuotes } from '@entity'
-import { Metadata } from '@entity/crates'
+import { addQuotes, Metadata, SearchCrateOutput } from '@entity'
 import ky from "ky"
 
 export const DEFAULT_SPARSE_INDEX_SERVER_URL = "https://index.crates.io"
@@ -57,5 +56,26 @@ export async function sparseIndexMetadata(name: string, url: string = DEFAULT_SP
 		rustVersion: rustVersion,
 		createdAt: new Date().getUTCMilliseconds()
 	}
+}
+
+type SearchCrateResponse = {
+	crates: SearchCrateOutput[]
+}
+
+export async function crates(query: string): Promise<SearchCrateOutput[]> {
+	if (query === "") {
+		return []
+	}
+	const res = await ky.get(
+		"https://crates.io/api/v1/crates?page=1&per_page=30&q=" + query,
+		{
+			headers: { "User-Agent": "VSCodeExtension/crates-cmp" }
+		},
+	)
+	if (res.status !== 200) {
+		throw new Error(`search crate error: statusCode=${res.status} ${await res.text()}`)
+	}
+	const j = await res.json() as SearchCrateResponse
+	return j.crates
 }
 

@@ -12,3 +12,9 @@ export type Metadata = {
 	},
 	createdAt: number
 }
+
+export type SearchCrateOutput = {
+	name: string
+	max_version: string
+	description: string
+}

@@ -5,6 +5,7 @@ import { versionsCompletionList } from "./versionsCompletionList"
 import { executeCommand } from "./promisify"
 import { async } from "@washanhanzi/result-enum"
 import { featuresCompletionList } from "./featuresCompletionList"
+import { crateNameCompletionList } from "./crateNameCompletionList"
 
 type Node = {
 	name: string
@@ -121,15 +122,15 @@ export class CratesCompletions implements CompletionItemProvider {
 				}
 				return []
 			}
+			if (!isComplexDependencyBlock) {
+				return await versionsCompletionList(
+					this.context,
+					crateName!,
+					versionRange
+				)
+			}
 		}
-		//simple dependency line
-		if (!isComplexDependencyBlock) {
-			return await versionsCompletionList(
-				this.context,
-				crateName!,
-				versionRange
-			)
-		}
-		return []
+		//cursor in crate name
+		return await crateNameCompletionList(document, position)
 	}
 }

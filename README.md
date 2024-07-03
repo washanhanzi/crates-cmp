@@ -28,8 +28,9 @@
 
 - [x] Version auto completion
 - [x] Features auto completion
-- [ ] Crate name auto completion
+- [x] Crate name auto completion
 - [ ] Version check
+- [ ] Quick action
 - [ ] Open source
 
 ## Copied from

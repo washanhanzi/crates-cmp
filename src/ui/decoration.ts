@@ -12,7 +12,7 @@ import {
 
 import { checkVersion } from "../semver/semverUtil"
 // import { Item } from "../core/item"
-import { status, ReplaceItem } from "../toml/command"
+// import { status, ReplaceItem } from "../toml/command"
 import { validRange } from "semver"
 import DecorationPreferences from "../core/decorationText"
 
