@@ -1,8 +1,6 @@
-import { sortString } from "@entity"
-import { versionCmp } from "usecase/versionCmp"
 import { CancellationToken, CompletionContext, CompletionItem, CompletionItemKind, CompletionItemProvider, CompletionList, ExtensionContext, Position, ProviderResult, Range, SnippetString, TextDocument, commands, window } from "vscode"
 import { versionsCompletionList } from "./versionsCompletionList"
-import { executeCommand } from "./promisify"
+import { executeCommand } from "./command"
 import { async } from "@washanhanzi/result-enum"
 import { featuresCompletionList } from "./featuresCompletionList"
 import { crateNameCompletionList } from "./crateNameCompletionList"
@@ -13,7 +11,7 @@ type Node = {
 	children: Node[]
 }
 
-export class CratesCompletions implements CompletionItemProvider {
+export class CratesCompletionProvider implements CompletionItemProvider {
 
 	private context: ExtensionContext
 

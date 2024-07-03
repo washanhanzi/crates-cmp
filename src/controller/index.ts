@@ -1,1 +1,1 @@
-export * from "./cratesCompletions"
+export * from "./cratesCompletionProvider"

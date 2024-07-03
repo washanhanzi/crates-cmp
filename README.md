@@ -22,7 +22,7 @@
     },
 ```
 
--
+- If you saw a lot of empty strings in scenario like `serde = ""`, I believe it's the auto completion from `Even Better Toml`'s `cargo.toml` schema.
 
 ## Features
 
@@ -31,7 +31,6 @@
 - [x] Crate name auto completion
 - [ ] Version check
 - [ ] Quick action
-- [ ] Open source
 
 ## Copied from
 

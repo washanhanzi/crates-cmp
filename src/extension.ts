@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 
 import { DocumentSelector, ExtensionContext, TextDocumentChangeEvent, languages, window, workspace } from 'vscode'
-import { CratesCompletions } from '@controller'
+import { CratesCompletionProvider } from '@controller'
 
 
 const CRATES_IO_SEARCH_URL = 'https://crates.io/api/v1/crates?page=1&per_page=10&q='
@@ -43,11 +43,6 @@ function getTextBeforeCursor(document: vscode.TextDocument, position: vscode.Pos
 export function activate(context: ExtensionContext) {
 	const documentSelector: DocumentSelector = { language: "toml", pattern: "**/[Cc]argo.toml" }
 
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "crates-cmp" is now active!')
-
 	context.subscriptions.push(
 		// Add active text editor listener and run once on start.
 		// window.onDidChangeActiveTextEditor(tomlListener),
@@ -66,7 +61,7 @@ export function activate(context: ExtensionContext) {
 		// Register our versions completions provider
 		languages.registerCompletionItemProvider(
 			documentSelector,
-			new CratesCompletions(context),
+			new CratesCompletionProvider(context),
 			'"', '.', "+", "-",
 			"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
 		),
