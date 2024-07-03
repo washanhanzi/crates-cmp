@@ -2,7 +2,7 @@
   "name": "crates-cmp",
   "displayName": "crates-cmp",
   "description": "Code completions for Cargo.toml",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "publisher": "washan",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -66,6 +66,7 @@
     "vitest": "^1.6.0"
   },
   "dependencies": {
+    "@washanhanzi/result-enum": "^2.0.3",
     "ky": "^1.4.0",
     "semver": "^7.6.2"
   }

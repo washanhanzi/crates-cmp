@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@washanhanzi/result-enum':
+        specifier: ^2.0.3
+        version: 2.0.3
       ky:
         specifier: ^1.4.0
         version: 1.4.0
@@ -449,6 +452,10 @@ packages:
   '@vscode/test-electron@2.4.0':
     resolution: {integrity: sha512-yojuDFEjohx6Jb+x949JRNtSn6Wk2FAh4MldLE3ck9cfvCqzwxF32QsNy1T9Oe4oT+ZfFcg0uPUCajJzOmPlTA==}
     engines: {node: '>=16'}
+
+  '@washanhanzi/result-enum@2.0.3':
+    resolution: {integrity: sha512-bAkUQMRCo5RWaW313g2qLvZ81+Nqul/v/t+dMNZMHFOYNaLtpxT6LMkPyquTRyjwrjRtkDlE30dJrsMir4Ajgw==}
+    engines: {node: '>=18.0.0'}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -2228,6 +2235,8 @@ snapshots:
       semver: 7.6.2
     transitivePeerDependencies:
       - supports-color
+
+  '@washanhanzi/result-enum@2.0.3': {}
 
   acorn-jsx@5.3.2(acorn@8.12.1):
     dependencies:

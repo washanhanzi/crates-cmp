@@ -1,14 +1,24 @@
-# crates-cmp README
+# crates-cmp
 
 > Why I must write js in order to write Rust?
 
 > [!WARNING]
-> It's for testing
-> Work in progress
 
-## Status
+> Testing for now
 
-- version completion
+> Still work in progress
+
+## Install
+
+- Require [Even Better Toml](https://marketplace.visualstudio.com/items?itemName=tamasfe.even-better-toml). I didn't test other toml extensions.
+
+## Features
+
+- [x] Version auto completion
+- [ ] Features auto completion
+- [ ] Crate name auto completion
+- [ ] Version check
+- [ ] Open source
 
 ## Copied from
 

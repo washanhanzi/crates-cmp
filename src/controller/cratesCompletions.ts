@@ -1,6 +1,9 @@
 import { sortString } from "@entity"
 import { versionCmp } from "usecase/versionCmp"
 import { CancellationToken, CompletionContext, CompletionItem, CompletionItemKind, CompletionItemProvider, CompletionList, ExtensionContext, Position, ProviderResult, Range, SnippetString, TextDocument, commands, window } from "vscode"
+import { versionsCompletionList } from "./versionCmp"
+import { executeCommand } from "./promisify"
+import { async } from "@washanhanzi/result-enum"
 
 type Node = {
 	name: string
@@ -34,17 +37,20 @@ export class CratesCompletions implements CompletionItemProvider {
 		_token: CancellationToken,
 		_context: CompletionContext
 	): Promise<ProviderResult<CompletionItem[] | CompletionList>> {
-		const tree: any[] = await commands.executeCommand("vscode.executeDocumentSymbolProvider", document.uri)
-		if (!tree || tree.length === 0) {
-			window.showErrorMessage("Try install Even Better TOML extension")
+		const treeResult = await async(executeCommand("vscode.executeDocumentSymbolProvider", document.uri))
+		if (treeResult.isErr()) {
+			window.showErrorMessage("Require `Even Better TOML` extension")
 			return []
 		}
+		const tree = treeResult.unwrap() as Node[]
+
 		let withinDependenciesBlock = false
 		let isComplexDependencyBlock = false
 		let crateName: string | undefined
 		let versionRange: Range | undefined
 		let versionNode: Node | undefined
 		let featuresNode: Node | undefined
+
 		for (let node of tree) {
 			if (node.name.includes("dependencies")) {
 				withinDependenciesBlock = true
@@ -86,8 +92,15 @@ export class CratesCompletions implements CompletionItemProvider {
 			//cursor in version node
 			if (versionNode) {
 				if ((versionNode.range as Range).contains(position)) {
-					console.log("you are typing version")
-					return []
+					return await versionsCompletionList(
+						this.context,
+						crateName,
+						new Range(
+							versionNode.range?.start.translate(0, 1)!,
+							versionNode.range?.end.translate(0, -1)!,
+						)
+
+					)
 				}
 			}
 
@@ -100,22 +113,14 @@ export class CratesCompletions implements CompletionItemProvider {
 			}
 			//simple dependency line
 			if (!isComplexDependencyBlock) {
-				const versions = await versionCmp(this.context, crateName)
-
-				const items = versions
-					.map((version, i) => {
-						const item = new CompletionItem(version, CompletionItemKind.Constant)
-						//insert text should be version slice prefix
-						item.insertText = version
-						item.sortText = sortString(i++)
-						item.preselect = i === 0
-						item.range = new Range(
-							versionRange?.start.translate(0, 1)!,
-							versionRange?.end.translate(0, -1)!,
-						)
-						return item
-					})
-				return new CompletionList(items)
+				return await versionsCompletionList(
+					this.context,
+					crateName,
+					new Range(
+						versionRange?.start.translate(0, 1)!,
+						versionRange?.end.translate(0, -1)!,
+					),
+				)
 			}
 			return []
 		}
