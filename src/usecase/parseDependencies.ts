@@ -1,4 +1,4 @@
-import { crateItemKey, DecorationStatus, DependencyItemType, DependencyNode, DependencyOutput, versionItemKey } from "@entity"
+import { crateItemKey, DecorationStatus, dependencyIdentifier, DependencyItemType, DependencyNode, DependencyOutput, versionItemKey } from "@entity"
 import { metadata } from "@repository"
 import { DiagnosticSeverity, ExtensionContext } from "vscode"
 import { satisfies, prerelease } from "semver"
@@ -27,17 +27,19 @@ async function parseDependency(ctx: ExtensionContext, input: DependencyNode): Pr
 	const m = await metadata(ctx, input.name)
 
 	const versionCheck = checkVersion(input, m)
-
 	//TODO check features
+
 	return {
+		id: input.id,
 		name: input.name,
+		dependencyIdentifier: dependencyIdentifier(input),
 		decoration: versionCheck.decoration,
 		diagnostics: versionCheck.diagnostics
 	}
 }
 
 function checkVersion(input: DependencyNode, m: Metadata): DependencyOutput {
-	const res: DependencyOutput = { name: input.name }
+	const res: DependencyOutput = { id: input.id, dependencyIdentifier: "", name: input.name }
 
 	//check if the user input version exist
 	let exist = false
@@ -56,7 +58,7 @@ function checkVersion(input: DependencyNode, m: Metadata): DependencyOutput {
 		// 	message: "Version not exist, latest stable: " + m.latestStable,
 		// 	source: "extension: crates-cmp"
 		// }]
-		res.decoration = newErrorDecoration(input.name, "version not found")
+		res.decoration = newErrorDecoration(input.id, "version not found")
 		return res
 	}
 
@@ -64,49 +66,49 @@ function checkVersion(input: DependencyNode, m: Metadata): DependencyOutput {
 	if (prerelease(input.version) === null) {
 		//didn't satisfy
 		if (!satisfies(m.latestStable, input.version)) {
-			res.decoration = newOutdatedDecoration(input.name, m.latestStable)
+			res.decoration = newOutdatedDecoration(input.id, m.latestStable)
 			return res
 		}
-		res.decoration = newLatestDecoration(input.name, m.latestStable)
+		res.decoration = newLatestDecoration(input.id, m.latestStable)
 	} else {
 		//pre release
 		//error no pre-release
 		if (m.latestPrerelease === null) {
 			//TODO return diagnostic, no pre-release
-			res.decoration = newErrorDecoration(input.name, "pre-release not found")
+			res.decoration = newErrorDecoration(input.id, "pre-release not found")
 			return res
 		} else {
 			//didn't satisfy
 			if (!satisfies(m.latestPrerelease, input.version)) {
-				res.decoration = newOutdatedDecoration(input.name, m.latestPrerelease)
+				res.decoration = newOutdatedDecoration(input.id, m.latestPrerelease)
 				return res
 			}
 		}
-		res.decoration = newLatestDecoration(input.name, m.latestPrerelease)
+		res.decoration = newLatestDecoration(input.id, m.latestPrerelease)
 	}
 	return res
 }
 
-function newLatestDecoration(crateName: string, latest: string) {
+function newLatestDecoration(id: string, latest: string) {
 	return {
-		key: crateItemKey(crateName),
+		key: crateItemKey(id),
 		status: DecorationStatus.LATEST,
 		latest: latest,
 	}
 }
 
-function newOutdatedDecoration(crateName: string, latest: string) {
+function newOutdatedDecoration(id: string, latest: string) {
 	return {
-		key: crateItemKey(crateName),
+		key: crateItemKey(id),
 		status: DecorationStatus.OUTDATED,
 		latest: latest,
 	}
 }
 
 //TODO use diagnostic
-function newErrorDecoration(crateName: string, latest: string) {
+function newErrorDecoration(id: string, latest: string) {
 	return {
-		key: crateItemKey(crateName),
+		key: crateItemKey(id),
 		status: DecorationStatus.ERROR,
 		latest: latest,
 	}

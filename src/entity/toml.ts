@@ -19,14 +19,23 @@ export enum DependenciesTable {
 }
 
 export type DependencyNode = {
+	id: string,
 	name: string,
 	version: string,
 	features: string[]
 	path?: string
 	git?: string
-	//dependencies, dev-dependencies, build-dependencies, target.<platform>.dependencies
+	//dependencies, dev-dependencies, build-dependencies, target.dependencies
 	tableName: DependenciesTable
 	platform?: string
+}
+
+export function dependencyIdentifier(node: DependencyNode) {
+	let identifier = node.tableName + ":"
+	if (node.platform) {
+		identifier += node.platform + ":"
+	}
+	return identifier + node.name
 }
 
 export enum DecorationStatus {
@@ -36,7 +45,9 @@ export enum DecorationStatus {
 }
 
 export type DependencyOutput = {
+	id: string,
 	name: string,
+	dependencyIdentifier: string,
 	decoration?: CrateDecoration,
 	diagnostics?: DependencyDiagnostic[]
 }
@@ -61,27 +72,27 @@ export enum DependencyItemType {
 	FEATURE = "Feature"
 }
 
-function dependencyItemKey(crateName: string, type: DependencyItemType, item?: string,) {
+function dependencyItemKey(id: string, type: DependencyItemType, item?: string,) {
 	switch (type) {
 		case DependencyItemType.CRATE:
-			return crateName + ":crate"
+			return id + ":crate"
 		case DependencyItemType.VERSION:
-			return crateName + ":version:" + item!
+			return id + ":version:" + item!
 		case DependencyItemType.FEATURE:
-			return crateName + ":feature:" + item!
+			return id + ":feature:" + item!
 	}
 }
 
-export function crateItemKey(crateName: string) {
-	return dependencyItemKey(crateName, DependencyItemType.CRATE)
+export function crateItemKey(id: string) {
+	return dependencyItemKey(id, DependencyItemType.CRATE)
 }
 
-export function versionItemKey(crateName: string, version: string) {
-	return dependencyItemKey(crateName, DependencyItemType.VERSION, version)
+export function versionItemKey(id: string, version: string) {
+	return dependencyItemKey(id, DependencyItemType.VERSION, version)
 }
 
-export function featureItemKey(crateName: string, feature: string) {
-	return dependencyItemKey(crateName, DependencyItemType.FEATURE, feature)
+export function featureItemKey(id: string, feature: string) {
+	return dependencyItemKey(id, DependencyItemType.FEATURE, feature)
 }
 
 

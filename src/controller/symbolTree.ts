@@ -1,9 +1,10 @@
 import { async } from "@washanhanzi/result-enum"
 import { executeCommand } from "./command"
 import { Uri, window, Range, TextDocument } from "vscode"
-import { crateItemKey, DependenciesTable, DependencyNode, featureItemKey, TopLevelTable, versionItemKey } from "@entity"
+import { crateItemKey, DependenciesTable, dependencyIdentifier, DependencyNode, featureItemKey, TopLevelTable, versionItemKey } from "@entity"
 import { squezze } from "util/squzze"
 import { delay } from "util/delay"
+import { nanoid } from "nanoid"
 
 
 export type SymbolTreeNode = {
@@ -137,9 +138,9 @@ type RangeMap = {
 }
 
 export class DependenciesTraverser extends DependenciesWalker {
-	crates: string[] = []
 	dependencies: DependencyNode[] = []
 	m: RangeMap = {}
+	identifiers: string[] = []
 
 	private doc: TextDocument
 
@@ -166,20 +167,22 @@ export class DependenciesTraverser extends DependenciesWalker {
 	onCrate(node: SymbolTreeNode, table: DependenciesTable, platform?: string) {
 		const crateName = node.name
 		const input: DependencyNode = {
+			id: nanoid(),
 			name: crateName,
 			version: "",
 			features: [],
 			tableName: table,
+			platform: platform
 		}
-		this.crates.push(crateName)
+		this.identifiers.push(dependencyIdentifier(input))
 		//set crate range
-		this.m[crateItemKey(input.name)] = node.range
+		this.m[crateItemKey(input.id)] = node.range
 
 		//simple dependency
 		if (node.children.length === 0) {
 			const version = this.doc.getText(squezze(node.range))
 			input.version = version
-			this.m[versionItemKey(crateName, version)]
+			this.m[versionItemKey(input.id, version)]
 			this.dependencies.push(input)
 			return
 		}
@@ -189,19 +192,19 @@ export class DependenciesTraverser extends DependenciesWalker {
 			if (child.name === "version") {
 				const version = this.doc.getText(squezze(child.range))
 				input.version = version
-				this.m[versionItemKey(crateName, version)]
+				this.m[versionItemKey(input.id, version)]
 				continue
 			}
 			if (child.name === "features") {
 				if (child.children.length !== 0) {
 					for (let grandChild of child.children) {
 						const f = this.doc.getText(squezze(grandChild.range))
-						this.m[featureItemKey(crateName, f)]
+						this.m[featureItemKey(input.id, f)]
 						input.features.push(f)
 					}
 				} else {
 					const f = this.doc.getText(squezze(child.range))
-					this.m[featureItemKey(crateName, f)]
+					this.m[featureItemKey(input.id, f)]
 					input.features.push(f)
 				}
 				continue
@@ -210,69 +213,4 @@ export class DependenciesTraverser extends DependenciesWalker {
 		}
 		this.dependencies.push(input)
 	}
-}
-
-export function parseSymbolTree(tree: SymbolTreeNode[], doc: TextDocument): [DependencyNode[], RangeMap, string[]] {
-	const res: DependencyNode[] = []
-	const m: RangeMap = {}
-	const crates: string[] = []
-
-	for (let node of tree) {
-		if (node.name.includes("dependencies")) {
-			//in dependencies node
-			if (node.children && node.children.length > 0) {
-				for (let child of node.children) {
-					const input: DependencyNode = {
-						name: "",
-						version: "",
-						features: [],
-						//TODO
-						tableName: DependenciesTable.DEPENDENCIES,
-					}
-					const crateName = child.name
-					crates.push(crateName)
-					input.name = crateName
-					//set crate range
-					m[crateItemKey(input.name)] = child.range
-
-					//find the dependency node
-					if (child.children.length !== 0) {
-						//complex dependency
-						for (let grandChild of child.children) {
-							if (grandChild.name === "version") {
-								const version = doc.getText(squezze(grandChild.range))
-								input.version = version
-								m[versionItemKey(crateName, version)]
-								continue
-							}
-							if (grandChild.name === "features") {
-								if (grandChild.children.length !== 0) {
-									for (let greatGrandChild of grandChild.children) {
-										const f = doc.getText(squezze(greatGrandChild.range))
-										m[featureItemKey(crateName, f)]
-										input.features.push(f)
-									}
-								} else {
-									const f = doc.getText(squezze(grandChild.range))
-									m[featureItemKey(crateName, f)]
-									input.features.push(f)
-								}
-								continue
-							}
-						}
-					} else {
-						//simple dependency
-						const version = doc.getText(squezze(child.range))
-						input.version = version
-						m[versionItemKey(crateName, version)]
-					}
-					if (input.version === "") {
-						continue
-					}
-					res.push(input)
-				}
-			}
-		}
-	}
-	return [res, m, crates]
 }
