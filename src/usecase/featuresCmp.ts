@@ -1,3 +1,4 @@
+import { Metadata } from "@entity"
 import { metadata } from "@repository"
 import { async } from "@washanhanzi/result-enum"
 import { satisfies } from "semver"
@@ -25,15 +26,7 @@ export async function featuresCmp(
 	}
 
 	//find the features in version satisfies user input version
-	let features = res.features[version] ?? []
-	if (features.length === 0) {
-		for (let v of res.versions) {
-			if (satisfies(v, version)) {
-				features = res.features[v] ?? []
-				break
-			}
-		}
-	}
+	const features = matchingFeatures(res, version)
 	//can't find features
 	if (features.length === 0) {
 		return []
@@ -46,6 +39,19 @@ export async function featuresCmp(
 			m[f] = true
 		}
 		return features.filter(f => !m[f])
+	}
+	return features
+}
+
+export function matchingFeatures(m: Metadata, version: string): string[] {
+	let features = m.features[version] ?? []
+	if (features.length === 0) {
+		for (let v of m.versions) {
+			if (satisfies(v, version)) {
+				features = m.features[v] ?? []
+				break
+			}
+		}
 	}
 	return features
 }

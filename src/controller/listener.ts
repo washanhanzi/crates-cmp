@@ -103,6 +103,10 @@ export class Listener {
 				const newOutdated = outdatedDecoration(deco.latest)
 				this.decorationState[name] = { key: key, status: deco.status, decoration: newOutdated }
 				return newOutdated
+			case DecorationStatus.ERROR:
+				const newError = errorDecoration(deco.latest)
+				this.decorationState[name] = { key: key, status: deco.status, decoration: newError }
+				return newError
 		}
 	}
 }
@@ -132,5 +136,14 @@ function outdatedDecoration(latest: string) {
 			margin: '0 0 0 2em' // Add some margin to the left
 		}
 	})
+}
 
+function errorDecoration(latest: string) {
+	return window.createTextEditorDecorationType({
+		after: {
+			contentText: '❌ ' + latest,
+			color: 'red',
+			margin: '0 0 0 2em' // Add some margin to the left
+		}
+	})
 }

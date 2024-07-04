@@ -32,6 +32,7 @@ export type DependencyNode = {
 export enum DecorationStatus {
 	LATEST = "Latest",
 	OUTDATED = "Outdated",
+	ERROR = "Error"
 }
 
 export type DependencyOutput = {

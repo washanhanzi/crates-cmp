@@ -29,7 +29,8 @@
 - [x] Version auto completion
 - [x] Features auto completion
 - [x] Crate name auto completion
-- [ ] Version check
+- [x] Version check
+- [ ] Features check
 - [ ] Quick action
 
 ## Copied from

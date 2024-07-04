@@ -1861,7 +1861,7 @@ __export(extension_exports, {
   deactivate: () => deactivate
 });
 module.exports = __toCommonJS(extension_exports);
-var import_vscode9 = require("vscode");
+var import_vscode8 = require("vscode");
 
 // src/util/addQuotes.ts
 function addQuotes(str) {
@@ -3092,15 +3092,7 @@ async function featuresCmp(ctx, crateName, version, existedFeatures) {
   if (version === "") {
     return res.features[res.latestStable] ?? [];
   }
-  let features = res.features[version] ?? [];
-  if (features.length === 0) {
-    for (let v of res.versions) {
-      if ((0, import_semver2.satisfies)(v, version)) {
-        features = res.features[v] ?? [];
-        break;
-      }
-    }
-  }
+  const features = matchingFeatures(res, version);
   if (features.length === 0) {
     return [];
   }
@@ -3110,6 +3102,18 @@ async function featuresCmp(ctx, crateName, version, existedFeatures) {
       m[f] = true;
     }
     return features.filter((f) => !m[f]);
+  }
+  return features;
+}
+function matchingFeatures(m, version) {
+  let features = m.features[version] ?? [];
+  if (features.length === 0) {
+    for (let v of m.versions) {
+      if ((0, import_semver2.satisfies)(v, version)) {
+        features = m.features[v] ?? [];
+        break;
+      }
+    }
   }
   return features;
 }
@@ -3136,7 +3140,6 @@ function featureItemKey(crateName, feature) {
 }
 
 // src/usecase/parseDependencies.ts
-var import_vscode = require("vscode");
 var import_semver3 = __toESM(require_semver2());
 function parseDependencies(ctx, input) {
   if (input.length === 0) {
@@ -3144,6 +3147,9 @@ function parseDependencies(ctx, input) {
   }
   let res = [];
   for (let d of input) {
+    if (d.version === "") {
+      continue;
+    }
     res.push(parseDependency(ctx, d));
   }
   return res;
@@ -3167,13 +3173,7 @@ function checkVersion(input, m) {
     }
   }
   if (!exist) {
-    res.diagnostics = [{
-      key: versionItemKey(input.name, input.version),
-      type: "Version" /* VERSION */,
-      servity: import_vscode.DiagnosticSeverity.Error,
-      message: "Version not exist, latest stable: " + m.latestStable,
-      source: "extension: crates-cmp"
-    }];
+    res.decoration = newErrorDecoration(input.name, "version not found");
     return res;
   }
   if ((0, import_semver3.prerelease)(input.version) === null) {
@@ -3184,7 +3184,7 @@ function checkVersion(input, m) {
     res.decoration = newLatestDecoration(input.name, m.latestStable);
   } else {
     if (m.latestPrerelease === null) {
-      console.log("diag: not pre release", input.name);
+      res.decoration = newErrorDecoration(input.name, "pre-release not found");
       return res;
     } else {
       if (!(0, import_semver3.satisfies)(m.latestPrerelease, input.version)) {
@@ -3210,18 +3210,44 @@ function newOutdatedDecoration(crateName, latest) {
     latest
   };
 }
+function newErrorDecoration(crateName, latest) {
+  return {
+    key: crateItemKey(crateName),
+    status: "Error" /* ERROR */,
+    latest
+  };
+}
 
 // src/controller/versionsCompletionList.ts
-var import_vscode2 = require("vscode");
+var import_vscode = require("vscode");
 async function versionsCompletionList(ctx, crateName, range) {
   const versionsResult = await async(versionCmp(ctx, crateName));
   if (versionsResult.isErr()) {
-    import_vscode2.window.showErrorMessage(versionsResult.unwrapErr().message);
+    import_vscode.window.showErrorMessage(versionsResult.unwrapErr().message);
     return [];
   }
   const items = versionsResult.unwrap().map((version, i) => {
-    const item = new import_vscode2.CompletionItem(addQuotes(version), import_vscode2.CompletionItemKind.Constant);
+    const item = new import_vscode.CompletionItem(addQuotes(version), import_vscode.CompletionItemKind.Constant);
     item.insertText = addQuotes(version);
+    item.sortText = sortString(i++);
+    item.preselect = i === 0;
+    item.range = range;
+    return item;
+  });
+  return new import_vscode.CompletionList(items);
+}
+
+// src/controller/featuresCompletionList.ts
+var import_vscode2 = require("vscode");
+async function featuresCompletionList(ctx, crateName, version, existedFeatures, range) {
+  const featuresResult = await async(featuresCmp(ctx, crateName, version, existedFeatures));
+  if (featuresResult.isErr()) {
+    import_vscode2.window.showErrorMessage(featuresResult.unwrapErr().message);
+    return [];
+  }
+  const items = featuresResult.unwrap().map((feature, i) => {
+    const item = new import_vscode2.CompletionItem(addQuotes(feature), import_vscode2.CompletionItemKind.Constant);
+    item.insertText = addQuotes(feature);
     item.sortText = sortString(i++);
     item.preselect = i === 0;
     item.range = range;
@@ -3230,54 +3256,35 @@ async function versionsCompletionList(ctx, crateName, range) {
   return new import_vscode2.CompletionList(items);
 }
 
-// src/controller/featuresCompletionList.ts
-var import_vscode3 = require("vscode");
-async function featuresCompletionList(ctx, crateName, version, existedFeatures, range) {
-  const featuresResult = await async(featuresCmp(ctx, crateName, version, existedFeatures));
-  if (featuresResult.isErr()) {
-    import_vscode3.window.showErrorMessage(featuresResult.unwrapErr().message);
-    return [];
-  }
-  const items = featuresResult.unwrap().map((feature, i) => {
-    const item = new import_vscode3.CompletionItem(addQuotes(feature), import_vscode3.CompletionItemKind.Constant);
-    item.insertText = addQuotes(feature);
-    item.sortText = sortString(i++);
-    item.preselect = i === 0;
-    item.range = range;
-    return item;
-  });
-  return new import_vscode3.CompletionList(items);
-}
-
 // src/usecase/searchCrate.ts
 async function searchCrate(query) {
   return crates(query);
 }
 
 // src/controller/crateNameCompletionList.ts
-var import_vscode4 = require("vscode");
+var import_vscode3 = require("vscode");
 async function crateNameCompletionList(document, position) {
   const lineText = getTextBeforeCursor(document, position);
   const searchResult = await async(searchCrate(lineText));
   if (searchResult.isErr()) {
-    import_vscode4.window.showErrorMessage(searchResult.unwrapErr().message);
+    import_vscode3.window.showErrorMessage(searchResult.unwrapErr().message);
     return [];
   }
   const [firstNonEmptyIndex, lastNonEmptyIndex] = lineReplaceRange(lineText);
   const items = searchResult.unwrap().map((crate, i) => {
-    const item = new import_vscode4.CompletionItem(crate.name, import_vscode4.CompletionItemKind.Constant);
+    const item = new import_vscode3.CompletionItem(crate.name, import_vscode3.CompletionItemKind.Constant);
     item.insertText = crate.name;
     item.documentation = crate.description;
     item.detail = "max version: " + crate.max_version;
     item.sortText = sortString(i++);
     item.preselect = i === 0;
-    item.range = new import_vscode4.Range(position.line, firstNonEmptyIndex, position.line, lastNonEmptyIndex);
+    item.range = new import_vscode3.Range(position.line, firstNonEmptyIndex, position.line, lastNonEmptyIndex);
     return item;
   });
   return items;
 }
 function getTextBeforeCursor(document, position) {
-  const range = new import_vscode4.Range(position.line, 0, position.line, position.character);
+  const range = new import_vscode3.Range(position.line, 0, position.line, position.character);
   return document.getText(range);
 }
 function lineReplaceRange(lineText) {
@@ -3295,10 +3302,10 @@ function lineReplaceRange(lineText) {
 }
 
 // src/controller/command.ts
-var import_vscode5 = require("vscode");
+var import_vscode4 = require("vscode");
 function executeCommand(command, uri) {
   return new Promise((resolve, reject) => {
-    import_vscode5.commands.executeCommand(command, uri).then(
+    import_vscode4.commands.executeCommand(command, uri).then(
       (res) => {
         if (isEmpty(res)) reject("symbol provider unavailable");
         resolve(res);
@@ -3309,15 +3316,15 @@ function executeCommand(command, uri) {
 }
 
 // src/controller/symbolTree.ts
-var import_vscode7 = require("vscode");
+var import_vscode6 = require("vscode");
 
 // src/util/squzze.ts
-var import_vscode6 = require("vscode");
+var import_vscode5 = require("vscode");
 function squezze(range) {
   if (!range) {
     return range;
   }
-  return new import_vscode6.Range(
+  return new import_vscode5.Range(
     range.start.translate(0, 1),
     range.end.translate(0, -1)
   );
@@ -3449,7 +3456,7 @@ async function symbolTree(uri) {
     }
     await delay2(300);
   }
-  import_vscode7.window.showErrorMessage("Require `Even Better TOML` extension");
+  import_vscode6.window.showErrorMessage("Require `Even Better TOML` extension");
   return [];
 }
 var DependenciesTraverser = class extends DependenciesWalker {
@@ -3626,7 +3633,7 @@ var CratesCompletionWalker = class extends DependenciesWalker {
 };
 
 // src/controller/listener.ts
-var import_vscode8 = require("vscode");
+var import_vscode7 = require("vscode");
 var Listener = class {
   ctx;
   decorationState;
@@ -3655,7 +3662,7 @@ var Listener = class {
         if (result.decoration) {
           const d = this.decoration(result.name, result.decoration);
           if (d !== null) {
-            import_vscode8.window.activeTextEditor?.setDecorations(d, [walker.m[result.decoration.key]]);
+            import_vscode7.window.activeTextEditor?.setDecorations(d, [walker.m[result.decoration.key]]);
           }
         }
         if (result.diagnostics) {
@@ -3706,11 +3713,15 @@ var Listener = class {
         const newOutdated = outdatedDecoration(deco.latest);
         this.decorationState[name] = { key, status: deco.status, decoration: newOutdated };
         return newOutdated;
+      case "Error" /* ERROR */:
+        const newError = errorDecoration(deco.latest);
+        this.decorationState[name] = { key, status: deco.status, decoration: newError };
+        return newError;
     }
   }
 };
 function latestDecoration(latest) {
-  return import_vscode8.window.createTextEditorDecorationType({
+  return import_vscode7.window.createTextEditorDecorationType({
     after: {
       contentText: "\u2705 " + latest,
       color: "green",
@@ -3720,10 +3731,20 @@ function latestDecoration(latest) {
   });
 }
 function outdatedDecoration(latest) {
-  return import_vscode8.window.createTextEditorDecorationType({
+  return import_vscode7.window.createTextEditorDecorationType({
     after: {
       contentText: "\u{1F7E1} " + latest,
       color: "orange",
+      margin: "0 0 0 2em"
+      // Add some margin to the left
+    }
+  });
+}
+function errorDecoration(latest) {
+  return import_vscode7.window.createTextEditorDecorationType({
+    after: {
+      contentText: "\u274C " + latest,
+      color: "red",
       margin: "0 0 0 2em"
       // Add some margin to the left
     }
@@ -3736,11 +3757,11 @@ function activate(context) {
   const listener = new Listener(context);
   context.subscriptions.push(
     // Add active text editor listener and run once on start.
-    import_vscode9.window.onDidChangeActiveTextEditor(listener.onDidChangeActiveEditor, listener),
+    import_vscode8.window.onDidChangeActiveTextEditor(listener.onDidChangeActiveEditor, listener),
     // When the text document is changed, fetch + check dependencies
-    import_vscode9.workspace.onDidChangeTextDocument(listener.onDidChangeTextDocument, listener),
+    import_vscode8.workspace.onDidChangeTextDocument(listener.onDidChangeTextDocument, listener),
     // Register our versions completions provider
-    import_vscode9.languages.registerCompletionItemProvider(
+    import_vscode8.languages.registerCompletionItemProvider(
       documentSelector,
       new CratesCompletionProvider(context),
       '"',

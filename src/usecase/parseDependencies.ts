@@ -3,6 +3,7 @@ import { metadata } from "@repository"
 import { DiagnosticSeverity, ExtensionContext } from "vscode"
 import { satisfies, prerelease } from "semver"
 import { Metadata } from "@entity"
+import { matchingFeatures } from "./featuresCmp"
 
 export function parseDependencies(ctx: ExtensionContext, input: DependencyNode[]) {
 	if (input.length === 0) {
@@ -10,6 +11,9 @@ export function parseDependencies(ctx: ExtensionContext, input: DependencyNode[]
 	}
 	let res: Promise<DependencyOutput>[] = []
 	for (let d of input) {
+		if (d.version === "") {
+			continue
+		}
 		res.push(parseDependency(ctx, d))
 	}
 	return res
@@ -44,13 +48,15 @@ function checkVersion(input: DependencyNode, m: Metadata): DependencyOutput {
 		}
 	}
 	if (!exist) {
-		res.diagnostics = [{
-			key: versionItemKey(input.name, input.version),
-			type: DependencyItemType.VERSION,
-			servity: DiagnosticSeverity.Error,
-			message: "Version not exist, latest stable: " + m.latestStable,
-			source: "extension: crates-cmp"
-		}]
+		//TODO return diagnostic, version not exist
+		// res.diagnostics = [{
+		// 	key: versionItemKey(input.name, input.version),
+		// 	type: DependencyItemType.VERSION,
+		// 	servity: DiagnosticSeverity.Error,
+		// 	message: "Version not exist, latest stable: " + m.latestStable,
+		// 	source: "extension: crates-cmp"
+		// }]
+		res.decoration = newErrorDecoration(input.name, "version not found")
 		return res
 	}
 
@@ -67,7 +73,7 @@ function checkVersion(input: DependencyNode, m: Metadata): DependencyOutput {
 		//error no pre-release
 		if (m.latestPrerelease === null) {
 			//TODO return diagnostic, no pre-release
-			console.log("diag: not pre release", input.name)
+			res.decoration = newErrorDecoration(input.name, "pre-release not found")
 			return res
 		} else {
 			//didn't satisfy
@@ -95,4 +101,17 @@ function newOutdatedDecoration(crateName: string, latest: string) {
 		status: DecorationStatus.OUTDATED,
 		latest: latest,
 	}
+}
+
+//TODO use diagnostic
+function newErrorDecoration(crateName: string, latest: string) {
+	return {
+		key: crateItemKey(crateName),
+		status: DecorationStatus.ERROR,
+		latest: latest,
+	}
+}
+
+function checkFeatures(input: DependencyNode, m: Metadata) {
+	const featurres = matchingFeatures(m, input.version)
 }
