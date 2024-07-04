@@ -11,6 +11,8 @@ export type Metadata = {
 		[key: string]: string[]
 	},
 	createdAt: number
+	latestStable: string,
+	latestPrerelease: string | null
 }
 
 export type SearchCrateOutput = {

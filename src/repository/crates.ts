@@ -1,12 +1,14 @@
-import { addQuotes, Metadata, SearchCrateOutput } from '@entity'
+import { Metadata, SearchCrateOutput } from '@entity'
 import ky from "ky"
+import { prerelease } from "semver"
 
 export const DEFAULT_SPARSE_INDEX_SERVER_URL = "https://index.crates.io"
 
 export async function sparseIndexMetadata(name: string, url: string = DEFAULT_SPARSE_INDEX_SERVER_URL): Promise<Metadata> {
-
 	// clean dirty names
+	// TODO is this neccessary?
 	let lowerName = name.replace(/"/g, "").toLocaleLowerCase()
+
 	let prefix = ""
 	if (lowerName.length <= 2) {
 		prefix = lowerName.length.toString()
@@ -27,34 +29,46 @@ export async function sparseIndexMetadata(name: string, url: string = DEFAULT_SP
 	let features: { [key: string]: string[] } = {}
 	let rustVersion: { [key: string]: string[] } = {}
 	let defaultFeatures: string[] = []
-	for (let d of jsonLinesArr) {
-		let j = JSON.parse(d)
+
+	let stable: string | null = null
+	let pre: string | null = null
+
+	//reverse loop jsonLinesArr
+	for (let i = jsonLinesArr.length - 1; i >= 0; i--) {
+		let j = JSON.parse(jsonLinesArr[i])
 		if (j.yanked === false) {
-			const quotedVersion = addQuotes(j.vers)
-			versions.push(quotedVersion)
+			versions.push(j.vers)
+
+			//find latest version
+			if (stable === null && prerelease(j.vers) === null) {
+				stable = j.vers
+			} else if (pre === null) {
+				pre = j.vers
+			}
+
 			if (j.rust_version) {
 				rustVersion[j.vers] = j.rust_version
 			}
-			features[quotedVersion] = Object.keys(j.features)
+			features[j.vers] = Object.keys(j.features)
 				.filter(f => {
 					if (f === "default") {
-						defaultFeatures = j.features["default"].map(f => addQuotes(f))
+						defaultFeatures = j.features["default"]
 						return false
 					}
 					return true
 				})
-				.map(f => addQuotes(f))
 		}
 	}
-	//reverse versions array
-	versions = versions.reverse()
+
 	return {
 		name: name,
 		versions: versions,
 		features: features,
 		defaultFeatures: defaultFeatures,
 		rustVersion: rustVersion,
-		createdAt: new Date().getUTCMilliseconds()
+		createdAt: new Date().getUTCMilliseconds(),
+		latestStable: stable!,
+		latestPrerelease: pre
 	}
 }
 

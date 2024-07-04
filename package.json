@@ -2,7 +2,7 @@
   "name": "crates-cmp",
   "displayName": "crates-cmp",
   "description": "Code completion for Cargo.toml",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "publisher": "washan",
   "license": "SEE LICENSE IN LICENSE",
   "author": {

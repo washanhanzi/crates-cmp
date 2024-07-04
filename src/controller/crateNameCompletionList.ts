@@ -1,4 +1,4 @@
-import { sortString } from "@entity"
+import { sortString } from "@util"
 import { searchCrate } from "@usecase/searchCrate"
 import { async } from "@washanhanzi/result-enum"
 import { window, Position, TextDocument, Range, CompletionItem, CompletionItemKind } from "vscode"

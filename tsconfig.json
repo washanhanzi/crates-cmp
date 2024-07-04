@@ -43,6 +43,9 @@
 			"@controller/*": [
 				"controller/*"
 			],
+			"@util": [
+				"util/index"
+			],
 		}
 	},
 	"exclude": [

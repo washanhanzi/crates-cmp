@@ -1,4 +1,4 @@
-import { isEmpty } from "@entity"
+import { isEmpty } from "@util"
 import { Uri, commands } from "vscode"
 
 export function executeCommand(command: string, uri: Uri) {

@@ -1,62 +1,19 @@
-import * as vscode from 'vscode'
-
 import { DocumentSelector, ExtensionContext, TextDocumentChangeEvent, languages, window, workspace } from 'vscode'
-import { CratesCompletionProvider } from '@controller'
-
-
-const CRATES_IO_SEARCH_URL = 'https://crates.io/api/v1/crates?page=1&per_page=10&q='
-const CRATES_IO_CRATE_URL = (crate: string) => `https://crates.io/api/v1/crates/${crate}`
-
-interface Crate {
-	name: string,
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	max_stable_version: string,
-	description: string,
-}
-interface CrateVersion {
-	num: string,
-	yanked: boolean,
-}
-
-function isInDependencies(document: vscode.TextDocument, cursorLine: number): boolean {
-	let regex = /^\s*\[(.+)\]/ig
-	let line = cursorLine - 1
-	let isInDependencies = false
-	while (line > 0) {
-		let attr = regex.exec(document.lineAt(line).text)
-		if (attr) {
-			isInDependencies = attr[1].includes('dependencies')
-			break
-		}
-		line--
-	}
-	return isInDependencies
-}
-
-function getTextBeforeCursor(document: vscode.TextDocument, position: vscode.Position): string {
-	const range = new vscode.Range(position.line, 0, position.line, position.character)
-	return document.getText(range)
-}
+import { CratesCompletionProvider, Listener } from '@controller'
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: ExtensionContext) {
-	const documentSelector: DocumentSelector = { language: "toml", pattern: "**/[Cc]argo.toml" }
+	const documentSelector: DocumentSelector = { language: "toml", pattern: "**/Cargo.toml" }
+
+	const listener = new Listener(context)
 
 	context.subscriptions.push(
 		// Add active text editor listener and run once on start.
-		// window.onDidChangeActiveTextEditor(tomlListener),
+		window.onDidChangeActiveTextEditor(listener.onDidChangeActiveEditor, listener),
 
 		// When the text document is changed, fetch + check dependencies
-		workspace.onDidChangeTextDocument((e: TextDocumentChangeEvent) => {
-			// const { fileName } = e.document
-			// if (fileName.toLocaleLowerCase().endsWith("cargo.toml")) {
-			// 	if (!e.document.isDirty) {
-			// 		tomlListener(window.activeTextEditor)
-			// 	}
-			// }
-		}),
-
+		workspace.onDidChangeTextDocument(listener.onDidChangeTextDocument, listener),
 
 		// Register our versions completions provider
 		languages.registerCompletionItemProvider(
@@ -73,16 +30,6 @@ export function activate(context: ExtensionContext) {
 		//   { providedCodeActionKinds: [CodeActionKind.QuickFix] }
 		// ),
 	)
-	// const nameProvider = vscode.languages.registerCompletionItemProvider(
-	// 	documentSelector,
-	// 	new CrateNameCompletionItemProvider(),
-	// )
-
-	// const versionProvider = vscode.languages.registerCompletionItemProvider(
-	// 	documentSelector,
-	// 	new CrateVersionCompletionItemProvider(),
-	// )
-
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
@@ -93,7 +40,6 @@ export function activate(context: ExtensionContext) {
 	// 	vscode.window.showInformationMessage('Hello World from crates-cmp!')
 	// })
 	// context.subscriptions.push(disposable)
-
 }
 
 // This method is called when your extension is deactivated
