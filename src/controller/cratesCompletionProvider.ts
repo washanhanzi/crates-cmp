@@ -2,8 +2,9 @@ import { CancellationToken, CompletionContext, CompletionItem, CompletionItemPro
 import { versionsCompletionList } from "./versionsCompletionList"
 import { featuresCompletionList } from "./featuresCompletionList"
 import { crateNameCompletionList } from "./crateNameCompletionList"
-import { symbolTree, SymbolTreeNode } from "./symbolTree"
+import { DependenciesWalker, symbolTree, SymbolTreeNode } from "./symbolTree"
 import { squezze } from "util/squzze"
+import { DependenciesTable } from "@entity"
 export class CratesCompletionProvider implements CompletionItemProvider {
 
 	private context: ExtensionContext
@@ -35,97 +36,110 @@ export class CratesCompletionProvider implements CompletionItemProvider {
 			return []
 		}
 
-		let withinDependenciesBlock = false
-		let isComplexDependencyBlock = false
-		let crateName: string | undefined
-		let versionRange: Range | undefined
-		let versionNode: SymbolTreeNode | undefined
-		let featuresNode: SymbolTreeNode | undefined
+		const walker = new CratesCompletionWalker(tree, position)
+		walker.walk()
 
-		for (let node of tree) {
-			if (node.name.includes("dependencies")) {
-				withinDependenciesBlock = true
-				//in dependencies node
-				if ((node.range as Range).contains(position)) {
-					if (node.children && node.children.length > 0) {
-						for (let child of node.children) {
-							//find the dependency node
-							if ((child.range as Range).contains(position)) {
-								crateName = child.name
-								versionRange = child.range
-								if (child.children && child.children.length > 0) {
-									isComplexDependencyBlock = true
-									for (let grandChild of child.children) {
-										if (grandChild.name === "version") {
-											versionNode = grandChild
-											continue
-										}
-										if (grandChild.name === "features") {
-											featuresNode = grandChild
-											continue
-										}
-									}
-								}
-								break
-							}
-						}
-					}
-				}
-
-			}
-		}
-		//not in dependencies block
-		if (!withinDependenciesBlock) {
-			return []
+		//cursor at crate name
+		if (!walker.crateName) {
+			return await crateNameCompletionList(document, position)
 		}
 
-		if (crateName) {
-			//cursor at version node
-			if (versionNode) {
-				if (versionNode.range.contains(position)) {
-					return await versionsCompletionList(
-						this.context,
-						crateName,
-						versionNode.range
-					)
-				}
-			}
-
-			//cursor at features node
-			if (featuresNode && featuresNode.children.length !== 0) {
-				if (featuresNode.range.contains(position)) {
-					const version = document.getText(squezze(versionNode?.range))
-					let range
-					let existedFeatures: string[] = []
-					for (let f of featuresNode.children) {
-						if (f.range.contains(position)) {
-							range = f.range
-							continue
-						}
-						existedFeatures.push(document.getText(squezze(f.range)))
-					}
-					return await featuresCompletionList(
-						this.context,
-						crateName,
-						version,
-						existedFeatures,
-						range
-					)
-				}
-				return []
-			}
-
-			//cursor at simple dependency version
-			if (!isComplexDependencyBlock) {
+		//cursor at version node
+		if (walker.versionNode) {
+			if (walker.versionNode.range.contains(position)) {
 				return await versionsCompletionList(
 					this.context,
-					crateName!,
-					versionRange
+					walker.crateName!,
+					walker.versionNode.range
 				)
 			}
 		}
 
-		//cursor at crate name
-		return await crateNameCompletionList(document, position)
+		//cursor at features node
+		if (walker.featuresNode && walker.featuresNode.children.length !== 0) {
+			if (walker.featuresNode.range.contains(position)) {
+				const version = document.getText(squezze(walker.versionNode?.range))
+				let range
+				let existedFeatures: string[] = []
+				for (let f of walker.featuresNode.children) {
+					if (f.range.contains(position)) {
+						range = f.range
+						continue
+					}
+					existedFeatures.push(document.getText(squezze(f.range)))
+				}
+				return await featuresCompletionList(
+					this.context,
+					walker.crateName!,
+					version,
+					existedFeatures,
+					range
+				)
+			}
+			return []
+		}
+
+		//cursor at simple dependency version
+		if (!walker.isComplexDependencyBlock) {
+			return await versionsCompletionList(
+				this.context,
+				walker.crateName!,
+				walker.crateRange
+			)
+		}
+
+		return []
+	}
+}
+
+class CratesCompletionWalker extends DependenciesWalker {
+	isComplexDependencyBlock = false
+	crateName: string | undefined
+	crateRange: Range | undefined
+	versionNode: SymbolTreeNode | undefined
+	featuresNode: SymbolTreeNode | undefined
+	position: Position
+
+	constructor(tree: SymbolTreeNode[], position: Position) {
+		super(tree)
+		this.position = position
+	}
+
+	enterTable(node, table): boolean {
+		return false
+	}
+
+	enterDependencies(node: SymbolTreeNode, table: DependenciesTable): boolean {
+		if (node.range.contains(this.position)) {
+			return true
+		}
+		return false
+	}
+
+	enterCrate(node: SymbolTreeNode): boolean {
+		if (node.range.contains(this.position)) {
+			return true
+		}
+		return false
+	}
+
+	onCrate(node: SymbolTreeNode): void {
+		this.crateName = node.name
+		this.crateRange = node.range
+		if (node.children.length !== 0) {
+			this.isComplexDependencyBlock = true
+			for (let child of node.children) {
+				if (child.name === "version") {
+					this.versionNode = child
+					continue
+				}
+				if (child.name === "features") {
+					this.featuresNode = child
+					continue
+				}
+			}
+		}
+		//stop entering more crate
+		this.enterCrate = (n) => false
 	}
 }

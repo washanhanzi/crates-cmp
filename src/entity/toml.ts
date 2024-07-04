@@ -1,9 +1,32 @@
 import { DiagnosticSeverity } from "vscode"
 
-export type DependencyInput = {
-	name: string
-	version: string
+export enum TopLevelTable {
+	PACKAGE = 'package',
+	FEATURES = 'features',
+	WORKSPACE = 'workspace',
+	LIB = 'lib',
+	BIN = 'bin',
+	PROFILE = 'profile',
+	BADGES = 'badges',
+	OTHER = 'other'
+}
+
+export enum DependenciesTable {
+	DEPENDENCIES = "dependencies",
+	DEV_DEPENDENCIES = "dev-dependencies",
+	BUILD_DEPENDENCIES = "build-dependencies",
+	TARGET_DEPENDENCIES = "target.dependencies"
+}
+
+export type DependencyNode = {
+	name: string,
+	version: string,
 	features: string[]
+	path?: string
+	git?: string
+	//dependencies, dev-dependencies, build-dependencies, target.<platform>.dependencies
+	tableName: DependenciesTable
+	platform?: string
 }
 
 export enum DecorationStatus {

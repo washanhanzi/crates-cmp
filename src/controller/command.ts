@@ -6,7 +6,7 @@ export function executeCommand(command: string, uri: Uri) {
 		commands.executeCommand(command, uri)
 			.then(
 				res => {
-					if (isEmpty(res)) reject("symbol provider undefined")
+					if (isEmpty(res)) reject("symbol provider unavailable")
 					resolve(res)
 				},
 				err => reject(err),

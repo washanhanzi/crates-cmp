@@ -1,10 +1,10 @@
-import { crateItemKey, DecorationStatus, DependencyInput, DependencyItemType, DependencyOutput, versionItemKey } from "@entity/dependency"
+import { crateItemKey, DecorationStatus, DependencyItemType, DependencyNode, DependencyOutput, versionItemKey } from "@entity"
 import { metadata } from "@repository"
 import { DiagnosticSeverity, ExtensionContext } from "vscode"
 import { satisfies, prerelease } from "semver"
 import { Metadata } from "@entity"
 
-export function parseDependencies(ctx: ExtensionContext, input: DependencyInput[]) {
+export function parseDependencies(ctx: ExtensionContext, input: DependencyNode[]) {
 	if (input.length === 0) {
 		return []
 	}
@@ -15,7 +15,7 @@ export function parseDependencies(ctx: ExtensionContext, input: DependencyInput[
 	return res
 }
 
-async function parseDependency(ctx: ExtensionContext, input: DependencyInput): Promise<DependencyOutput> {
+async function parseDependency(ctx: ExtensionContext, input: DependencyNode): Promise<DependencyOutput> {
 	//check if semver is valid
 	//`even better toml` has done this for us
 
@@ -32,7 +32,7 @@ async function parseDependency(ctx: ExtensionContext, input: DependencyInput): P
 	}
 }
 
-function checkVersion(input: DependencyInput, m: Metadata): DependencyOutput {
+function checkVersion(input: DependencyNode, m: Metadata): DependencyOutput {
 	const res: DependencyOutput = { name: input.name }
 
 	//check if the user input version exist

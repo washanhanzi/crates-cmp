@@ -1,5 +1,5 @@
 import { ExtensionContext, TextDocumentChangeEvent, window, Range, TextEditorDecorationType, TextDocument, TextEditor } from "vscode"
-import { parseSymbolTree, symbolTree } from "./symbolTree"
+import { DependenciesTraverser, parseSymbolTree, symbolTree } from "./symbolTree"
 import { parseDependencies } from "@usecase"
 import { DecorationStatus, CrateDecoration, versionItemKey } from "@entity"
 
@@ -16,11 +16,11 @@ export class Listener {
 		if (tree.length === 0) {
 			return
 		}
-		// window.activeTextEditor?.setDecorations(smallNumberDecorationType, [tree![2]?.children[0].range])
-		const [input, m, crates] = parseSymbolTree(tree, document)
-		this.updateCrates(crates)
+		const walker = new DependenciesTraverser(tree, document)
+		walker.walk()
+		this.updateCrates(walker.crates)
 
-		let promises = parseDependencies(this.ctx, input)
+		let promises = parseDependencies(this.ctx, walker.dependencies)
 
 		while (promises.length > 0) {
 			// Use Promise.race to get the first resolved promise
@@ -34,7 +34,7 @@ export class Listener {
 				if (result.decoration) {
 					const d = this.decoration(result.name, result.decoration)
 					if (d !== null) {
-						window.activeTextEditor?.setDecorations(d, [m[result.decoration.key]])
+						window.activeTextEditor?.setDecorations(d, [walker.m[result.decoration.key]])
 					}
 				}
 				if (result.diagnostics) { }
@@ -76,17 +76,21 @@ export class Listener {
 
 		//clear decorations state
 		for (let d of deletedItems) {
+			this.decorationState[d].decoration.dispose()
 			delete this.decorationState[d]
 		}
 	}
 
+	//decoration return an old decoration or new onee
 	decoration(name: string, deco: CrateDecoration): TextEditorDecorationType | null {
 		const key = versionItemKey(name, deco.latest)
 		const d = this.decorationState[name]
 		if (d) {
+			//the decoration already exist
 			if (d.key === key && d.status === deco.status) {
-				return null
+				return d.decoration
 			} else {
+				//the decoration has changed
 				d.decoration.dispose()
 			}
 		}
