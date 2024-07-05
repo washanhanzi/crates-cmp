@@ -2,7 +2,7 @@
   "name": "crates-cmp",
   "displayName": "crates-cmp",
   "description": "Code completion for Cargo.toml",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "icon": "image/icon.webp",
   "publisher": "washan",
   "license": "SEE LICENSE IN LICENSE",
@@ -36,7 +36,15 @@
     "toml"
   ],
   "main": "./dist/extension.js",
-  "contributes": {},
+  "contributes": {
+    "configurationDefaults": {
+      "[toml]": {
+        "editor.quickSuggestions": {
+          "strings": "on"
+        }
+      }
+    }
+  },
   "scripts": {
     "build": "pnpm run package && vsce package --no-dependencies",
     "vscode:prepublish": "pnpm run package",

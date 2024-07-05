@@ -61,6 +61,7 @@ export class Listener {
 
 	async onDidChangeActiveEditor(editor: TextEditor | undefined) {
 		if (!editor) return
+		if (!editor.document.fileName.endsWith("Cargo.toml")) return
 		await this.onChange(editor.document)
 	}
 

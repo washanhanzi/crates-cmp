@@ -12,16 +12,6 @@
 
 - Require [Even Better Toml](https://marketplace.visualstudio.com/items?itemName=tamasfe.even-better-toml). I didn't test other toml extensions.
 
-- Turn on Vscode strings quick suggestion for features auto completion.
-
-```json
-    "[toml]": {
-        "editor.quickSuggestions": {
-            "strings": "on"
-        },
-    },
-```
-
 - If you saw a lot of empty strings in scenario like `serde = ""`, I believe it's the auto completion from `Even Better Toml`'s `cargo.toml` schema.
 
 ## Features
