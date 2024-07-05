@@ -1,14 +1,14 @@
 import { ExtensionContext, TextDocumentChangeEvent, window, Range, TextEditorDecorationType, TextDocument, TextEditor } from "vscode"
 import { DependenciesTraverser, symbolTree } from "./symbolTree"
 import { parseDependencies } from "@usecase"
-import { DecorationStatus, CrateDecoration, versionItemKey } from "@entity"
+import { DependencyDecorationStatus, DependencyDecoration } from "@entity"
 
 export class Listener {
 	private ctx: ExtensionContext
-	//TODO messy, please fix
+	//track the decoration state
 	private decorationState: { [key: string]: DecorationState }
-	//TODO messy, please fix
-	private identifiers: Set<string> = new Set()
+	//track all the toml nodes in the editor
+	private nodes: Set<string> = new Set()
 	constructor(ctx: ExtensionContext) {
 		this.ctx = ctx
 		this.decorationState = {}
@@ -18,6 +18,9 @@ export class Listener {
 		if (tree.length === 0) {
 			return
 		}
+
+		console.log(tree)
+
 		const walker = new DependenciesTraverser(tree, document)
 		walker.walk()
 		this.updateCrates(walker.identifiers)
@@ -34,9 +37,9 @@ export class Listener {
 			// Process the result
 			if (!(result instanceof Error)) {
 				if (result.decoration) {
-					const d = this.decoration(result.dependencyIdentifier, result.decoration)
+					const d = this.decoration(result.id, result.decoration)
 					if (d !== null) {
-						window.activeTextEditor?.setDecorations(d, [walker.m[result.decoration.key]])
+						window.activeTextEditor?.setDecorations(d, [walker.m[result.decoration.id]])
 					}
 				}
 				if (result.diagnostics) { }
@@ -68,13 +71,13 @@ export class Listener {
 		const newSet = new Set(newCrates)
 
 		// Find items to delete (present in persistentSet but not in newSet)
-		const deletedItems = [...this.identifiers].filter(item => !newSet.has(item))
+		const deletedItems = [...this.nodes].filter(item => !newSet.has(item))
 
 		// Update the persistent set: remove deleted items
-		deletedItems.forEach(item => this.identifiers.delete(item))
+		deletedItems.forEach(item => this.nodes.delete(item))
 
 		// Add new items from the new array to the persistent set
-		newCrates.forEach(item => this.identifiers.add(item))
+		newCrates.forEach(item => this.nodes.add(item))
 
 		//clear decorations state
 		for (let d of deletedItems) {
@@ -84,36 +87,35 @@ export class Listener {
 	}
 
 	//decoration return an old decoration or new onee
-	decoration(id: string, deco: CrateDecoration): TextEditorDecorationType | null {
-		const key = versionItemKey(id, deco.latest)
+	decoration(id: string, deco: DependencyDecoration): TextEditorDecorationType | null {
 		const d = this.decorationState[id]
 		if (d) {
-			if (d.key === key && d.status === deco.status) {
+			if (d.latest === deco.latest && d.status === deco.status) {
 				return d.decoration
 			} else {
 				d.decoration.dispose()
 			}
 		}
 		switch (deco.status) {
-			case DecorationStatus.LATEST:
+			case DependencyDecorationStatus.LATEST:
 				const newLatest = latestDecoration(deco.latest)
-				this.decorationState[id] = { key: key, status: deco.status, decoration: newLatest }
+				this.decorationState[id] = { latest: deco.latest, status: deco.status, decoration: newLatest }
 				return newLatest
-			case DecorationStatus.OUTDATED:
+			case DependencyDecorationStatus.OUTDATED:
 				const newOutdated = outdatedDecoration(deco.latest)
-				this.decorationState[id] = { key: key, status: deco.status, decoration: newOutdated }
+				this.decorationState[id] = { latest: deco.latest, status: deco.status, decoration: newOutdated }
 				return newOutdated
-			case DecorationStatus.ERROR:
+			case DependencyDecorationStatus.ERROR:
 				const newError = errorDecoration(deco.latest)
-				this.decorationState[id] = { key: key, status: deco.status, decoration: newError }
+				this.decorationState[id] = { latest: deco.latest, status: deco.status, decoration: newError }
 				return newError
 		}
 	}
 }
 
 type DecorationState = {
-	key: string,
-	status: DecorationStatus,
+	status: DependencyDecorationStatus,
+	latest: string,
 	decoration: TextEditorDecorationType
 }
 

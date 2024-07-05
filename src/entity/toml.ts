@@ -30,15 +30,7 @@ export type DependencyNode = {
 	platform?: string
 }
 
-export function dependencyIdentifier(node: DependencyNode) {
-	let identifier = node.tableName + ":"
-	if (node.platform) {
-		identifier += node.platform + ":"
-	}
-	return identifier + node.name
-}
-
-export enum DecorationStatus {
+export enum DependencyDecorationStatus {
 	LATEST = "Latest",
 	OUTDATED = "Outdated",
 	ERROR = "Error"
@@ -47,15 +39,14 @@ export enum DecorationStatus {
 export type DependencyOutput = {
 	id: string,
 	name: string,
-	dependencyIdentifier: string,
-	decoration?: CrateDecoration,
+	decoration?: DependencyDecoration,
 	diagnostics?: DependencyDiagnostic[]
 }
 
-export type CrateDecoration = {
-	key: string,
+export type DependencyDecoration = {
+	id: string,
 	latest: string,
-	status: DecorationStatus
+	status: DependencyDecorationStatus
 }
 
 export type DependencyDiagnostic = {
@@ -71,28 +62,3 @@ export enum DependencyItemType {
 	VERSION = "Version",
 	FEATURE = "Feature"
 }
-
-function dependencyItemKey(id: string, type: DependencyItemType, item?: string,) {
-	switch (type) {
-		case DependencyItemType.CRATE:
-			return id + ":crate"
-		case DependencyItemType.VERSION:
-			return id + ":version:" + item!
-		case DependencyItemType.FEATURE:
-			return id + ":feature:" + item!
-	}
-}
-
-export function crateItemKey(id: string) {
-	return dependencyItemKey(id, DependencyItemType.CRATE)
-}
-
-export function versionItemKey(id: string, version: string) {
-	return dependencyItemKey(id, DependencyItemType.VERSION, version)
-}
-
-export function featureItemKey(id: string, feature: string) {
-	return dependencyItemKey(id, DependencyItemType.FEATURE, feature)
-}
-
-

@@ -123,7 +123,7 @@ class CratesCompletionWalker extends DependenciesWalker {
 		return false
 	}
 
-	onCrate(node: SymbolTreeNode): void {
+	onCrate(id: string, node: SymbolTreeNode): void {
 		this.crateName = node.name
 		this.crateRange = node.range
 		if (node.children.length !== 0) {

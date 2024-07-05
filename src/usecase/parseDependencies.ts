@@ -1,4 +1,4 @@
-import { crateItemKey, DecorationStatus, dependencyIdentifier, DependencyItemType, DependencyNode, DependencyOutput, versionItemKey } from "@entity"
+import { DependencyDecorationStatus, DependencyNode, DependencyOutput } from "@entity"
 import { metadata } from "@repository"
 import { DiagnosticSeverity, ExtensionContext } from "vscode"
 import { satisfies, prerelease } from "semver"
@@ -32,14 +32,13 @@ async function parseDependency(ctx: ExtensionContext, input: DependencyNode): Pr
 	return {
 		id: input.id,
 		name: input.name,
-		dependencyIdentifier: dependencyIdentifier(input),
 		decoration: versionCheck.decoration,
 		diagnostics: versionCheck.diagnostics
 	}
 }
 
 function checkVersion(input: DependencyNode, m: Metadata): DependencyOutput {
-	const res: DependencyOutput = { id: input.id, dependencyIdentifier: "", name: input.name }
+	const res: DependencyOutput = { id: input.id, name: input.name }
 
 	//check if the user input version exist
 	let exist = false
@@ -91,16 +90,16 @@ function checkVersion(input: DependencyNode, m: Metadata): DependencyOutput {
 
 function newLatestDecoration(id: string, latest: string) {
 	return {
-		key: crateItemKey(id),
-		status: DecorationStatus.LATEST,
+		id: id,
+		status: DependencyDecorationStatus.LATEST,
 		latest: latest,
 	}
 }
 
 function newOutdatedDecoration(id: string, latest: string) {
 	return {
-		key: crateItemKey(id),
-		status: DecorationStatus.OUTDATED,
+		id: id,
+		status: DependencyDecorationStatus.OUTDATED,
 		latest: latest,
 	}
 }
@@ -108,8 +107,8 @@ function newOutdatedDecoration(id: string, latest: string) {
 //TODO use diagnostic
 function newErrorDecoration(id: string, latest: string) {
 	return {
-		key: crateItemKey(id),
-		status: DecorationStatus.ERROR,
+		id: id,
+		status: DependencyDecorationStatus.ERROR,
 		latest: latest,
 	}
 }
