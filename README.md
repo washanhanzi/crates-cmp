@@ -4,7 +4,7 @@
 
 > [!WARNING]
 
-> Testing for now
+> Alpha stage, if you have any suggestion or problems, please open an issue.
 
 > Still work in progress
 

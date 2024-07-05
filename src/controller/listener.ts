@@ -19,8 +19,6 @@ export class Listener {
 			return
 		}
 
-		console.log(tree)
-
 		const walker = new DependenciesTraverser(tree, document)
 		walker.walk()
 		this.updateCrates(walker.identifiers)
