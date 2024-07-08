@@ -1,7 +1,7 @@
 import { DependencyDecorationStatus, DependencyNode, DependencyOutput } from "@entity"
 import { metadata } from "@repository"
 import { DiagnosticSeverity, ExtensionContext } from "vscode"
-import { satisfies, prerelease } from "semver"
+import { satisfies, prerelease, major } from "semver"
 import { Metadata } from "@entity"
 import { matchingFeatures } from "./featuresCmp"
 
@@ -11,7 +11,7 @@ export function parseDependencies(ctx: ExtensionContext, input: DependencyNode[]
 	}
 	let res: Promise<DependencyOutput>[] = []
 	for (let d of input) {
-		if (d.version === "") {
+		if (d.currentVersion === "") {
 			continue
 		}
 		res.push(parseDependency(ctx, d))
@@ -43,7 +43,7 @@ function checkVersion(input: DependencyNode, m: Metadata): DependencyOutput {
 	//check if the user input version exist
 	let exist = false
 	for (let v of m.versions) {
-		if (satisfies(v, input.version)) {
+		if (satisfies(v, input.inputVersion)) {
 			exist = true
 			break
 		}
@@ -61,12 +61,24 @@ function checkVersion(input: DependencyNode, m: Metadata): DependencyOutput {
 		return res
 	}
 
+
 	//stable
-	if (prerelease(input.version) === null) {
-		//didn't satisfy
-		if (!satisfies(m.latestStable, input.version)) {
-			res.decoration = newOutdatedDecoration(input.id, m.latestStable)
-			return res
+	if (prerelease(input.currentVersion) === null) {
+		//outdated
+		if (input.currentVersion !== m.latestStable) {
+			res.decoration = newOutdatedDecoration(input.id, input.currentVersion, m.latestStable)
+			//return latest stable
+			if (major(input.currentVersion) === major(m.latestStable)) {
+				return res
+			} else {
+				//return the max version that satisfy the input version
+				for (let v of m.versions) {
+					if (satisfies(v, input.currentVersion)) {
+						res.decoration.currentMax = v
+						return res
+					}
+				}
+			}
 		}
 		res.decoration = newLatestDecoration(input.id, m.latestStable)
 	} else {
@@ -77,9 +89,20 @@ function checkVersion(input: DependencyNode, m: Metadata): DependencyOutput {
 			res.decoration = newErrorDecoration(input.id, "pre-release not found")
 			return res
 		} else {
-			//didn't satisfy
-			if (!satisfies(m.latestPrerelease, input.version)) {
-				res.decoration = newOutdatedDecoration(input.id, m.latestPrerelease)
+			if (input.currentVersion !== m.latestPrerelease) {
+				res.decoration = newOutdatedDecoration(input.id, input.currentVersion, m.latestPrerelease)
+				//return latest stable
+				if (satisfies(input.inputVersion, m.latestPrerelease)) {
+					return res
+				} else {
+					//return the max version that satisfy the input version
+					for (let v of m.versions) {
+						if (satisfies(v, input.inputVersion)) {
+							res.decoration.currentMax = v
+							return res
+						}
+					}
+				}
 				return res
 			}
 		}
@@ -92,14 +115,18 @@ function newLatestDecoration(id: string, latest: string) {
 	return {
 		id: id,
 		status: DependencyDecorationStatus.LATEST,
+		current: "",
+		currentMax: "",
 		latest: latest,
 	}
 }
 
-function newOutdatedDecoration(id: string, latest: string) {
+function newOutdatedDecoration(id: string, current: string, latest: string) {
 	return {
 		id: id,
 		status: DependencyDecorationStatus.OUTDATED,
+		current: current,
+		currentMax: "",
 		latest: latest,
 	}
 }
@@ -109,10 +136,12 @@ function newErrorDecoration(id: string, latest: string) {
 	return {
 		id: id,
 		status: DependencyDecorationStatus.ERROR,
+		current: "",
+		currentMax: "",
 		latest: latest,
 	}
 }
 
 function checkFeatures(input: DependencyNode, m: Metadata) {
-	const featurres = matchingFeatures(m, input.version)
+	const featurres = matchingFeatures(m, input.currentVersion)
 }

@@ -1,10 +1,19 @@
-import { DocumentSelector, ExtensionContext, TextDocumentChangeEvent, languages, window, workspace } from 'vscode'
-import { CratesCompletionProvider, Listener } from '@controller'
+import { commands, DocumentSelector, ExtensionContext, extensions, languages, Uri, window, workspace } from 'vscode'
+import { ServerOptions, TransportKind, LanguageClient, LanguageClientOptions } from "vscode-languageclient/node"
+import { CratesCompletionProvider, Listener, rustAnalyzer } from '@controller'
+import path from 'path'
+import { async } from '@washanhanzi/result-enum'
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-export function activate(context: ExtensionContext) {
+export async function activate(context: ExtensionContext) {
+
 	const documentSelector: DocumentSelector = { language: "toml", pattern: "**/Cargo.toml" }
+
+	const client = await async(rustAnalyzer.init())
+	if (client.isErr()) {
+		window.showErrorMessage(client.unwrapErr().message)
+	}
 
 	const listener = new Listener(context)
 
@@ -30,17 +39,10 @@ export function activate(context: ExtensionContext) {
 		//   { providedCodeActionKinds: [CodeActionKind.QuickFix] }
 		// ),
 	)
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	// const disposable = vscode.commands.registerCommand('crates-cmp.helloWorld', () => {
-	// 	// The code you place here will be executed every time your command is executed
-	// 	// Display a message box to the user
-	// 	vscode.window.showInformationMessage('Hello World from crates-cmp!')
-	// })
-	// context.subscriptions.push(disposable)
 }
 
+
 // This method is called when your extension is deactivated
-export function deactivate() { }
+export function deactivate() {
+	return rustAnalyzer.stop()
+}

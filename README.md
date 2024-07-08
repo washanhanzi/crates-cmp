@@ -22,6 +22,7 @@
 - [x] Version check
 - [ ] Features check
 - [ ] Quick action
+- [ ] Configuration
 
 ## Copied from
 

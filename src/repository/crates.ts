@@ -42,7 +42,7 @@ export async function sparseIndexMetadata(name: string, url: string = DEFAULT_SP
 			//find latest version
 			if (stable === null && prerelease(j.vers) === null) {
 				stable = j.vers
-			} else if (pre === null) {
+			} else if (pre === null && prerelease(j.vers) !== null) {
 				pre = j.vers
 			}
 

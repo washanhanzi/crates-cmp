@@ -1,13 +1,8 @@
-import { DependencyDecorationStatus } from "@entity"
+import { DependencyDecoration, DependencyDecorationStatus } from "@entity"
 import { TextEditorDecorationType, window } from "vscode"
 
-type DecorationState = {
-	status: DependencyDecorationStatus,
-	latest: string,
-	decoration: TextEditorDecorationType
-}
 
-function latestDecoration(latest: string) {
+export function latestDecoration(latest: string) {
 	return window.createTextEditorDecorationType({
 		after: {
 			contentText: '✅ ' + latest,
@@ -18,17 +13,35 @@ function latestDecoration(latest: string) {
 
 }
 
-function outdatedDecoration(latest: string) {
+export function outdatedDecoration(deco: DependencyDecoration) {
+	if (deco.currentMax !== "" && deco.current === deco.currentMax) {
+		return window.createTextEditorDecorationType({
+			after: {
+				contentText: '🟡 ' + deco.current + ", " + deco.latest,
+				color: 'orange',
+				margin: '0 0 0 4em' // Add some margin to the left
+			}
+		})
+	}
+	if (deco.currentMax !== "" && deco.current !== deco.currentMax) {
+		return window.createTextEditorDecorationType({
+			after: {
+				contentText: '🟡 ' + deco.current + "==>" + deco.currentMax + ", " + deco.latest,
+				color: 'orange',
+				margin: '0 0 0 4em' // Add some margin to the left
+			}
+		})
+	}
 	return window.createTextEditorDecorationType({
 		after: {
-			contentText: '🟡 ' + latest,
+			contentText: '🟡 ' + deco.current + "==>" + deco.latest,
 			color: 'orange',
 			margin: '0 0 0 4em' // Add some margin to the left
 		}
 	})
 }
 
-function errorDecoration(latest: string) {
+export function errorDecoration(latest: string) {
 	return window.createTextEditorDecorationType({
 		after: {
 			contentText: '❌ ' + latest,

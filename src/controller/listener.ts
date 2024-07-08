@@ -1,7 +1,13 @@
 import { ExtensionContext, TextDocumentChangeEvent, window, Range, TextEditorDecorationType, TextDocument, TextEditor } from "vscode"
-import { DependenciesTraverser, symbolTree } from "./symbolTree"
+import { DependenciesTraverser, RangeStore, symbolTree } from "./symbolTree"
 import { parseDependencies } from "@usecase"
-import { DependencyDecorationStatus, DependencyDecoration } from "@entity"
+import { DependencyDecorationStatus, DependencyDecoration, DependencyOutput } from "@entity"
+import { exec } from "child_process"
+import { async } from "@washanhanzi/result-enum"
+import { delay } from "util/delay"
+import { rustAnalyzer } from "./rustAnalyzer"
+import { outdatedDecoration } from "./dependencyDecoration"
+import { cargoTree } from "./cargo"
 
 export class Listener {
 	private ctx: ExtensionContext
@@ -9,45 +15,50 @@ export class Listener {
 	private decorationState: { [key: string]: DecorationState }
 	//track all the toml nodes in the editor
 	private nodes: Set<string> = new Set()
+	private rangeStore: RangeStore = new RangeStore()
 	constructor(ctx: ExtensionContext) {
 		this.ctx = ctx
 		this.decorationState = {}
 	}
 	async onChange(document: TextDocument) {
+
+
+		// const t = window.createTerminal("crates-cmp")
+		// t.sendText("cargo tree --depth 1")
+
 		const tree = await symbolTree(document.uri)
 		if (tree.length === 0) {
 			return
 		}
 
-		const walker = new DependenciesTraverser(tree, document)
+
+		const walker = new DependenciesTraverser(tree, document, this.rangeStore)
 		walker.walk()
 		this.updateCrates(walker.identifiers)
 
+		const currentDeps = await cargoTree(document.uri.path)
+		if (!currentDeps) {
+			return
+		}
+
+		for (let dep of walker.dependencies) {
+			dep.currentVersion = currentDeps![dep.name]
+		}
+
 		let promises = parseDependencies(this.ctx, walker.dependencies)
 
-		while (promises.length > 0) {
-			// Use Promise.race to get the first resolved promise
-			const { promise, result } = await Promise.race(promises.map(p =>
-				p.then(value => ({ promise: p, result: value }),
-					reason => ({ promise: p, result: reason }))
-			))
+		promises.forEach(p => p.then(this.outputPromiseHandler.bind(this)))
 
-			// Process the result
-			if (!(result instanceof Error)) {
-				if (result.decoration) {
-					const d = this.decoration(result.id, result.decoration)
-					if (d !== null) {
-						window.activeTextEditor?.setDecorations(d, [walker.m[result.decoration.id]])
-					}
-				}
-				if (result.diagnostics) { }
-			} else {
-				console.error('Rejected reason:', result)
-			}
-
-			promises = promises.filter(p => p !== promise)
-		}
 		return
+	}
+
+	outputPromiseHandler(output: DependencyOutput) {
+		if (output.decoration) {
+			const d = this.decoration(output.id, output.decoration)
+			if (d !== null) {
+				window.activeTextEditor?.setDecorations(d, [this.rangeStore.range(output.decoration.id)!])
+			}
+		}
 	}
 
 	async onDidChangeTextDocument(event: TextDocumentChangeEvent) {
@@ -101,7 +112,7 @@ export class Listener {
 				this.decorationState[id] = { latest: deco.latest, status: deco.status, decoration: newLatest }
 				return newLatest
 			case DependencyDecorationStatus.OUTDATED:
-				const newOutdated = outdatedDecoration(deco.latest)
+				const newOutdated = outdatedDecoration(deco)
 				this.decorationState[id] = { latest: deco.latest, status: deco.status, decoration: newOutdated }
 				return newOutdated
 			case DependencyDecorationStatus.ERROR:
@@ -129,15 +140,6 @@ function latestDecoration(latest: string) {
 
 }
 
-function outdatedDecoration(latest: string) {
-	return window.createTextEditorDecorationType({
-		after: {
-			contentText: '🟡 ' + latest,
-			color: 'orange',
-			margin: '0 0 0 4em' // Add some margin to the left
-		}
-	})
-}
 
 function errorDecoration(latest: string) {
 	return window.createTextEditorDecorationType({

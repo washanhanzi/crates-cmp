@@ -21,7 +21,8 @@ export enum DependenciesTable {
 export type DependencyNode = {
 	id: string,
 	name: string,
-	version: string,
+	inputVersion: string
+	currentVersion: string,
 	features: string[]
 	path?: string
 	git?: string
@@ -45,6 +46,8 @@ export type DependencyOutput = {
 
 export type DependencyDecoration = {
 	id: string,
+	current: string,
+	currentMax: string,
 	latest: string,
 	status: DependencyDecorationStatus
 }

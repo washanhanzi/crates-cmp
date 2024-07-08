@@ -117,7 +117,7 @@ export class DependenciesWalker extends CargoTomlWalker {
 
 
 export async function symbolTree(uri: Uri) {
-	for (let counter = 0; counter < 3; counter++) {
+	for (let counter = 0; counter < 5; counter++) {
 		const tree = await async(executeCommand("vscode.executeDocumentSymbolProvider", uri))
 		console.log("waiting for Even better toml")
 
@@ -125,27 +125,24 @@ export async function symbolTree(uri: Uri) {
 			return tree.unwrap() as SymbolTreeNode[]
 		}
 
-		await delay(300)
+		await delay(500)
 	}
 
 	window.showErrorMessage("Require `Even Better TOML` extension")
 	return []
 }
 
-type RangeMap = {
-	[key: string]: Range
-}
-
 export class DependenciesTraverser extends DependenciesWalker {
 	dependencies: DependencyNode[] = []
-	m: RangeMap = {}
+	rangeStore: RangeStore
 	identifiers: string[] = []
 
 	private doc: TextDocument
 
-	constructor(tree: SymbolTreeNode[], doc: TextDocument) {
+	constructor(tree: SymbolTreeNode[], doc: TextDocument, rangeStore: RangeStore) {
 		super(tree)
 		this.doc = doc
+		this.rangeStore = rangeStore
 	}
 
 	//don't enter other tables
@@ -166,21 +163,22 @@ export class DependenciesTraverser extends DependenciesWalker {
 	onCrate(id: string, node: SymbolTreeNode, table: DependenciesTable, platform?: string) {
 		const crateName = node.name
 		const input: DependencyNode = {
-			id: nodeId(id, node.name),
+			id: id,
 			name: crateName,
-			version: "",
+			inputVersion: "",
+			currentVersion: "",
 			features: [],
 			tableName: table,
 			platform: platform
 		}
 		this.identifiers.push(input.id)
 		//set crate range
-		this.m[input.id] = node.range
+		this.rangeStore.set(input.id, node.range)
 
 		//simple dependency
 		if (node.children.length === 0) {
 			const version = this.doc.getText(squezze(node.range))
-			input.version = version
+			input.inputVersion = version
 			this.dependencies.push(input)
 			return
 		}
@@ -189,20 +187,20 @@ export class DependenciesTraverser extends DependenciesWalker {
 		for (let child of node.children) {
 			if (child.name === "version") {
 				const version = this.doc.getText(squezze(child.range))
-				input.version = version
-				this.m[nodeId(input.id, child.name)] = child.range
+				input.inputVersion = version
+				this.rangeStore.set(nodeId(input.id, child.name), child.range)
 				continue
 			}
 			if (child.name === "features") {
 				if (child.children.length !== 0) {
 					for (let grandChild of child.children) {
 						const f = this.doc.getText(squezze(grandChild.range))
-						this.m[nodeId(input.id, child.name, grandChild.name)] = grandChild.range
+						this.rangeStore.set(nodeId(input.id, child.name, grandChild.name), grandChild.range)
 						input.features.push(f)
 					}
 				} else {
 					const f = this.doc.getText(squezze(child.range))
-					this.m[nodeId(input.id, child.name)] = child.range
+					this.rangeStore.set(nodeId(input.id, child.name), child.range)
 					input.features.push(f)
 				}
 				continue
@@ -215,4 +213,18 @@ export class DependenciesTraverser extends DependenciesWalker {
 
 export function nodeId(...params: string[]): string {
 	return params.join('.')
+}
+
+export class RangeStore {
+	private m: { [key: string]: Range } = {}
+	constructor() {
+		this.m = {}
+	}
+
+	range(id: string): Range | undefined {
+		return this.m[id]
+	}
+	set(id: string, range: Range) {
+		this.m[id] = range
+	}
 }
