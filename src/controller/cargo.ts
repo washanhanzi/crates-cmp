@@ -1,10 +1,10 @@
 import { async } from "@washanhanzi/result-enum"
 import { execAsync } from "util/execAsync"
 
-export async function cargoTree(path: string): Promise<{ [key: string]: string } | undefined> {
+export async function cargoTree(path: string): Promise<{ [key: string]: string }> {
 	const tree = await async(execAsync(`cargo tree --manifest-path ${path} --depth 1 --all-features`))
 	if (tree.isErr()) {
-		return undefined
+		throw tree.unwrapErr()
 	}
 
 	return parseCargoTree(tree.unwrap() as string)

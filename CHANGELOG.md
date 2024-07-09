@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.25] - 2024-07-09
+
+### Added
+
+- show version and feature diagnostic (with a hack)
+
 ## [0.0.24] - 2024-07-09
 
 ### Fixed

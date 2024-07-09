@@ -21,8 +21,7 @@ export function execAsync(command: string) {
 			if (code === 0) {
 				resolve(stdoutBuffer) // Resolve with stdout content if exit code is 0
 			} else {
-				console.error('stderr:', stderrBuffer) // Log stderr if exit code is non-zero
-				reject(new Error(`Process exited with code ${code}`))
+				reject(new Error(stderrBuffer))
 			}
 		})
 

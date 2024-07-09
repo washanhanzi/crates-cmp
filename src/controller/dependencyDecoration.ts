@@ -59,7 +59,7 @@ export function outdatedDecoration(deco: DependencyDecoration) {
 			}
 		})
 	}
-	if (deco.currentMax !== "" && deco.current !== deco.currentMax) {
+	if (deco.currentMax && deco.current !== deco.currentMax) {
 		return window.createTextEditorDecorationType({
 			after: {
 				contentText: '🟡 ' + deco.current + "==>" + deco.currentMax + ", " + deco.latest,

@@ -167,7 +167,6 @@ export class DependenciesTraverser extends DependenciesWalker {
 			id: id,
 			name: crateName,
 			inputVersion: "",
-			currentVersion: "",
 			features: [],
 			tableName: table,
 			platform: platform
@@ -232,6 +231,8 @@ export class NodeStore {
 	private newlyAdded: Set<string> = new Set()
 	private deleted: Set<string> = new Set()
 	private uri: string | undefined = undefined
+	//TODO hack!!!!
+	private done = false
 	constructor() {
 		this.m = {}
 	}
@@ -245,16 +246,19 @@ export class NodeStore {
 			this.deleted.clear()
 			return
 		}
-		this.dirtyNodes.clear()
-		this.newlyAdded.clear()
-		//delete nodes in the previous walk
-		for (let key of this.deleted) {
-			delete this.m[key]
-		}
-		this.deleted.clear()
-		//init the deleted set
-		for (let key of Object.keys(this.m)) {
-			this.deleted.add(key)
+		if (this.done) {
+			this.dirtyNodes.clear()
+			this.newlyAdded.clear()
+			//delete nodes in the previous walk
+			for (let key of this.deleted) {
+				delete this.m[key]
+			}
+			this.deleted.clear()
+			//init the deleted set
+			for (let key of Object.keys(this.m)) {
+				this.deleted.add(key)
+			}
+			this.done = false
 		}
 	}
 
@@ -293,10 +297,19 @@ export class NodeStore {
 		return [...this.newlyAdded]
 	}
 
+	isAdded(id: string) {
+		return this.newlyAdded.has(id)
+	}
+
 	isDirty(id: string): boolean {
-		if (this.dirtyNodes.has(id)) {
-			return true
-		}
-		return false
+		return this.dirtyNodes.has(id)
+	}
+
+	setDone() {
+		this.done = true
+	}
+
+	isDone() {
+		return this.done
 	}
 }

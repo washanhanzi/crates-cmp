@@ -49,7 +49,7 @@ export async function sparseIndexMetadata(name: string, url: string = DEFAULT_SP
 			if (j.rust_version) {
 				rustVersion[j.vers] = j.rust_version
 			}
-			features[j.vers] = Object.keys(j.features)
+			const f1 = Object.keys(j.features)
 				.filter(f => {
 					if (f === "default") {
 						defaultFeatures = j.features["default"]
@@ -57,6 +57,11 @@ export async function sparseIndexMetadata(name: string, url: string = DEFAULT_SP
 					}
 					return true
 				})
+			let f2: string[] = []
+			if (j.features2) {
+				f2 = Object.keys(j.features2)
+			}
+			features[j.vers] = [...f1, ...f2]
 		}
 	}
 

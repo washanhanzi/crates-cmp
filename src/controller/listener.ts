@@ -1,19 +1,22 @@
-import { ExtensionContext, TextDocumentChangeEvent, window, TextDocument, TextEditor } from "vscode"
+import { ExtensionContext, TextDocumentChangeEvent, window, TextDocument, TextEditor, languages, DiagnosticCollection, Diagnostic } from "vscode"
 import { DependenciesTraverser, NodeStore, symbolTree } from "./symbolTree"
-import { parseDependencies } from "@usecase"
-import { DependencyDecorationStatus, DependencyDecoration, DependencyOutput, DependencyItemType } from "@entity"
+import { dependenciesDecorations } from "@usecase"
+import { DependencyDecorationStatus, DependencyDecoration, DependencyItemType } from "@entity"
 import { DecorationStore, errorDecoration, latestDecoration, loadingDecoration, outdatedDecoration } from "./dependencyDecoration"
 import { cargoTree } from "./cargo"
 import { async } from "@washanhanzi/result-enum"
+import { dependenciesDiagnostics } from "@usecase/dependenciesDiagnostics"
 
 export class Listener {
 	private ctx: ExtensionContext
 	//track the decoration state
 	private decorationStore = new DecorationStore()
 	//track toml nodes
-	private nodeStore: NodeStore = new NodeStore()
+	private nodeStore = new NodeStore()
+	private diagnosticCollection: DiagnosticCollection
 	constructor(ctx: ExtensionContext) {
 		this.ctx = ctx
+		this.diagnosticCollection = languages.createDiagnosticCollection("crates-cmp")
 	}
 	async onChange(document: TextDocument) {
 		const tree = await symbolTree(document.uri)
@@ -23,17 +26,37 @@ export class Listener {
 
 		const walker = new DependenciesTraverser(tree, document, this.nodeStore)
 		this.nodeStore.init(document.uri.path)
-		walker.walk()
+		if (!this.nodeStore.isDone()) {
+			walker.walk()
 
-		//tree is clear
-		if (this.nodeStore.isClean()) { return }
+			//tree is clean
+			if (this.nodeStore.isClean()) { return }
 
-		this.addedNodes(this.nodeStore.addedIds())
-		this.deletedNodes(this.nodeStore.deletedIds())
-		this.dirtyNodes(this.nodeStore.dirtyIds())
+			this.addedNodes(this.nodeStore.addedIds())
+			this.deletedNodes(this.nodeStore.deletedIds())
+			this.dirtyNodes(this.nodeStore.dirtyIds())
+		}
 
 		const currentDepsResult = await async(cargoTree(document.uri.path))
-		if (currentDepsResult.isErr()) { return }
+		if (currentDepsResult.isErr()) {
+			this.addedNodes(this.nodeStore.addedIds())
+			this.deletedNodes(this.nodeStore.deletedIds())
+			this.dirtyNodes(this.nodeStore.dirtyIds())
+			//parse for diagnostic
+			const filtered = walker.dependencies.filter(d => this.nodeStore.isAdded(d.id) || this.nodeStore.isDirty(d.id))
+			const diagnostics = await dependenciesDiagnostics(this.ctx, filtered)
+			let cols: Diagnostic[] = []
+			let deleted: string[] = []
+			for (let d of diagnostics) {
+				cols.push(new Diagnostic(this.nodeStore.range(d.id)!, d.message, d.servity))
+				deleted.push(d.id)
+			}
+			this.deletedNodes(deleted)
+			this.diagnosticCollection.set(document.uri, cols)
+			this.nodeStore.setDone()
+			return
+		}
+		this.diagnosticCollection.clear()
 
 		let deleted: string[] = []
 		const currentDepts = currentDepsResult.unwrap()!
@@ -53,17 +76,16 @@ export class Listener {
 			this.deletedNodes(deleted)
 		}
 
-		let promises = parseDependencies(this.ctx, walker.dependencies)
+		let promises = dependenciesDecorations(this.ctx, walker.dependencies)
 
 		promises.forEach(p => p.then(this.outputPromiseHandler.bind(this)))
 
+		this.nodeStore.setDone()
 		return
 	}
 
-	outputPromiseHandler(output: DependencyOutput) {
-		if (output.decoration) {
-			this.decorate(output.id, output.decoration)
-		}
+	outputPromiseHandler(output: DependencyDecoration) {
+		this.decorate(output.id, output)
 	}
 
 
@@ -113,9 +135,6 @@ export class Listener {
 			case DependencyDecorationStatus.OUTDATED:
 				dt = outdatedDecoration(deco)
 				break
-			case DependencyDecorationStatus.ERROR:
-				dt = errorDecoration(deco.latest)
-				break
 			case DependencyDecorationStatus.LOADING:
 				dt = loadingDecoration()
 				break
@@ -141,5 +160,3 @@ export class Listener {
 		await this.onChange(editor.document)
 	}
 }
-
-

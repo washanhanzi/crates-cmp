@@ -28,7 +28,7 @@ export type DependencyNode = {
 	//icns = { package = "tauri-icns", version = "0.1" }
 	packageName?: string,
 	inputVersion: string
-	currentVersion: string,
+	currentVersion?: string,
 	features: string[]
 	path?: string
 	git?: string
@@ -41,26 +41,19 @@ export enum DependencyDecorationStatus {
 	LATEST = "Latest",
 	OUTDATED = "Outdated",
 	LOADING = "Loading",
-	ERROR = "Error"
-}
-
-export type DependencyOutput = {
-	id: string,
-	name: string,
-	decoration?: DependencyDecoration,
-	diagnostics?: DependencyDiagnostic[]
+	UNKOWN = "Unkown"
 }
 
 export type DependencyDecoration = {
 	id: string,
 	current: string,
-	currentMax: string,
+	currentMax?: string,
 	latest: string,
 	status: DependencyDecorationStatus
 }
 
 export type DependencyDiagnostic = {
-	key: string,
+	id: string,
 	type: DependencyItemType
 	servity: DiagnosticSeverity
 	message: string

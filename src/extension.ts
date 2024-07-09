@@ -7,10 +7,10 @@ import { async } from '@washanhanzi/result-enum'
 export async function activate(context: ExtensionContext) {
 	const documentSelector: DocumentSelector = { language: "toml", pattern: "**/Cargo.toml" }
 
-	const client = await async(rustAnalyzer.init())
-	if (client.isErr()) {
-		window.showErrorMessage(client.unwrapErr().message)
-	}
+	// const client = await async(rustAnalyzer.init())
+	// if (client.isErr()) {
+	// 	window.showErrorMessage(client.unwrapErr().message)
+	// }
 
 	const listener = new Listener(context)
 
