@@ -57,8 +57,10 @@ export class CargoTomlWalker {
 					break
 				case "target":
 					if (this.enterDependencies(node, CargoTomlTable.TARGET_DEPENDENCIES)) {
-						for (let child of node.children[0].children) {
-							this.onDependencies(nodeId(node.name, node.children[0].name, child.name), child, CargoTomlTable.TARGET_DEPENDENCIES, node.children[0].name)
+						for (let child of node.children) {
+							for (let grandChild of child.children) {
+								this.onDependencies(nodeId(node.name, child.name, grandChild.name), grandChild, CargoTomlTable.TARGET_DEPENDENCIES, child.name)
+							}
 						}
 					}
 				case 'features':
@@ -203,6 +205,9 @@ export class DependenciesTraverser extends DependenciesWalker {
 					input.features.push(f)
 				}
 				continue
+			}
+			if (child.name === "package") {
+				input.packageName = this.doc.getText(squezze(child.range))
 			}
 			//TODO path, git
 		}

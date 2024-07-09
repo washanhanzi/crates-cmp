@@ -32,11 +32,25 @@ export class Listener {
 		this.deletedNodes(this.nodeStore.deletedIds())
 		this.dirtyNodes(this.nodeStore.dirtyIds())
 
-		const currentDeps = await async(cargoTree(document.uri.path))
-		if (currentDeps.isErr()) { return }
+		const currentDepsResult = await async(cargoTree(document.uri.path))
+		if (currentDepsResult.isErr()) { return }
 
+		let deleted: string[] = []
+		const currentDepts = currentDepsResult.unwrap()!
 		for (let dep of walker.dependencies) {
-			dep.currentVersion = currentDeps.unwrap()![dep.name]
+			if (currentDepts[dep.name]) {
+				dep.currentVersion = currentDepts[dep.name]
+				continue
+			}
+			if (dep.packageName && currentDepts[dep.packageName]) {
+				dep.currentVersion = currentDepts[dep.packageName]
+				continue
+			}
+			deleted.push(dep.id)
+		}
+
+		if (deleted.length !== 0) {
+			this.deletedNodes(deleted)
 		}
 
 		let promises = parseDependencies(this.ctx, walker.dependencies)

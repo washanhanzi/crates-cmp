@@ -25,6 +25,8 @@ export enum DependencyItemType {
 export type DependencyNode = {
 	id: string,
 	name: string,
+	//icns = { package = "tauri-icns", version = "0.1" }
+	packageName?: string,
 	inputVersion: string
 	currentVersion: string,
 	features: string[]
