@@ -1,7 +1,7 @@
 import { async } from "@washanhanzi/result-enum"
 import { executeCommand } from "./command"
 import { Uri, window, Range, TextDocument } from "vscode"
-import { DependenciesTable, DependencyNode, TopLevelTable } from "@entity"
+import { CargoTomlTable, DependencyItemType, DependencyNode } from "@entity"
 import { squezze } from "util/squzze"
 import { delay } from "util/delay"
 
@@ -12,13 +12,12 @@ export type SymbolTreeNode = {
 	children: SymbolTreeNode[]
 }
 
-
 export class CargoTomlWalker {
-	enterTable(node: SymbolTreeNode, table: TopLevelTable,): boolean { return true }
-	enterDependencies(node: SymbolTreeNode, table: DependenciesTable): boolean { return true }
+	enterTable(node: SymbolTreeNode, table: CargoTomlTable,): boolean { return true }
+	enterDependencies(node: SymbolTreeNode, table: CargoTomlTable): boolean { return true }
 
 	onPackage(id: string, node: SymbolTreeNode): void { }
-	onDependencies(id: string, node: SymbolTreeNode, table: DependenciesTable, platform?: string): void { }
+	onDependencies(id: string, node: SymbolTreeNode, table: CargoTomlTable, platform?: string): void { }
 	onFeatures(id: string, node: SymbolTreeNode): void { }
 	onWorkspace(id: string, node: SymbolTreeNode): void { }
 	onLib(id: string, node: SymbolTreeNode): void { }
@@ -37,63 +36,63 @@ export class CargoTomlWalker {
 		for (let node of this.tree) {
 			switch (node.name) {
 				case 'package':
-					if (this.enterTable(node, TopLevelTable.PACKAGE)) {
+					if (this.enterTable(node, CargoTomlTable.PACKAGE)) {
 						this.onPackage(node.name, node)
 					}
 					break
 				case 'dependencies':
-					if (this.enterDependencies(node, DependenciesTable.DEPENDENCIES)) {
-						this.onDependencies(node.name, node, DependenciesTable.DEPENDENCIES)
+					if (this.enterDependencies(node, CargoTomlTable.DEPENDENCIES)) {
+						this.onDependencies(node.name, node, CargoTomlTable.DEPENDENCIES)
 					}
 					break
 				case 'dev-dependencies':
-					if (this.enterDependencies(node, DependenciesTable.DEV_DEPENDENCIES)) {
-						this.onDependencies(node.name, node, DependenciesTable.DEV_DEPENDENCIES)
+					if (this.enterDependencies(node, CargoTomlTable.DEV_DEPENDENCIES)) {
+						this.onDependencies(node.name, node, CargoTomlTable.DEV_DEPENDENCIES)
 					}
 					break
 				case 'build-dependencies':
-					if (this.enterDependencies(node, DependenciesTable.BUILD_DEPENDENCIES)) {
-						this.onDependencies(node.name, node, DependenciesTable.BUILD_DEPENDENCIES)
+					if (this.enterDependencies(node, CargoTomlTable.BUILD_DEPENDENCIES)) {
+						this.onDependencies(node.name, node, CargoTomlTable.BUILD_DEPENDENCIES)
 					}
 					break
 				case "target":
-					if (this.enterDependencies(node, DependenciesTable.TARGET_DEPENDENCIES)) {
+					if (this.enterDependencies(node, CargoTomlTable.TARGET_DEPENDENCIES)) {
 						for (let child of node.children[0].children) {
-							this.onDependencies(nodeId(node.name, node.children[0].name, child.name), child, DependenciesTable.TARGET_DEPENDENCIES, node.children[0].name)
+							this.onDependencies(nodeId(node.name, node.children[0].name, child.name), child, CargoTomlTable.TARGET_DEPENDENCIES, node.children[0].name)
 						}
 					}
 				case 'features':
-					if (this.enterTable(node, TopLevelTable.FEATURES)) {
+					if (this.enterTable(node, CargoTomlTable.FEATURES)) {
 						this.onFeatures(node.name, node)
 					}
 					break
 				case 'workspace':
-					if (this.enterTable(node, TopLevelTable.WORKSPACE)) {
+					if (this.enterTable(node, CargoTomlTable.WORKSPACE)) {
 						this.onWorkspace(node.name, node)
 					}
 					break
 				case 'lib':
-					if (this.enterTable(node, TopLevelTable.LIB)) {
+					if (this.enterTable(node, CargoTomlTable.LIB)) {
 						this.onLib(node.name, node)
 					}
 					break
 				case 'bin':
-					if (this.enterTable(node, TopLevelTable.BIN)) {
+					if (this.enterTable(node, CargoTomlTable.BIN)) {
 						this.onBin(node.name, node)
 					}
 					break
 				case 'profile':
-					if (this.enterTable(node, TopLevelTable.PROFILE)) {
+					if (this.enterTable(node, CargoTomlTable.PROFILE)) {
 						this.onProfile(node.name, node)
 					}
 					break
 				case 'badges':
-					if (this.enterTable(node, TopLevelTable.BADGES)) {
+					if (this.enterTable(node, CargoTomlTable.BADGES)) {
 						this.onBadges(node.name, node)
 					}
 					break
 				default:
-					if (this.enterTable(node, TopLevelTable.OTHER)) {
+					if (this.enterTable(node, CargoTomlTable.OTHER)) {
 						this.onOther(node.name, node)
 					}
 					break
@@ -104,9 +103,9 @@ export class CargoTomlWalker {
 
 export class DependenciesWalker extends CargoTomlWalker {
 	enterCrate(node: SymbolTreeNode): boolean { return true }
-	onCrate(id: string, node: SymbolTreeNode, table: DependenciesTable, platform?: string) { }
+	onCrate(id: string, node: SymbolTreeNode, table: CargoTomlTable, platform?: string) { }
 
-	onDependencies(id: string, node: SymbolTreeNode, table: DependenciesTable, platform?: string) {
+	onDependencies(id: string, node: SymbolTreeNode, table: CargoTomlTable, platform?: string) {
 		for (let crate of node.children) {
 			if (this.enterCrate(crate)) {
 				this.onCrate(nodeId(id, crate.name), crate, table, platform)
@@ -134,24 +133,24 @@ export async function symbolTree(uri: Uri) {
 
 export class DependenciesTraverser extends DependenciesWalker {
 	dependencies: DependencyNode[] = []
-	rangeStore: RangeStore
+	nodeStore: NodeStore
 	identifiers: string[] = []
 
 	private doc: TextDocument
 
-	constructor(tree: SymbolTreeNode[], doc: TextDocument, rangeStore: RangeStore) {
+	constructor(tree: SymbolTreeNode[], doc: TextDocument, nodeStore: NodeStore) {
 		super(tree)
 		this.doc = doc
-		this.rangeStore = rangeStore
+		this.nodeStore = nodeStore
 	}
 
 	//don't enter other tables
-	enterTable(node: SymbolTreeNode, table: TopLevelTable): boolean {
+	enterTable(node: SymbolTreeNode, table: CargoTomlTable): boolean {
 		return false
 	}
 
 	//only enter dependencies
-	enterDependencies(node: SymbolTreeNode, table: DependenciesTable): boolean {
+	enterDependencies(node: SymbolTreeNode, table: CargoTomlTable): boolean {
 		return true
 	}
 
@@ -160,7 +159,7 @@ export class DependenciesTraverser extends DependenciesWalker {
 		return true
 	}
 
-	onCrate(id: string, node: SymbolTreeNode, table: DependenciesTable, platform?: string) {
+	onCrate(id: string, node: SymbolTreeNode, table: CargoTomlTable, platform?: string) {
 		const crateName = node.name
 		const input: DependencyNode = {
 			id: id,
@@ -173,7 +172,7 @@ export class DependenciesTraverser extends DependenciesWalker {
 		}
 		this.identifiers.push(input.id)
 		//set crate range
-		this.rangeStore.set(input.id, node.range)
+		this.nodeStore.set(input.id, { value: this.doc.getText(node.range), table: table, range: node.range, denpendencyType: DependencyItemType.CRATE })
 
 		//simple dependency
 		if (node.children.length === 0) {
@@ -188,19 +187,19 @@ export class DependenciesTraverser extends DependenciesWalker {
 			if (child.name === "version") {
 				const version = this.doc.getText(squezze(child.range))
 				input.inputVersion = version
-				this.rangeStore.set(nodeId(input.id, child.name), child.range)
+				this.nodeStore.set(nodeId(input.id, child.name), { value: version, range: child.range, table: table, denpendencyType: DependencyItemType.VERSION })
 				continue
 			}
 			if (child.name === "features") {
 				if (child.children.length !== 0) {
 					for (let grandChild of child.children) {
 						const f = this.doc.getText(squezze(grandChild.range))
-						this.rangeStore.set(nodeId(input.id, child.name, grandChild.name), grandChild.range)
+						this.nodeStore.set(nodeId(input.id, child.name, grandChild.name), { value: f, range: grandChild.range, table: table, denpendencyType: DependencyItemType.FEATURE })
 						input.features.push(f)
 					}
 				} else {
 					const f = this.doc.getText(squezze(child.range))
-					this.rangeStore.set(nodeId(input.id, child.name), child.range)
+					this.nodeStore.set(nodeId(input.id, child.name), { value: f, range: child.range, table: table, denpendencyType: DependencyItemType.FEATURE })
 					input.features.push(f)
 				}
 				continue
@@ -215,16 +214,84 @@ export function nodeId(...params: string[]): string {
 	return params.join('.')
 }
 
-export class RangeStore {
-	private m: { [key: string]: Range } = {}
+type TreeNode = {
+	value: string,
+	range: Range
+	table: CargoTomlTable,
+	denpendencyType: DependencyItemType
+}
+
+export class NodeStore {
+	private m: { [key: string]: TreeNode } = {}
+	private dirtyNodes: Set<string> = new Set()
+	private newlyAdded: Set<string> = new Set()
+	private deleted: Set<string> = new Set()
+	private uri: string | undefined = undefined
 	constructor() {
 		this.m = {}
 	}
 
-	range(id: string): Range | undefined {
-		return this.m[id]
+	init(uri: string) {
+		if (this.uri !== uri) {
+			this.m = {}
+			this.uri = uri
+			this.dirtyNodes.clear()
+			this.newlyAdded.clear()
+			this.deleted.clear()
+			return
+		}
+		this.dirtyNodes.clear()
+		this.newlyAdded.clear()
+		//delete nodes in the previous walk
+		for (let key of this.deleted) {
+			delete this.m[key]
+		}
+		this.deleted.clear()
+		//init the deleted set
+		for (let key of Object.keys(this.m)) {
+			this.deleted.add(key)
+		}
 	}
-	set(id: string, range: Range) {
-		this.m[id] = range
+
+	isClean() {
+		return this.dirtyNodes.size === 0 && this.newlyAdded.size === 0 && this.deleted.size === 0
+	}
+
+	node(id: string): TreeNode | undefined {
+		return this.m[id] ?? undefined
+	}
+
+	range(id: string): Range | undefined {
+		return this.m[id]?.range
+	}
+
+	set(id: string, node: TreeNode) {
+		if (this.m[id] && this.m[id].value !== node.value) {
+			this.dirtyNodes.add(id)
+		}
+		if (!this.m[id]) {
+			this.newlyAdded.add(id)
+		}
+		this.deleted.delete(id)
+		this.m[id] = node
+	}
+
+	deletedIds(): string[] {
+		return [...this.deleted]
+	}
+
+	dirtyIds(): string[] {
+		return [...this.dirtyNodes]
+	}
+
+	addedIds(): string[] {
+		return [...this.newlyAdded]
+	}
+
+	isDirty(id: string): boolean {
+		if (this.dirtyNodes.has(id)) {
+			return true
+		}
+		return false
 	}
 }

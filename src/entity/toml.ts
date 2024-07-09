@@ -1,6 +1,6 @@
 import { DiagnosticSeverity } from "vscode"
 
-export enum TopLevelTable {
+export enum CargoTomlTable {
 	PACKAGE = 'package',
 	FEATURES = 'features',
 	WORKSPACE = 'workspace',
@@ -8,14 +8,18 @@ export enum TopLevelTable {
 	BIN = 'bin',
 	PROFILE = 'profile',
 	BADGES = 'badges',
-	OTHER = 'other'
-}
-
-export enum DependenciesTable {
+	OTHER = 'other',
 	DEPENDENCIES = "dependencies",
 	DEV_DEPENDENCIES = "dev-dependencies",
 	BUILD_DEPENDENCIES = "build-dependencies",
 	TARGET_DEPENDENCIES = "target.dependencies"
+}
+
+export enum DependencyItemType {
+	CRATE = "Crate",
+	VERSION = "Version",
+	FEATURE = "Feature",
+	UNKOWN = "Unkown"
 }
 
 export type DependencyNode = {
@@ -27,13 +31,14 @@ export type DependencyNode = {
 	path?: string
 	git?: string
 	//dependencies, dev-dependencies, build-dependencies, target.dependencies
-	tableName: DependenciesTable
+	tableName: CargoTomlTable
 	platform?: string
 }
 
 export enum DependencyDecorationStatus {
 	LATEST = "Latest",
 	OUTDATED = "Outdated",
+	LOADING = "Loading",
 	ERROR = "Error"
 }
 
@@ -58,10 +63,4 @@ export type DependencyDiagnostic = {
 	servity: DiagnosticSeverity
 	message: string
 	source: string
-}
-
-export enum DependencyItemType {
-	CRATE = "Crate",
-	VERSION = "Version",
-	FEATURE = "Feature"
 }

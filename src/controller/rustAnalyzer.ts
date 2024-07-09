@@ -1,4 +1,3 @@
-import { resolve } from "node:path/win32"
 import { extensions } from "vscode"
 import { LanguageClient } from "vscode-languageclient/node"
 

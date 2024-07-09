@@ -1,13 +1,10 @@
-import { commands, DocumentSelector, ExtensionContext, extensions, languages, Uri, window, workspace } from 'vscode'
-import { ServerOptions, TransportKind, LanguageClient, LanguageClientOptions } from "vscode-languageclient/node"
+import { DocumentSelector, ExtensionContext, languages, window, workspace } from 'vscode'
 import { CratesCompletionProvider, Listener, rustAnalyzer } from '@controller'
-import path from 'path'
 import { async } from '@washanhanzi/result-enum'
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: ExtensionContext) {
-
 	const documentSelector: DocumentSelector = { language: "toml", pattern: "**/Cargo.toml" }
 
 	const client = await async(rustAnalyzer.init())

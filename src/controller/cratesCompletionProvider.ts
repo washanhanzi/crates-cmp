@@ -4,7 +4,7 @@ import { featuresCompletionList } from "./featuresCompletionList"
 import { crateNameCompletionList } from "./crateNameCompletionList"
 import { DependenciesWalker, symbolTree, SymbolTreeNode } from "./symbolTree"
 import { squezze } from "util/squzze"
-import { DependenciesTable } from "@entity"
+import { CargoTomlTable } from "@entity"
 export class CratesCompletionProvider implements CompletionItemProvider {
 
 	private context: ExtensionContext
@@ -105,11 +105,11 @@ class CratesCompletionWalker extends DependenciesWalker {
 		this.position = position
 	}
 
-	enterTable(node, table): boolean {
+	enterTable(_node, _table): boolean {
 		return false
 	}
 
-	enterDependencies(node: SymbolTreeNode, table: DependenciesTable): boolean {
+	enterDependencies(node: SymbolTreeNode, table: CargoTomlTable): boolean {
 		if (node.range.contains(this.position)) {
 			return true
 		}

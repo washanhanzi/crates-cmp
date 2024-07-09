@@ -1,48 +1,42 @@
-import { ExtensionContext, TextDocumentChangeEvent, window, Range, TextEditorDecorationType, TextDocument, TextEditor } from "vscode"
-import { DependenciesTraverser, RangeStore, symbolTree } from "./symbolTree"
+import { ExtensionContext, TextDocumentChangeEvent, window, TextDocument, TextEditor } from "vscode"
+import { DependenciesTraverser, NodeStore, symbolTree } from "./symbolTree"
 import { parseDependencies } from "@usecase"
-import { DependencyDecorationStatus, DependencyDecoration, DependencyOutput } from "@entity"
-import { exec } from "child_process"
-import { async } from "@washanhanzi/result-enum"
-import { delay } from "util/delay"
-import { rustAnalyzer } from "./rustAnalyzer"
-import { outdatedDecoration } from "./dependencyDecoration"
+import { DependencyDecorationStatus, DependencyDecoration, DependencyOutput, DependencyItemType } from "@entity"
+import { DecorationStore, errorDecoration, latestDecoration, loadingDecoration, outdatedDecoration } from "./dependencyDecoration"
 import { cargoTree } from "./cargo"
+import { async } from "@washanhanzi/result-enum"
 
 export class Listener {
 	private ctx: ExtensionContext
 	//track the decoration state
-	private decorationState: { [key: string]: DecorationState }
-	//track all the toml nodes in the editor
-	private nodes: Set<string> = new Set()
-	private rangeStore: RangeStore = new RangeStore()
+	private decorationStore = new DecorationStore()
+	//track toml nodes
+	private nodeStore: NodeStore = new NodeStore()
 	constructor(ctx: ExtensionContext) {
 		this.ctx = ctx
-		this.decorationState = {}
 	}
 	async onChange(document: TextDocument) {
-
-
-		// const t = window.createTerminal("crates-cmp")
-		// t.sendText("cargo tree --depth 1")
-
 		const tree = await symbolTree(document.uri)
 		if (tree.length === 0) {
 			return
 		}
 
-
-		const walker = new DependenciesTraverser(tree, document, this.rangeStore)
+		const walker = new DependenciesTraverser(tree, document, this.nodeStore)
+		this.nodeStore.init(document.uri.path)
 		walker.walk()
-		this.updateCrates(walker.identifiers)
 
-		const currentDeps = await cargoTree(document.uri.path)
-		if (!currentDeps) {
-			return
-		}
+		//tree is clear
+		if (this.nodeStore.isClean()) { return }
+
+		this.addedNodes(this.nodeStore.addedIds())
+		this.deletedNodes(this.nodeStore.deletedIds())
+		this.dirtyNodes(this.nodeStore.dirtyIds())
+
+		const currentDeps = await async(cargoTree(document.uri.path))
+		if (currentDeps.isErr()) { return }
 
 		for (let dep of walker.dependencies) {
-			dep.currentVersion = currentDeps![dep.name]
+			dep.currentVersion = currentDeps.unwrap()![dep.name]
 		}
 
 		let promises = parseDependencies(this.ctx, walker.dependencies)
@@ -54,10 +48,67 @@ export class Listener {
 
 	outputPromiseHandler(output: DependencyOutput) {
 		if (output.decoration) {
-			const d = this.decoration(output.id, output.decoration)
-			if (d !== null) {
-				window.activeTextEditor?.setDecorations(d, [this.rangeStore.range(output.decoration.id)!])
+			this.decorate(output.id, output.decoration)
+		}
+	}
+
+
+	addedNodes(ids: string[]) {
+		for (let id of ids) {
+			//add loading decoration
+			this.decorate(id, { id: id, current: "", currentMax: "", latest: "", status: DependencyDecorationStatus.LOADING })
+		}
+	}
+
+	deletedNodes(ids: string[]) {
+		for (let id of ids) {
+			//clear decorations state
+			this.decorationStore.delete(id)
+		}
+	}
+
+	dirtyNodes(ids: string[]) {
+		for (let id of ids) {
+			//add loading decoration
+			this.decorate(id, { id: id, current: "", currentMax: "", latest: "", status: DependencyDecorationStatus.LOADING })
+		}
+	}
+
+	//decoration return an old decoration or new onee
+	decorate(id: string, deco: DependencyDecoration) {
+		if (this.nodeStore.node(id) && this.nodeStore.node(id)?.denpendencyType !== DependencyItemType.CRATE) {
+			return null
+		}
+		const d = this.decorationStore.get(id)
+		if (d) {
+			if (d.latest === deco.latest && d.status === deco.status) {
+				//decorate
+				if (this.nodeStore.range(id)) {
+					window.activeTextEditor?.setDecorations(d.decoration, [this.nodeStore.range(id)!])
+				}
+				return d.decoration
+			} else {
+				d.decoration.dispose()
 			}
+		}
+		let dt
+		switch (deco.status) {
+			case DependencyDecorationStatus.LATEST:
+				dt = latestDecoration(deco.latest)
+				break
+			case DependencyDecorationStatus.OUTDATED:
+				dt = outdatedDecoration(deco)
+				break
+			case DependencyDecorationStatus.ERROR:
+				dt = errorDecoration(deco.latest)
+				break
+			case DependencyDecorationStatus.LOADING:
+				dt = loadingDecoration()
+				break
+		}
+		this.decorationStore.set(id, { latest: deco.latest, status: deco.status, decoration: dt })
+		if (this.nodeStore.range(id)) {
+			window.activeTextEditor?.setDecorations(dt, [this.nodeStore.range(id)!])
 		}
 	}
 
@@ -75,78 +126,6 @@ export class Listener {
 		if (!editor.document.fileName.endsWith("Cargo.toml")) return
 		await this.onChange(editor.document)
 	}
-
-	updateCrates(newCrates: string[]) {
-		// Convert the new array to a set for efficient lookups
-		const newSet = new Set(newCrates)
-
-		// Find items to delete (present in persistentSet but not in newSet)
-		const deletedItems = [...this.nodes].filter(item => !newSet.has(item))
-
-		// Update the persistent set: remove deleted items
-		deletedItems.forEach(item => this.nodes.delete(item))
-
-		// Add new items from the new array to the persistent set
-		newCrates.forEach(item => this.nodes.add(item))
-
-		//clear decorations state
-		for (let d of deletedItems) {
-			this.decorationState[d].decoration.dispose()
-			delete this.decorationState[d]
-		}
-	}
-
-	//decoration return an old decoration or new onee
-	decoration(id: string, deco: DependencyDecoration): TextEditorDecorationType | null {
-		const d = this.decorationState[id]
-		if (d) {
-			if (d.latest === deco.latest && d.status === deco.status) {
-				return d.decoration
-			} else {
-				d.decoration.dispose()
-			}
-		}
-		switch (deco.status) {
-			case DependencyDecorationStatus.LATEST:
-				const newLatest = latestDecoration(deco.latest)
-				this.decorationState[id] = { latest: deco.latest, status: deco.status, decoration: newLatest }
-				return newLatest
-			case DependencyDecorationStatus.OUTDATED:
-				const newOutdated = outdatedDecoration(deco)
-				this.decorationState[id] = { latest: deco.latest, status: deco.status, decoration: newOutdated }
-				return newOutdated
-			case DependencyDecorationStatus.ERROR:
-				const newError = errorDecoration(deco.latest)
-				this.decorationState[id] = { latest: deco.latest, status: deco.status, decoration: newError }
-				return newError
-		}
-	}
-}
-
-type DecorationState = {
-	status: DependencyDecorationStatus,
-	latest: string,
-	decoration: TextEditorDecorationType
-}
-
-function latestDecoration(latest: string) {
-	return window.createTextEditorDecorationType({
-		after: {
-			contentText: '✅ ' + latest,
-			color: 'green',
-			margin: '0 0 0 4em' // Add some margin to the left
-		}
-	})
-
 }
 
 
-function errorDecoration(latest: string) {
-	return window.createTextEditorDecorationType({
-		after: {
-			contentText: '❌ ' + latest,
-			color: 'red',
-			margin: '0 0 0 4em' // Add some margin to the left
-		}
-	})
-}
