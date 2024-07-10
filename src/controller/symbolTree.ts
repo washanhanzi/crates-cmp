@@ -240,6 +240,7 @@ export class NodeStore {
 
 	private uri: string | undefined = undefined
 
+
 	constructor() {
 		this.m = {}
 	}
@@ -247,6 +248,11 @@ export class NodeStore {
 	initialized(uri: string) {
 		return this.uri !== undefined && this.uri === uri
 	}
+
+	close() {
+		this.uri = undefined
+	}
+
 
 	init(uri: string) {
 		if (this.uri !== uri) {

@@ -9,6 +9,9 @@ export function dependenciesDecorations(ctx: ExtensionContext, input: Dependency
 	}
 	let res: Promise<DependencyDecoration>[] = []
 	for (let d of input) {
+		if (d.currentVersion === undefined) {
+			continue
+		}
 		res.push(dependencyDecoration(ctx, d))
 	}
 	return res

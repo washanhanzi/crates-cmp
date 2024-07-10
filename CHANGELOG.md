@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.28] - 2024-07-10
+
+### Fixed
+
+- fix dependency may not installed on user's machine
+
 ## [0.0.27] - 2024-07-10
 
 ### Changed

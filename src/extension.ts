@@ -21,6 +21,8 @@ export async function activate(context: ExtensionContext) {
 		// When the text document is changed, fetch + check dependencies
 		workspace.onDidChangeTextDocument(listener.onDidChangeTextDocument, listener),
 
+		workspace.onDidCloseTextDocument(listener.onDidCloseTextDocument, listener),
+
 		// Register our versions completions provider
 		languages.registerCompletionItemProvider(
 			documentSelector,

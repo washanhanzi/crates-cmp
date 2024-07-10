@@ -170,4 +170,8 @@ export class Listener {
 		if (!editor.document.fileName.endsWith("Cargo.toml")) return
 		await this.onChange(editor.document)
 	}
+
+	onDidCloseTextDocument(_document: TextDocument) {
+		this.nodeStore.close()
+	}
 }
