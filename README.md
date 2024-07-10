@@ -20,8 +20,9 @@
 - [x] Features auto completion
 - [x] Crate name auto completion
 - [x] Version check
-- [ ] Features check
+- [x] Version and Features diagnostic infomation
 - [ ] Quick action
+- [ ] Audit
 - [ ] Configuration
 
 ## Copied from

@@ -19,6 +19,10 @@ export class Listener {
 		this.diagnosticCollection = languages.createDiagnosticCollection("crates-cmp")
 	}
 	async onChange(document: TextDocument) {
+		if (!document.isDirty && this.nodeStore.initialized()) {
+			return
+		}
+
 		const tree = await symbolTree(document.uri)
 		if (tree.length === 0) {
 			return
@@ -26,38 +30,44 @@ export class Listener {
 
 		const walker = new DependenciesTraverser(tree, document, this.nodeStore)
 		this.nodeStore.init(document.uri.path)
-		if (!this.nodeStore.isDone()) {
-			walker.walk()
+		walker.walk()
+		this.nodeStore.finishWalk()
 
-			//tree is clean
-			if (this.nodeStore.isClean()) { return }
+		//tree is clean
+		if (this.nodeStore.isClean()) { return }
 
-			this.addedNodes(this.nodeStore.addedIds())
-			this.deletedNodes(this.nodeStore.deletedIds())
-			this.dirtyNodes(this.nodeStore.dirtyIds())
-		}
+		//process dirty nodes of current walk
+		this.diagnosticCollection.delete(document.uri)
+		this.addedNodes(this.nodeStore.addedIds())
+		this.deletedNodes(this.nodeStore.deletedIds())
+		this.dirtyNodes(this.nodeStore.dirtyIds())
 
+		//suspend
 		const currentDepsResult = await async(cargoTree(document.uri.path))
 		if (currentDepsResult.isErr()) {
-			this.addedNodes(this.nodeStore.addedIds())
-			this.deletedNodes(this.nodeStore.deletedIds())
-			this.dirtyNodes(this.nodeStore.dirtyIds())
+			//resume point, check
+			if (this.nodeStore.isClean()) { return }
+
 			//parse for diagnostic
 			const filtered = walker.dependencies.filter(d => this.nodeStore.isAdded(d.id) || this.nodeStore.isDirty(d.id))
+
+			//suspend
 			const diagnostics = await dependenciesDiagnostics(this.ctx, filtered)
-			let cols: Diagnostic[] = []
-			let deleted: string[] = []
-			for (let d of diagnostics) {
-				cols.push(new Diagnostic(this.nodeStore.range(d.id)!, d.message, d.servity))
-				deleted.push(d.id)
-			}
-			this.deletedNodes(deleted)
+			//resume point, check
+			if (diagnostics.length === 0) { return }
+
+			const cols = diagnostics.map(d => new Diagnostic(this.nodeStore.range(d.id)!, d.message, d.servity))
+			this.deletedNodes(diagnostics.map(d => d.id))
 			this.diagnosticCollection.set(document.uri, cols)
-			this.nodeStore.setDone()
+
+			//clear the state
+			this.nodeStore.patch()
 			return
 		}
-		this.diagnosticCollection.clear()
+		//resume point, check
+		if (this.nodeStore.isClean()) { return }
 
+		//parse for decoration
 		let deleted: string[] = []
 		const currentDepts = currentDepsResult.unwrap()!
 		for (let dep of walker.dependencies) {
@@ -80,7 +90,8 @@ export class Listener {
 
 		promises.forEach(p => p.then(this.outputPromiseHandler.bind(this)))
 
-		this.nodeStore.setDone()
+		//clear the state
+		this.nodeStore.patch()
 		return
 	}
 

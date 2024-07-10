@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.26] - 2024-07-10
+
+### Changed
+
+- nothing changed. Code refactor, deal with async. Maybe I can use RxJS, but I'm not familiar with it.
+
 ## [0.0.25] - 2024-07-09
 
 ### Added

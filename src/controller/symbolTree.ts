@@ -227,43 +227,50 @@ type TreeNode = {
 
 export class NodeStore {
 	private m: { [key: string]: TreeNode } = {}
-	private dirtyNodes: Set<string> = new Set()
-	private newlyAdded: Set<string> = new Set()
-	private deleted: Set<string> = new Set()
+
+	//track nodes need to be updated in current walk
+	private currentDirty: Set<string> = new Set()
+	private currentyAdded: Set<string> = new Set()
+	private currentDeleted: Set<string> = new Set()
+
+	//track nodes need to be updated in current and previous walk
+	private unpatchedDirty: Set<string> = new Set()
+	private unpatchedAdded: Set<string> = new Set()
+	private unpatchedDeleted: Set<string> = new Set()
+
 	private uri: string | undefined = undefined
-	//TODO hack!!!!
-	private done = false
+
 	constructor() {
 		this.m = {}
+	}
+
+	initialized() {
+		return this.uri !== undefined
 	}
 
 	init(uri: string) {
 		if (this.uri !== uri) {
 			this.m = {}
 			this.uri = uri
-			this.dirtyNodes.clear()
-			this.newlyAdded.clear()
-			this.deleted.clear()
+			this.currentDirty.clear()
+			this.currentyAdded.clear()
+			this.currentDeleted.clear()
+			this.unpatchedAdded.clear()
+			this.unpatchedDirty.clear()
+			this.unpatchedDeleted.clear()
 			return
 		}
-		if (this.done) {
-			this.dirtyNodes.clear()
-			this.newlyAdded.clear()
-			//delete nodes in the previous walk
-			for (let key of this.deleted) {
-				delete this.m[key]
-			}
-			this.deleted.clear()
-			//init the deleted set
-			for (let key of Object.keys(this.m)) {
-				this.deleted.add(key)
-			}
-			this.done = false
+		this.currentDirty.clear()
+		this.currentyAdded.clear()
+		this.currentDeleted.clear()
+		//init the deleted set
+		for (let key of Object.keys(this.m)) {
+			this.currentDeleted.add(key)
 		}
 	}
 
 	isClean() {
-		return this.dirtyNodes.size === 0 && this.newlyAdded.size === 0 && this.deleted.size === 0
+		return this.currentDirty.size === 0 && this.currentyAdded.size === 0 && this.currentDeleted.size === 0 && this.unpatchedDirty.size === 0 && this.unpatchedAdded.size === 0 && this.unpatchedDeleted.size === 0
 	}
 
 	node(id: string): TreeNode | undefined {
@@ -276,40 +283,50 @@ export class NodeStore {
 
 	set(id: string, node: TreeNode) {
 		if (this.m[id] && this.m[id].value !== node.value) {
-			this.dirtyNodes.add(id)
+			this.currentDirty.add(id)
+			this.unpatchedDirty.add(id)
 		}
 		if (!this.m[id]) {
-			this.newlyAdded.add(id)
+			this.currentyAdded.add(id)
+			this.unpatchedAdded.add(id)
 		}
-		this.deleted.delete(id)
+		this.currentDeleted.delete(id)
 		this.m[id] = node
 	}
 
+	finishWalk() {
+		for (let key of this.currentDeleted) {
+			this.unpatchedDeleted.add(key)
+		}
+	}
+
 	deletedIds(): string[] {
-		return [...this.deleted]
+		return [...this.currentDeleted]
 	}
 
 	dirtyIds(): string[] {
-		return [...this.dirtyNodes]
+		return [...this.currentDirty]
 	}
 
 	addedIds(): string[] {
-		return [...this.newlyAdded]
+		return [...this.currentyAdded]
 	}
 
 	isAdded(id: string) {
-		return this.newlyAdded.has(id)
+		return this.unpatchedAdded.has(id)
 	}
 
 	isDirty(id: string): boolean {
-		return this.dirtyNodes.has(id)
+		return this.unpatchedDirty.has(id)
 	}
 
-	setDone() {
-		this.done = true
+	patch() {
+		this.unpatchedAdded.clear()
+		this.unpatchedDirty.clear()
+		for (let key of this.unpatchedDeleted) {
+			delete this.m[key]
+		}
+		this.unpatchedDeleted.clear()
 	}
 
-	isDone() {
-		return this.done
-	}
 }
