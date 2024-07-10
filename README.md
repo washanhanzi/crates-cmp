@@ -16,11 +16,11 @@
 
 ## Features
 
-- [x] Version auto completion
-- [x] Features auto completion
-- [x] Crate name auto completion
-- [x] Version check
-- [x] Version and Features diagnostic infomation
+- [x] Version code completion
+- [x] Features code completion
+- [x] Crate name code completion
+- [x] Version check (compare installed version and latest version, etc.)
+- [x] Diagnostic (version not exist, feature not exit, etc.)
 - [ ] Quick action
 - [ ] Audit
 - [ ] Configuration

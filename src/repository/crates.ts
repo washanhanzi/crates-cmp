@@ -1,6 +1,6 @@
 import { Metadata, SearchCrateOutput } from '@entity'
 import ky from "ky"
-import { prerelease } from "semver"
+import { prerelease, satisfies } from "semver"
 
 export const DEFAULT_SPARSE_INDEX_SERVER_URL = "https://index.crates.io"
 
@@ -62,6 +62,11 @@ export async function sparseIndexMetadata(name: string, url: string = DEFAULT_SP
 				f2 = Object.keys(j.features2)
 			}
 			features[j.vers] = [...f1, ...f2]
+			for (let dep of j.deps) {
+				if (dep.optional && satisfies(j.vers, dep.req)) {
+					features[j.vers].push(dep.name)
+				}
+			}
 		}
 	}
 

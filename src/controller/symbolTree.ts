@@ -27,10 +27,14 @@ export class CargoTomlWalker {
 	onOther(id: string, node: SymbolTreeNode): void { }
 
 	private tree: SymbolTreeNode[]
+	private version: number
 
-	constructor(tree: SymbolTreeNode[]) {
+	constructor(tree: SymbolTreeNode[], version: number) {
 		this.tree = tree
+		this.version = version
 	}
+
+	getVersion(): number { return this.version }
 
 	walk(): void {
 		for (let node of this.tree) {
@@ -140,8 +144,8 @@ export class DependenciesTraverser extends DependenciesWalker {
 
 	private doc: TextDocument
 
-	constructor(tree: SymbolTreeNode[], doc: TextDocument, nodeStore: NodeStore) {
-		super(tree)
+	constructor(tree: SymbolTreeNode[], doc: TextDocument, nodeStore: NodeStore, version: number) {
+		super(tree, version)
 		this.doc = doc
 		this.nodeStore = nodeStore
 	}
@@ -173,7 +177,8 @@ export class DependenciesTraverser extends DependenciesWalker {
 		}
 		this.identifiers.push(input.id)
 		//set crate range
-		this.nodeStore.set(input.id, { value: this.doc.getText(node.range), table: table, range: node.range, denpendencyType: DependencyItemType.CRATE })
+		this.nodeStore.set(input.id, { value: this.doc.getText(node.range), table: table, range: node.range, denpendencyType: DependencyItemType.CRATE }, this.getVersion())
+		this.nodeStore.setNode(input.id, { value: this.doc.getText(node.range), table: table, range: node.range, denpendencyType: DependencyItemType.CRATE })
 
 		//simple dependency
 		if (node.children.length === 0) {
@@ -188,19 +193,19 @@ export class DependenciesTraverser extends DependenciesWalker {
 			if (child.name === "version") {
 				const version = this.doc.getText(squezze(child.range))
 				input.inputVersion = version
-				this.nodeStore.set(nodeId(input.id, child.name), { value: version, range: child.range, table: table, denpendencyType: DependencyItemType.VERSION })
+				this.nodeStore.setNode(nodeId(input.id, child.name), { value: version, range: child.range, table: table, denpendencyType: DependencyItemType.VERSION })
 				continue
 			}
 			if (child.name === "features") {
 				if (child.children.length !== 0) {
 					for (let grandChild of child.children) {
 						const f = this.doc.getText(squezze(grandChild.range))
-						this.nodeStore.set(nodeId(input.id, child.name, grandChild.name), { value: f, range: grandChild.range, table: table, denpendencyType: DependencyItemType.FEATURE })
+						this.nodeStore.setNode(nodeId(input.id, child.name, grandChild.name), { value: f, range: grandChild.range, table: table, denpendencyType: DependencyItemType.FEATURE })
 						input.features.push(f)
 					}
 				} else {
 					const f = this.doc.getText(squezze(child.range))
-					this.nodeStore.set(nodeId(input.id, child.name), { value: f, range: child.range, table: table, denpendencyType: DependencyItemType.FEATURE })
+					this.nodeStore.setNode(nodeId(input.id, child.name), { value: f, range: child.range, table: table, denpendencyType: DependencyItemType.FEATURE })
 					input.features.push(f)
 				}
 				continue
@@ -228,46 +233,42 @@ type TreeNode = {
 export class NodeStore {
 	private m: { [key: string]: TreeNode } = {}
 
-	//track nodes need to be updated in current walk
-	private currentDirty: Set<string> = new Set()
-	private currentyAdded: Set<string> = new Set()
+	//track nodes need to be deleted in current walk
+	//require to call finishWalk
 	private currentDeleted: Set<string> = new Set()
 
-	//track nodes need to be updated in current and previous walk
-	private unpatchedDirty: Set<string> = new Set()
-	private unpatchedAdded: Set<string> = new Set()
-	private unpatchedDeleted: Set<string> = new Set()
-
 	private uri: string | undefined = undefined
+	private version: number = 0
 
+	//added and updated track the dependency crate nodes
+	//we must process all added nodes to clear the tree
+	//updated nodes only track for the node with latest version, we only need to process latest version to clear the tree
+	private added: Set<string> = new Set()
+	private updated: Map<string, number> = new Map()
+
+	clean: Set<number> = new Set()
 
 	constructor() {
 		this.m = {}
-	}
-
-	initialized(uri: string) {
-		return this.uri !== undefined && this.uri === uri
 	}
 
 	close() {
 		this.uri = undefined
 	}
 
+	initialized(uri: string, version: number) {
+		return this.uri === uri && this.version === version
+	}
 
-	init(uri: string) {
+
+	init(uri: string, version: number) {
+		this.version = version
 		if (this.uri !== uri) {
 			this.m = {}
 			this.uri = uri
-			this.currentDirty.clear()
-			this.currentyAdded.clear()
 			this.currentDeleted.clear()
-			this.unpatchedAdded.clear()
-			this.unpatchedDirty.clear()
-			this.unpatchedDeleted.clear()
 			return
 		}
-		this.currentDirty.clear()
-		this.currentyAdded.clear()
 		this.currentDeleted.clear()
 		//init the deleted set
 		for (let key of Object.keys(this.m)) {
@@ -275,8 +276,13 @@ export class NodeStore {
 		}
 	}
 
+	skip(uri: string) {
+		return this.uri !== uri
+	}
+
+
 	isClean() {
-		return this.currentDirty.size === 0 && this.currentyAdded.size === 0 && this.currentDeleted.size === 0 && this.unpatchedDirty.size === 0 && this.unpatchedAdded.size === 0 && this.unpatchedDeleted.size === 0
+		return this.added.size === 0 && this.updated.size === 0
 	}
 
 	node(id: string): TreeNode | undefined {
@@ -287,23 +293,39 @@ export class NodeStore {
 		return this.m[id]?.range
 	}
 
-	set(id: string, node: TreeNode) {
-		if (this.m[id] && this.m[id].value !== node.value) {
-			this.currentDirty.add(id)
-			this.unpatchedDirty.add(id)
-		}
-		if (!this.m[id]) {
-			this.currentyAdded.add(id)
-			this.unpatchedAdded.add(id)
-		}
-		this.currentDeleted.delete(id)
+	setNode(id: string, node: TreeNode) {
 		this.m[id] = node
 	}
 
-	finishWalk() {
-		for (let key of this.currentDeleted) {
-			this.unpatchedDeleted.add(key)
+
+	set(id: string, node: TreeNode, version: number) {
+		if (this.m[id] && this.m[id].value !== node.value) {
+			this.addUpdated(id, version)
 		}
+		if (!this.m[id]) {
+			this.added.add(id)
+		}
+		this.currentDeleted.delete(id)
+	}
+
+	addUpdated(id: string, version: number) {
+		const v = this.updated.get(id)
+		if (v === undefined || v < version) {
+			this.updated.set(id, version)
+		}
+	}
+
+	checkAndDelDirty(id: string, version: number) {
+		if (this.added.has(id)) {
+			this.added.delete(id)
+			return true
+		}
+		const v = this.updated.get(id)
+		if (v === undefined || version < v) {
+			return false
+		}
+		this.updated.delete(id)
+		return true
 	}
 
 	deletedIds(): string[] {
@@ -311,28 +333,22 @@ export class NodeStore {
 	}
 
 	dirtyIds(): string[] {
-		return [...this.currentDirty]
+		const u = Array.from(this.updated.keys())
+		const a = Array.from(this.added)
+		return [...u, ...a]
 	}
 
-	addedIds(): string[] {
-		return [...this.currentyAdded]
-	}
-
-	isAdded(id: string) {
-		return this.unpatchedAdded.has(id)
-	}
-
-	isDirty(id: string): boolean {
-		return this.unpatchedDirty.has(id)
-	}
-
-	patch() {
-		this.unpatchedAdded.clear()
-		this.unpatchedDirty.clear()
-		for (let key of this.unpatchedDeleted) {
-			delete this.m[key]
+	finishWalk() {
+		for (let k of this.currentDeleted) {
+			delete this.m[k]
 		}
-		this.unpatchedDeleted.clear()
 	}
 
+	isDirty(id: string, version: number): boolean {
+		if (this.added.has(id)) {
+			return true
+		}
+		const v = this.updated.get(id)
+		return v === version
+	}
 }

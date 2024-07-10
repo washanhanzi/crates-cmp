@@ -44,12 +44,24 @@ export enum DependencyDecorationStatus {
 	UNKOWN = "Unkown"
 }
 
+export type DependencyDecorationWithCtx = {
+	uri: string,
+	version: number,
+	decoration: DependencyDecoration
+}
+
 export type DependencyDecoration = {
 	id: string,
 	current: string,
 	currentMax?: string,
 	latest: string,
 	status: DependencyDecorationStatus
+}
+
+export type DependencyDiagnosticWithCtx = {
+	uri: string,
+	version: number,
+	diagnostic: DependencyDiagnostic
 }
 
 export type DependencyDiagnostic = {

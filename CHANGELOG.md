@@ -1,5 +1,19 @@
 # Change Log
 
+## [0.0.34] - 2024-07-10
+
+### Fixed
+
+- correctly handle file update
+- add optional dependecy to crate feature
+
+## [0.0.29] - 2024-07-10
+
+### Fixed
+
+- fix parse pre-release version correctly
+- fix corret handle file update
+
 ## [0.0.28] - 2024-07-10
 
 ### Fixed

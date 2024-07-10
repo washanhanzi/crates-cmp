@@ -19,7 +19,7 @@ export async function activate(context: ExtensionContext) {
 		window.onDidChangeActiveTextEditor(listener.onDidChangeActiveEditor, listener),
 
 		// When the text document is changed, fetch + check dependencies
-		workspace.onDidChangeTextDocument(listener.onDidChangeTextDocument, listener),
+		workspace.onDidSaveTextDocument(listener.onDidChangeTextDocument, listener),
 
 		workspace.onDidCloseTextDocument(listener.onDidCloseTextDocument, listener),
 

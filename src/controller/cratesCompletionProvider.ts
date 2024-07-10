@@ -101,7 +101,7 @@ class CratesCompletionWalker extends DependenciesWalker {
 	position: Position
 
 	constructor(tree: SymbolTreeNode[], position: Position) {
-		super(tree)
+		super(tree, 0)
 		this.position = position
 	}
 
