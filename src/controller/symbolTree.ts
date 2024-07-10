@@ -244,8 +244,8 @@ export class NodeStore {
 		this.m = {}
 	}
 
-	initialized() {
-		return this.uri !== undefined
+	initialized(uri: string) {
+		return this.uri !== undefined && this.uri === uri
 	}
 
 	init(uri: string) {

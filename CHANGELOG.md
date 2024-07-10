@@ -1,5 +1,15 @@
 # Change Log
 
+## [0.0.27] - 2024-07-10
+
+### Changed
+
+- change decoration color and emoji for crate dependencies
+
+### Fixed
+
+- fix workspace with multiple Cargo.toml files
+
 ## [0.0.26] - 2024-07-10
 
 ### Changed

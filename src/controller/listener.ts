@@ -19,7 +19,7 @@ export class Listener {
 		this.diagnosticCollection = languages.createDiagnosticCollection("crates-cmp")
 	}
 	async onChange(document: TextDocument) {
-		if (!document.isDirty && this.nodeStore.initialized()) {
+		if (!document.isDirty && this.nodeStore.initialized(document.uri.path)) {
 			return
 		}
 

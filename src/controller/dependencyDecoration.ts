@@ -53,7 +53,7 @@ export function outdatedDecoration(deco: DependencyDecoration) {
 	if (deco.currentMax !== "" && deco.current === deco.currentMax) {
 		return window.createTextEditorDecorationType({
 			after: {
-				contentText: '🟡 ' + deco.current + ", " + deco.latest,
+				contentText: '🔒 ' + deco.current + ", " + deco.latest,
 				color: 'orange',
 				margin: '0 0 0 4em' // Add some margin to the left
 			}
@@ -62,16 +62,16 @@ export function outdatedDecoration(deco: DependencyDecoration) {
 	if (deco.currentMax && deco.current !== deco.currentMax) {
 		return window.createTextEditorDecorationType({
 			after: {
-				contentText: '🟡 ' + deco.current + "==>" + deco.currentMax + ", " + deco.latest,
-				color: 'orange',
+				contentText: '⬆️ ' + deco.current + "==>" + deco.currentMax + ", " + deco.latest,
+				color: 'yellow',
 				margin: '0 0 0 4em' // Add some margin to the left
 			}
 		})
 	}
 	return window.createTextEditorDecorationType({
 		after: {
-			contentText: '🟡 ' + deco.current + "==>" + deco.latest,
-			color: 'orange',
+			contentText: '⬆️ ' + deco.current + "==>" + deco.latest,
+			color: 'yellow',
 			margin: '0 0 0 4em' // Add some margin to the left
 		}
 	})
