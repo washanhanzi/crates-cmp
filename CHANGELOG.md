@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.39] - 2024-07-13
+
+### Changed
+
+- speed up error diagnostics finding
+
 ## [0.0.38] - 2024-07-13
 
 ### Fixed
