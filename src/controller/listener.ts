@@ -1,7 +1,7 @@
 import { ExtensionContext, window, TextDocument, TextEditor, DiagnosticCollection, Diagnostic, Uri, DiagnosticSeverity } from "vscode"
 import { DependenciesTraverser, NodeStore, symbolTree } from "./symbolTree"
 import { dependenciesDecorations } from "@/usecase"
-import { DependencyDecorationStatus, DependencyDecoration, DependencyItemType, DependencyDecorationWithCtx } from "@/entity"
+import { DependencyDecorationStatus, DependencyDecoration, DependencyItemType, DependencyDecorationWithCtx, Ctx } from "@/entity"
 import { DecorationStore, latestDecoration, loadingDecoration, notInstalledDecoration, outdatedDecoration } from "./decoration"
 import { cargoTree } from "./cargo"
 import { async } from "@washanhanzi/result-enum"
@@ -24,12 +24,7 @@ export class Listener {
 	}
 
 	async onChange(document: TextDocument) {
-		const ctx = {
-			extensionContext: this.ctx,
-			path: document.uri.path,
-			version: document.version,
-			uri: document.uri
-		}
+		const documentVersion = document.version
 
 		const tree = await symbolTree(document.uri)
 		if (tree.length === 0) {
@@ -39,8 +34,17 @@ export class Listener {
 		if (this.nodeStore.skip(document.uri.path)) {
 			return
 		}
+		if (document.version !== documentVersion) {
+			return
+		}
 
-		const walker = new DependenciesTraverser(tree, document, this.nodeStore, ctx.version)
+		const ctx = {
+			extensionContext: this.ctx,
+			path: document.uri.path,
+			rev: this.nodeStore.incRev(),
+			uri: document.uri
+		}
+		const walker = new DependenciesTraverser(tree, document, this.nodeStore, ctx.rev)
 		walker.walk()
 		this.nodeStore.finishWalk()
 
@@ -55,84 +59,11 @@ export class Listener {
 		//set dirty nodes to waiting decoration
 		this.setWaitingNodes(this.nodeStore.dirtyIds())
 
-		//suspend
-		const currentDepsResult = await async(cargoTreeCommandCache.call(ctx.path, cargoTree, ctx.path))
-		if (currentDepsResult.isErr()) {
-			//resume point, check
-			if (this.nodeStore.isClean()) { return }
-
-			//parse for diagnostic
-			const filtered = this.nodeStore.dependencies.filter(d => this.nodeStore.isDirty(d.id, ctx.version))
-
-			//suspend
-			const diagnostics = await dependenciesDiagnostics(ctx, filtered)
-			//resume point, check
-			if (diagnostics.length === 0) { return }
-
-			let clear: string[] = []
-			diagnostics
-				.filter(d => this.nodeStore.checkAndDelDirty(d.diagnostic.id, d.ctx.version))
-				.forEach(d => {
-					clear.push(d.diagnostic.id)
-					this.diagnosticStore.addRaw(d.ctx.path, this.nodeStore.range(d.diagnostic.id)!, d.diagnostic)
-				})
-			//clear decorations for diagnostics
-			this.clearDecoration(clear)
-			this.diagnosticStore.set(ctx.uri)
-			return
-		}
-
-		//cargo command exit with 0, remove error diagnostics
-		this.diagnosticStore.clearSeverity(ctx.uri, DiagnosticSeverity.Error)
-
-		//resume point, check
-		if (this.nodeStore.isClean()) {
-			return
-		}
-
-		//populate dependencies with current version
-		//find duplicated crates but with different versions
-		let duplicated: Set<string> = new Set()
-		let found: { [key: string]: { versions: Set<string>, ids: string[] } } = {}
-		const currentDepts = currentDepsResult.unwrap()!
-		for (let dep of this.nodeStore.dependencies) {
-			if (currentDepts[dep.tableName]) {
-				const deps = currentDepts[dep.tableName]
-				const crateName = dep.packageName ?? dep.name
-				if (deps[crateName]) {
-					dep.currentVersion = deps[crateName].version
-
-					//find duplicate crates
-					if (found[crateName]) {
-						found[crateName].versions.add(dep.currentVersion!)
-						found[crateName].ids.push(dep.id)
-						if (found[crateName].versions.size > 1) {
-							duplicated.add(crateName)
-						}
-					} else {
-						found[crateName] = { versions: new Set([dep.currentVersion!]), ids: [dep.id] }
-					}
-					continue
-				}
-			}
-		}
-
-		if (duplicated.size !== 0) {
-			for (let crate of duplicated) {
-				const message = "Found multiple versions: " + Array.from(found[crate].versions).join(", ")
-				const diags = found[crate].ids.map(id => new Diagnostic(this.nodeStore.range(id)!, message, DiagnosticSeverity.Information))
-				this.diagnosticStore.add(ctx.path, ...diags)
-			}
-			this.diagnosticStore.set(ctx.uri)
-		}
-
-		let promises = dependenciesDecorations(ctx, this.nodeStore.dependencies)
-
-		promises.forEach(p => p.then(this.outputPromiseHandler.bind(this)))
+		await this.patchNodeStore(ctx)
 	}
 
 	outputPromiseHandler(output: DependencyDecorationWithCtx) {
-		if (this.nodeStore.checkAndDelDirty(output.decoration.id, output.ctx.version)) {
+		if (this.nodeStore.checkAndDelDirty(output.decoration.id, output.ctx.rev)) {
 			this.decorate(output.decoration.id, output.decoration)
 		}
 	}
@@ -187,7 +118,7 @@ export class Listener {
 		}
 	}
 
-	async onDidChangeTextDocument(document: TextDocument) {
+	async onDidSaveTextDocument(document: TextDocument) {
 		if (
 			document.fileName.endsWith("Cargo.toml")
 		) {
@@ -202,7 +133,6 @@ export class Listener {
 			this.nodeStore.reset()
 			return
 		}
-		// this.nodeStore.reset()
 		this.init(editor.document)
 		await this.onChange(editor.document)
 	}
@@ -215,50 +145,15 @@ export class Listener {
 		const ctx = {
 			extensionContext: this.ctx,
 			path: window.activeTextEditor.document.uri.path,
-			version: window.activeTextEditor.document.version,
+			rev: this.nodeStore.incRev(),
 			uri: window.activeTextEditor.document.uri
 		}
-
-		const currentDepsResult = await async(cargoTreeCommandCache.call(this.nodeStore.path, cargoTree, this.nodeStore.path))
-		if (currentDepsResult.isErr()) {
-			return
-		}
-		//resume check
-		if (!window.activeTextEditor) return
-		if (!window.activeTextEditor.document.fileName.endsWith("Cargo.toml")) return
-		if (!this.nodeStore.path) return
-		if (this.nodeStore.skip(ctx.path)) return
-		if (this.nodeStore.version !== ctx.version) return
-
-		const currentDeps = currentDepsResult.unwrap()!
-		let taints: string[] = []
-		for (let dep of this.nodeStore.dependencies) {
-			if (currentDeps[dep.tableName]) {
-				const deps = currentDeps[dep.tableName]
-				const crateName = dep.packageName ?? dep.name
-				if (deps[crateName]) {
-					if (dep.currentVersion !== deps[crateName].version) {
-						dep.currentVersion = deps[crateName].version
-						//the node is ditry
-						this.nodeStore.taint(dep.id)
-						taints.push(dep.id)
-					}
-				}
-			}
-		}
-		if (taints.length === 0) return
-		this.setWaitingNodes(taints)
-
-		let promises = dependenciesDecorations(ctx, this.nodeStore.dependencies)
-
-		promises.forEach(p => p.then(this.outputPromiseHandler.bind(this)))
+		await this.patchNodeStore(ctx)
 	}
 
 	onDidCloseTextDocument(document: TextDocument) {
 		if (!document.fileName.endsWith("Cargo.toml")) return
-		if (this.nodeStore.skip(document.uri.path)) {
-			return
-		}
+		if (this.nodeStore.skip(document.uri.path)) return
 		this.nodeStore.reset()
 	}
 
@@ -270,5 +165,97 @@ export class Listener {
 	reset() {
 		this.nodeStore.reset()
 		this.decorationStore.reset()
+	}
+
+	async patchNodeStore(ctx: Ctx) {
+		//suspend
+		const currentDepsResult = await async(cargoTreeCommandCache.call(ctx.path, cargoTree, ctx.path))
+		if (currentDepsResult.isErr()) {
+			//resume point, check
+			if (this.nodeStore.isClean()) { return }
+
+			//parse for diagnostic
+			const filtered = this.nodeStore.dependencies.filter(d => this.nodeStore.isDirty(d.id, ctx.rev))
+
+			//suspend
+			const diagnostics = await dependenciesDiagnostics(ctx, filtered)
+			//resume point, check
+			if (diagnostics.length === 0) { return }
+
+			let clear: string[] = []
+			diagnostics
+				.filter(d => this.nodeStore.checkAndDelDirty(d.diagnostic.id, d.ctx.rev))
+				.forEach(d => {
+					clear.push(d.diagnostic.id)
+					this.diagnosticStore.addRaw(d.ctx.path, this.nodeStore.range(d.diagnostic.id)!, d.diagnostic)
+				})
+			//clear decorations for diagnostics
+			this.clearDecoration(clear)
+			this.diagnosticStore.set(ctx.uri)
+			return
+		}
+		//resume check
+		if (!window.activeTextEditor) return
+		if (!window.activeTextEditor.document.fileName.endsWith("Cargo.toml")) return
+		if (!this.nodeStore.path) return
+		if (this.nodeStore.skip(ctx.path)) return
+
+		//cargo command exit with 0, remove error diagnostics
+		this.diagnosticStore.clearSeverity(ctx.uri, DiagnosticSeverity.Error)
+
+		//populate dependencies with current version
+		//find crates with different versions
+		let duplicated: Set<string> = new Set()
+		let found: { [key: string]: { versions: Set<string>, ids: string[] } } = {}
+		let taints: string[] = []
+
+		const currentDepts = currentDepsResult.unwrap()!
+
+		for (let dep of this.nodeStore.dependencies) {
+			if (currentDepts[dep.tableName]) {
+				const deps = currentDepts[dep.tableName]
+				const crateName = dep.packageName ?? dep.name
+				if (deps[crateName]) {
+					if (dep.currentVersion !== undefined && dep.currentVersion !== deps[crateName].version) {
+						this.nodeStore.taint(dep.id, ctx.rev)
+						taints.push(dep.id)
+					}
+					dep.currentVersion = deps[crateName].version
+
+					//find duplicate crates
+					if (found[crateName]) {
+						found[crateName].versions.add(dep.currentVersion!)
+						found[crateName].ids.push(dep.id)
+						if (found[crateName].versions.size > 1) {
+							duplicated.add(crateName)
+						}
+					} else {
+						found[crateName] = { versions: new Set([dep.currentVersion!]), ids: [dep.id] }
+					}
+					continue
+				}
+			}
+		}
+
+		if (duplicated.size !== 0) {
+			for (let crate of duplicated) {
+				const message = "Found multiple versions: " + Array.from(found[crate].versions).join(", ")
+				const diags = found[crate].ids.map(id => new Diagnostic(this.nodeStore.range(id)!, message, DiagnosticSeverity.Information))
+				this.diagnosticStore.add(ctx.path, ...diags)
+			}
+			this.diagnosticStore.set(ctx.uri)
+		} else {
+			this.diagnosticStore.clearSeverity(ctx.uri, DiagnosticSeverity.Information)
+		}
+
+		if (taints.length !== 0) {
+			this.setWaitingNodes(taints)
+		}
+
+		if (this.nodeStore.isClean()) return
+
+		let promises = dependenciesDecorations(ctx, this.nodeStore.dependencies)
+
+		promises.forEach(p => p.then(this.outputPromiseHandler.bind(this)))
 	}
 }

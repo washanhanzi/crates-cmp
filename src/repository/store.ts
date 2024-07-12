@@ -10,7 +10,7 @@ export async function metadata(ctx: ExtensionContext, crate: string, force: bool
 		return m
 	}
 	const m: Metadata | undefined = ctx.globalState.get(key)
-	if (!m || m.createdAt > new Date().getUTCMilliseconds() - 1000 * 60 * 30) {
+	if (!m || m.createdAt > new Date().getUTCMilliseconds() - 1000 * 60 * 10) {
 		const m = await sparseIndexMetadata(crate)
 		ctx.globalState.update(key, m)
 		return m

@@ -2,7 +2,7 @@
   "name": "crates-cmp",
   "displayName": "crates-cmp",
   "description": "Code completion for Cargo.toml",
-  "version": "0.0.36",
+  "version": "0.0.37",
   "icon": "image/icon.webp",
   "publisher": "washan",
   "license": "SEE LICENSE IN LICENSE",
@@ -43,20 +43,7 @@
           "strings": "on"
         }
       }
-    },
-    "taskDefinitions": [
-      {
-        "type": "cargo",
-        "required": [
-          "command"
-        ],
-        "properties": {
-          "command": {
-            "type": "string"
-          }
-        }
-      }
-    ]
+    }
   },
   "scripts": {
     "build": "pnpm run package && vsce package --no-dependencies",

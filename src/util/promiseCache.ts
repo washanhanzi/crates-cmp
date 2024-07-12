@@ -5,6 +5,8 @@ export class PromiseCache<T> {
 		this.cache = new Map()
 	}
 
+	//the key is used for deduplicate concurrent calls
+	//asyncFunction should has its own lock mechanism
 	call(key: string, asyncFunction: (...args: any[]) => Promise<T>, ...args: any[]): Promise<T> {
 		if (this.cache.has(key)) {
 			// Return the existing promise to avoid duplicate executions

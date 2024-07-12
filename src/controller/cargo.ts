@@ -3,12 +3,9 @@ import { execAsync } from "@/util"
 import { CargoTomlTable, Ctx } from "@/entity"
 
 export async function cargoTree(path: string) {
-	const tree = await async(execAsync(`cargo tree --manifest-path ${path} --depth 1 --all-features`))
-	if (tree.isErr()) {
-		throw tree.unwrapErr()
-	}
+	const tree = await execAsync(`cargo tree --manifest-path ${path} --depth 1 --all-features`).catch(e => { throw e })
 
-	return parseCargoTreeOutput(tree.unwrap() as string)
+	return parseCargoTreeOutput(tree as string)
 }
 
 type CargoTreeOutputItem = {

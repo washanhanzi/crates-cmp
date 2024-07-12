@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.37] - 2024-07-13
+
+### Changed
+
+- No change, minor code refactor
+
 ## [0.0.36] - 2024-07-12
 
 ### Added

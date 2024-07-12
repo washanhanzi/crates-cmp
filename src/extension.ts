@@ -11,18 +11,18 @@ export async function activate(context: ExtensionContext) {
 	// 	window.showErrorMessage(client.unwrapErr().message)
 	// }
 
-	let def: TaskDefinition = {
-		type: "cargo",
-		command: "update"
-	}
-	let task = new Task(def, TaskScope.Workspace, "cargo update", "crates-cmp", new ShellExecution("cargo update"))
+	// let def: TaskDefinition = {
+	// 	type: "cargo",
+	// 	command: "update"
+	// }
+	// let task = new Task(def, TaskScope.Workspace, "cargo update", "crates-cmp", new ShellExecution("cargo update"))
 
-	let taskc = tasks.registerTaskProvider("cargo", {
-		provideTasks: () => { return [task] },
-		resolveTask: (task, token) => { return task }
-	})
+	// let taskc = tasks.registerTaskProvider("cargo", {
+	// 	provideTasks: () => { return [task] },
+	// 	resolveTask: (task, token) => { return task }
+	// })
 
-	context.subscriptions.push(taskc)
+	// context.subscriptions.push(taskc)
 
 	const listener = new Listener(context)
 
@@ -34,11 +34,9 @@ export async function activate(context: ExtensionContext) {
 	// })
 
 	context.subscriptions.push(
-		// Add active text editor listener and run once on start.
 		window.onDidChangeActiveTextEditor(listener.onDidChangeActiveEditor, listener),
 
-		// When the text document is changed, fetch + check dependencies
-		workspace.onDidSaveTextDocument(listener.onDidChangeTextDocument, listener),
+		workspace.onDidSaveTextDocument(listener.onDidSaveTextDocument, listener),
 
 		workspace.onDidCloseTextDocument(listener.onDidCloseTextDocument, listener),
 

@@ -27,14 +27,14 @@ export class CargoTomlWalker {
 	onOther(id: string, node: SymbolTreeNode): void { }
 
 	private tree: SymbolTreeNode[]
-	private version: number
+	private rev: number
 
 	constructor(tree: SymbolTreeNode[], version: number) {
 		this.tree = tree
-		this.version = version
+		this.rev = version
 	}
 
-	getVersion(): number { return this.version }
+	getRev(): number { return this.rev }
 
 	walk(): void {
 		for (let node of this.tree) {
@@ -175,8 +175,8 @@ export class DependenciesTraverser extends DependenciesWalker {
 			platform: platform
 		}
 		this.identifiers.push(input.id)
-		//set crate range
-		this.nodeStore.set(input.id, { value: this.doc.getText(node.range), table: table, range: node.range, denpendencyType: DependencyItemType.CRATE }, this.getVersion())
+		//set crate
+		this.nodeStore.set(input.id, { value: this.doc.getText(node.range), table: table, range: node.range, denpendencyType: DependencyItemType.CRATE }, this.getRev())
 		this.nodeStore.setNode(input.id, { value: this.doc.getText(node.range), table: table, range: node.range, denpendencyType: DependencyItemType.CRATE })
 
 		//simple dependency
@@ -238,7 +238,8 @@ export class NodeStore {
 	private currentDeleted: Set<string> = new Set()
 
 	path: string | undefined = undefined
-	version: number = 0
+	documentVersion: number = 0
+	rev: number = 0
 
 	//added and updated track the dependency crate nodes
 	//we must process all added nodes to clear the tree
@@ -254,22 +255,25 @@ export class NodeStore {
 		this.path = undefined
 	}
 
-	initialized(uri: string, version: number) {
-		return this.path === uri && this.version === version
+	incRev() {
+		this.rev = this.rev + 1
+		return this.rev
 	}
 
-
-	init(uri: string, version: number) {
+	init(path: string, documentVersion: number) {
 		this.dependencies.length = 0
-		this.version = version
-		if (this.path !== uri) {
+		this.documentVersion = documentVersion
+		//we already init the document
+		if (this.path !== path) {
 			this.nodes = {}
-			this.path = uri
+			this.path = path
 			this.currentDeleted.clear()
 			this.added.clear()
 			this.updated.clear()
+			this.rev = 1
 			return
 		}
+		//new document
 		this.currentDeleted.clear()
 		//init the deleted set
 		for (let key of Object.keys(this.nodes)) {
@@ -280,7 +284,6 @@ export class NodeStore {
 	skip(uri: string) {
 		return this.path !== uri
 	}
-
 
 	isClean() {
 		return this.added.size === 0 && this.updated.size === 0
@@ -298,10 +301,9 @@ export class NodeStore {
 		this.nodes[id] = node
 	}
 
-
-	set(id: string, node: TreeNode, version: number) {
+	set(id: string, node: TreeNode, rev: number) {
 		if (this.nodes[id] && this.nodes[id].value !== node.value) {
-			this.addUpdated(id, version)
+			this.addUpdated(id, rev)
 		}
 		if (!this.nodes[id]) {
 			this.added.add(id)
@@ -309,24 +311,24 @@ export class NodeStore {
 		this.currentDeleted.delete(id)
 	}
 
-	taint(id: string) {
-		this.addUpdated(id, this.version)
+	taint(id: string, rev: number) {
+		this.addUpdated(id, rev)
 	}
 
-	addUpdated(id: string, version: number) {
+	addUpdated(id: string, rev: number) {
 		const v = this.updated.get(id)
-		if (v === undefined || v < version) {
-			this.updated.set(id, version)
+		if (v === undefined || v < rev) {
+			this.updated.set(id, rev)
 		}
 	}
 
-	checkAndDelDirty(id: string, version: number) {
+	checkAndDelDirty(id: string, rev: number) {
 		if (this.added.has(id)) {
 			this.added.delete(id)
 			return true
 		}
 		const v = this.updated.get(id)
-		if (v === undefined || version < v) {
+		if (v === undefined || rev < v) {
 			return false
 		}
 		this.updated.delete(id)

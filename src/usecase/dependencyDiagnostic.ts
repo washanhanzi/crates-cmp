@@ -4,7 +4,7 @@ import { metadata } from "@/repository"
 import { satisfies } from "semver"
 import { DiagnosticSeverity, ExtensionContext } from "vscode"
 
-//TODO features specified dependencies not exist
+//TODO features specified dependency not exist
 export async function dependenciesDiagnostics(ctx: Ctx, input: DependencyNode[]) {
 	if (input.length === 0) {
 		return []

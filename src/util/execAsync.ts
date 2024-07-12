@@ -25,6 +25,14 @@ export function execAsync(command: string) {
 			}
 		})
 
+		child.on('close', (code) => {
+			if (code === 0) {
+				resolve(stdoutBuffer)
+			} else {
+				reject(new Error(stderrBuffer || 'Unknown error'))
+			}
+		})
+
 		// Handle process errors (e.g., command not found, etc.)
 		child.on('error', (err) => {
 			console.error('Failed to start subprocess:', err)
