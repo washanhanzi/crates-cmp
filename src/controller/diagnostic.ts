@@ -30,6 +30,12 @@ export class DiagnosticStore {
 		this.collection.set(uri, this.state[uri.path])
 	}
 
+	clear(uri: Uri) {
+		if (this.state[uri.path]) {
+			this.state[uri.path].length = 0
+		}
+	}
+
 	clearSeverity(uri: Uri, severity: DiagnosticSeverity) {
 		if (!this.state[uri.path]) return undefined
 		this.state[uri.path] = this.state[uri.path].filter(d => d.severity !== severity)

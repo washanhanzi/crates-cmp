@@ -238,6 +238,7 @@ export class Listener {
 		}
 
 		if (duplicated.size !== 0) {
+			this.diagnosticStore.clear(ctx.uri)
 			for (let crate of duplicated) {
 				const message = "Found multiple versions: " + Array.from(found[crate].versions).join(", ")
 				const diags = found[crate].ids.map(id => new Diagnostic(this.nodeStore.range(id)!, message, DiagnosticSeverity.Information))

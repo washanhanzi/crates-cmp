@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.38] - 2024-07-13
+
+### Fixed
+
+- #16 duplicate infomation diagnostics
+
 ## [0.0.37] - 2024-07-13
 
 ### Changed

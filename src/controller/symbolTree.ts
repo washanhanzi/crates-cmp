@@ -351,11 +351,14 @@ export class NodeStore {
 		}
 	}
 
-	isDirty(id: string, version: number): boolean {
+	isDirty(id: string, rev: number): boolean {
 		if (this.added.has(id)) {
 			return true
 		}
 		const v = this.updated.get(id)
-		return v === version
+		if (v === undefined) {
+			return false
+		}
+		return v <= rev
 	}
 }
