@@ -1,4 +1,4 @@
-import { DiagnosticSeverity, Range } from "vscode"
+import { DiagnosticSeverity } from "vscode"
 import { Ctx } from "./ctx"
 
 export enum CargoTomlTable {

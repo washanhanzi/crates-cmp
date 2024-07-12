@@ -4,8 +4,9 @@
 
 ### Added
 
-= show decoration for not installed crates
+- show decoration for not installed crates
 - show diagnostic for installed crate with multiple versions
+- react to Cargo.lock file change
 
 ### Fixed
 

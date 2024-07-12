@@ -3524,7 +3524,6 @@ async function symbolTree(uri) {
   return [];
 }
 var DependenciesTraverser = class extends DependenciesWalker {
-  dependencies = [];
   nodeStore;
   identifiers = [];
   doc;
@@ -3561,7 +3560,7 @@ var DependenciesTraverser = class extends DependenciesWalker {
     if (node.children.length === 0) {
       const version = this.doc.getText(squezze(node.range));
       input.inputVersion = version;
-      this.dependencies.push(input);
+      this.nodeStore.dependencies.push(input);
       return;
     }
     for (let child of node.children) {
@@ -3589,18 +3588,19 @@ var DependenciesTraverser = class extends DependenciesWalker {
         input.packageName = this.doc.getText(squezze(child.range));
       }
     }
-    this.dependencies.push(input);
+    this.nodeStore.dependencies.push(input);
   }
 };
 function nodeId(...params) {
   return params.join(".");
 }
 var NodeStore = class {
-  m = {};
+  dependencies = [];
+  nodes = {};
   //track nodes need to be deleted in current walk
   //require to call finishWalk
   currentDeleted = /* @__PURE__ */ new Set();
-  uri = void 0;
+  path = void 0;
   version = 0;
   //added and updated track the dependency crate nodes
   //we must process all added nodes to clear the tree
@@ -3608,52 +3608,56 @@ var NodeStore = class {
   added = /* @__PURE__ */ new Set();
   updated = /* @__PURE__ */ new Map();
   constructor() {
-    this.m = {};
+    this.nodes = {};
   }
   reset() {
-    this.uri = void 0;
+    this.path = void 0;
   }
   initialized(uri, version) {
-    return this.uri === uri && this.version === version;
+    return this.path === uri && this.version === version;
   }
   init(uri, version) {
+    this.dependencies.length = 0;
     this.version = version;
-    if (this.uri !== uri) {
-      this.m = {};
-      this.uri = uri;
+    if (this.path !== uri) {
+      this.nodes = {};
+      this.path = uri;
       this.currentDeleted.clear();
       this.added.clear();
       this.updated.clear();
       return;
     }
     this.currentDeleted.clear();
-    for (let key of Object.keys(this.m)) {
+    for (let key of Object.keys(this.nodes)) {
       this.currentDeleted.add(key);
     }
   }
   skip(uri) {
-    return this.uri !== uri;
+    return this.path !== uri;
   }
   isClean() {
     return this.added.size === 0 && this.updated.size === 0;
   }
   node(id) {
-    return this.m[id] ?? void 0;
+    return this.nodes[id] ?? void 0;
   }
   range(id) {
-    return this.m[id]?.range;
+    return this.nodes[id]?.range;
   }
   setNode(id, node) {
-    this.m[id] = node;
+    this.nodes[id] = node;
   }
   set(id, node, version) {
-    if (this.m[id] && this.m[id].value !== node.value) {
+    if (this.nodes[id] && this.nodes[id].value !== node.value) {
       this.addUpdated(id, version);
     }
-    if (!this.m[id]) {
+    if (!this.nodes[id]) {
       this.added.add(id);
     }
     this.currentDeleted.delete(id);
+  }
+  taint(id) {
+    this.addUpdated(id, this.version);
   }
   addUpdated(id, version) {
     const v = this.updated.get(id);
@@ -3683,7 +3687,7 @@ var NodeStore = class {
   }
   finishWalk() {
     for (let k of this.currentDeleted) {
-      delete this.m[k];
+      delete this.nodes[k];
     }
   }
   isDirty(id, version) {
@@ -3901,8 +3905,8 @@ function notInstalledDecoration() {
 }
 
 // src/controller/cargo.ts
-async function cargoTree(ctx) {
-  const tree = await async(execAsync(`cargo tree --manifest-path ${ctx.path} --depth 1 --all-features`));
+async function cargoTree(path) {
+  const tree = await async(execAsync(`cargo tree --manifest-path ${path} --depth 1 --all-features`));
   if (tree.isErr()) {
     throw tree.unwrapErr();
   }
@@ -3993,7 +3997,27 @@ var DiagnosticStore = class {
   }
 };
 
+// src/util/promiseCache.ts
+var PromiseCache = class {
+  cache;
+  constructor() {
+    this.cache = /* @__PURE__ */ new Map();
+  }
+  call(key, asyncFunction, ...args) {
+    if (this.cache.has(key)) {
+      return this.cache.get(key);
+    }
+    const promise = asyncFunction(...args);
+    this.cache.set(key, promise);
+    promise.finally(() => {
+      this.cache.delete(key);
+    });
+    return promise;
+  }
+};
+
 // src/controller/listener.ts
+var cargoTreeCommandCache = new PromiseCache();
 var Listener = class {
   ctx;
   //track the decoration state
@@ -4026,12 +4050,12 @@ var Listener = class {
       return;
     }
     this.setWaitingNodes(this.nodeStore.dirtyIds());
-    const currentDepsResult = await async(cargoTree(ctx));
+    const currentDepsResult = await async(cargoTreeCommandCache.call(ctx.path, cargoTree, ctx.path));
     if (currentDepsResult.isErr()) {
       if (this.nodeStore.isClean()) {
         return;
       }
-      const filtered = walker.dependencies.filter((d) => this.nodeStore.isDirty(d.id, ctx.version));
+      const filtered = this.nodeStore.dependencies.filter((d) => this.nodeStore.isDirty(d.id, ctx.version));
       const diagnostics = await dependenciesDiagnostics(ctx, filtered);
       if (diagnostics.length === 0) {
         return;
@@ -4052,7 +4076,7 @@ var Listener = class {
     let duplicated = /* @__PURE__ */ new Set();
     let found = {};
     const currentDepts = currentDepsResult.unwrap();
-    for (let dep of walker.dependencies) {
+    for (let dep of this.nodeStore.dependencies) {
       if (currentDepts[dep.tableName]) {
         const deps = currentDepts[dep.tableName];
         const crateName = dep.packageName ?? dep.name;
@@ -4073,13 +4097,13 @@ var Listener = class {
     }
     if (duplicated.size !== 0) {
       for (let crate of duplicated) {
-        const message = crate + " has multiple versions: " + Array.from(found[crate].versions).join(", ");
+        const message = "Found multiple versions: " + Array.from(found[crate].versions).join(", ");
         const diags = found[crate].ids.map((id) => new import_vscode10.Diagnostic(this.nodeStore.range(id), message, import_vscode10.DiagnosticSeverity.Information));
         this.diagnosticStore.add(ctx.path, ...diags);
       }
       this.diagnosticStore.set(ctx.uri);
     }
-    let promises = dependenciesDecorations(ctx, walker.dependencies);
+    let promises = dependenciesDecorations(ctx, this.nodeStore.dependencies);
     promises.forEach((p) => p.then(this.outputPromiseHandler.bind(this)));
   }
   outputPromiseHandler(output) {
@@ -4139,12 +4163,51 @@ var Listener = class {
   }
   async onDidChangeActiveEditor(editor) {
     if (!editor) return;
-    if (!editor.document.fileName.endsWith("Cargo.toml")) return;
+    if (!editor.document.fileName.endsWith("Cargo.toml")) {
+      this.nodeStore.reset();
+      return;
+    }
     this.init(editor.document);
     await this.onChange(editor.document);
   }
-  //TODO
-  async onDidLockFileChange(_uri) {
+  async onDidLockFileChange() {
+    if (!import_vscode10.window.activeTextEditor) return;
+    if (!import_vscode10.window.activeTextEditor.document.fileName.endsWith("Cargo.toml")) return;
+    if (!this.nodeStore.path) return;
+    const ctx = {
+      extensionContext: this.ctx,
+      path: import_vscode10.window.activeTextEditor.document.uri.path,
+      version: import_vscode10.window.activeTextEditor.document.version,
+      uri: import_vscode10.window.activeTextEditor.document.uri
+    };
+    const currentDepsResult = await async(cargoTreeCommandCache.call(this.nodeStore.path, cargoTree, this.nodeStore.path));
+    if (currentDepsResult.isErr()) {
+      return;
+    }
+    if (!import_vscode10.window.activeTextEditor) return;
+    if (!import_vscode10.window.activeTextEditor.document.fileName.endsWith("Cargo.toml")) return;
+    if (!this.nodeStore.path) return;
+    if (this.nodeStore.skip(ctx.path)) return;
+    if (this.nodeStore.version !== ctx.version) return;
+    const currentDeps = currentDepsResult.unwrap();
+    let taints = [];
+    for (let dep of this.nodeStore.dependencies) {
+      if (currentDeps[dep.tableName]) {
+        const deps = currentDeps[dep.tableName];
+        const crateName = dep.packageName ?? dep.name;
+        if (deps[crateName]) {
+          if (dep.currentVersion !== deps[crateName].version) {
+            dep.currentVersion = deps[crateName].version;
+            this.nodeStore.taint(dep.id);
+            taints.push(dep.id);
+          }
+        }
+      }
+    }
+    if (taints.length === 0) return;
+    this.setWaitingNodes(taints);
+    let promises = dependenciesDecorations(ctx, this.nodeStore.dependencies);
+    promises.forEach((p) => p.then(this.outputPromiseHandler.bind(this)));
   }
   onDidCloseTextDocument(document) {
     if (!document.fileName.endsWith("Cargo.toml")) return;
@@ -4224,6 +4287,7 @@ async function activate(context) {
     // When the text document is changed, fetch + check dependencies
     import_vscode12.workspace.onDidSaveTextDocument(listener.onDidChangeTextDocument, listener),
     import_vscode12.workspace.onDidCloseTextDocument(listener.onDidCloseTextDocument, listener),
+    import_vscode12.workspace.createFileSystemWatcher("**/Cargo.lock").onDidChange(listener.onDidLockFileChange, listener),
     // Register our versions completions provider
     import_vscode12.languages.registerCompletionItemProvider(
       documentSelector,

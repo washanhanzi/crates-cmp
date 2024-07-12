@@ -42,6 +42,8 @@ export async function activate(context: ExtensionContext) {
 
 		workspace.onDidCloseTextDocument(listener.onDidCloseTextDocument, listener),
 
+		workspace.createFileSystemWatcher("**/Cargo.lock").onDidChange(listener.onDidLockFileChange, listener),
+
 
 		// Register our versions completions provider
 		languages.registerCompletionItemProvider(

@@ -138,7 +138,6 @@ export async function symbolTree(uri: Uri) {
 }
 
 export class DependenciesTraverser extends DependenciesWalker {
-	dependencies: DependencyNode[] = []
 	nodeStore: NodeStore
 	identifiers: string[] = []
 
@@ -184,7 +183,7 @@ export class DependenciesTraverser extends DependenciesWalker {
 		if (node.children.length === 0) {
 			const version = this.doc.getText(squezze(node.range))
 			input.inputVersion = version
-			this.dependencies.push(input)
+			this.nodeStore.dependencies.push(input)
 			return
 		}
 
@@ -215,7 +214,7 @@ export class DependenciesTraverser extends DependenciesWalker {
 			}
 			//TODO path, git
 		}
-		this.dependencies.push(input)
+		this.nodeStore.dependencies.push(input)
 	}
 }
 
@@ -231,14 +230,15 @@ type TreeNode = {
 }
 
 export class NodeStore {
-	private m: { [key: string]: TreeNode } = {}
+	dependencies: DependencyNode[] = []
+	private nodes: { [key: string]: TreeNode } = {}
 
 	//track nodes need to be deleted in current walk
 	//require to call finishWalk
 	private currentDeleted: Set<string> = new Set()
 
-	private uri: string | undefined = undefined
-	private version: number = 0
+	path: string | undefined = undefined
+	version: number = 0
 
 	//added and updated track the dependency crate nodes
 	//we must process all added nodes to clear the tree
@@ -247,23 +247,24 @@ export class NodeStore {
 	private updated: Map<string, number> = new Map()
 
 	constructor() {
-		this.m = {}
+		this.nodes = {}
 	}
 
 	reset() {
-		this.uri = undefined
+		this.path = undefined
 	}
 
 	initialized(uri: string, version: number) {
-		return this.uri === uri && this.version === version
+		return this.path === uri && this.version === version
 	}
 
 
 	init(uri: string, version: number) {
+		this.dependencies.length = 0
 		this.version = version
-		if (this.uri !== uri) {
-			this.m = {}
-			this.uri = uri
+		if (this.path !== uri) {
+			this.nodes = {}
+			this.path = uri
 			this.currentDeleted.clear()
 			this.added.clear()
 			this.updated.clear()
@@ -271,13 +272,13 @@ export class NodeStore {
 		}
 		this.currentDeleted.clear()
 		//init the deleted set
-		for (let key of Object.keys(this.m)) {
+		for (let key of Object.keys(this.nodes)) {
 			this.currentDeleted.add(key)
 		}
 	}
 
 	skip(uri: string) {
-		return this.uri !== uri
+		return this.path !== uri
 	}
 
 
@@ -286,26 +287,30 @@ export class NodeStore {
 	}
 
 	node(id: string): TreeNode | undefined {
-		return this.m[id] ?? undefined
+		return this.nodes[id] ?? undefined
 	}
 
 	range(id: string): Range | undefined {
-		return this.m[id]?.range
+		return this.nodes[id]?.range
 	}
 
 	setNode(id: string, node: TreeNode) {
-		this.m[id] = node
+		this.nodes[id] = node
 	}
 
 
 	set(id: string, node: TreeNode, version: number) {
-		if (this.m[id] && this.m[id].value !== node.value) {
+		if (this.nodes[id] && this.nodes[id].value !== node.value) {
 			this.addUpdated(id, version)
 		}
-		if (!this.m[id]) {
+		if (!this.nodes[id]) {
 			this.added.add(id)
 		}
 		this.currentDeleted.delete(id)
+	}
+
+	taint(id: string) {
+		this.addUpdated(id, this.version)
 	}
 
 	addUpdated(id: string, version: number) {
@@ -340,7 +345,7 @@ export class NodeStore {
 
 	finishWalk() {
 		for (let k of this.currentDeleted) {
-			delete this.m[k]
+			delete this.nodes[k]
 		}
 	}
 

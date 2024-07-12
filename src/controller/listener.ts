@@ -1,12 +1,15 @@
-import { ExtensionContext, TextDocumentChangeEvent, window, TextDocument, TextEditor, languages, DiagnosticCollection, Diagnostic, Uri, DiagnosticSeverity } from "vscode"
+import { ExtensionContext, window, TextDocument, TextEditor, DiagnosticCollection, Diagnostic, Uri, DiagnosticSeverity } from "vscode"
 import { DependenciesTraverser, NodeStore, symbolTree } from "./symbolTree"
 import { dependenciesDecorations } from "@/usecase"
 import { DependencyDecorationStatus, DependencyDecoration, DependencyItemType, DependencyDecorationWithCtx } from "@/entity"
-import { DecorationStore, errorDecoration, latestDecoration, loadingDecoration, notInstalledDecoration, outdatedDecoration } from "./decoration"
+import { DecorationStore, latestDecoration, loadingDecoration, notInstalledDecoration, outdatedDecoration } from "./decoration"
 import { cargoTree } from "./cargo"
 import { async } from "@washanhanzi/result-enum"
 import { dependenciesDiagnostics } from "@/usecase"
 import { DiagnosticStore } from "./diagnostic"
+import { PromiseCache } from "@/util/promiseCache"
+
+const cargoTreeCommandCache = new PromiseCache()
 
 export class Listener {
 	private ctx: ExtensionContext
@@ -53,13 +56,13 @@ export class Listener {
 		this.setWaitingNodes(this.nodeStore.dirtyIds())
 
 		//suspend
-		const currentDepsResult = await async(cargoTree(ctx))
+		const currentDepsResult = await async(cargoTreeCommandCache.call(ctx.path, cargoTree, ctx.path))
 		if (currentDepsResult.isErr()) {
 			//resume point, check
 			if (this.nodeStore.isClean()) { return }
 
 			//parse for diagnostic
-			const filtered = walker.dependencies.filter(d => this.nodeStore.isDirty(d.id, ctx.version))
+			const filtered = this.nodeStore.dependencies.filter(d => this.nodeStore.isDirty(d.id, ctx.version))
 
 			//suspend
 			const diagnostics = await dependenciesDiagnostics(ctx, filtered)
@@ -92,7 +95,7 @@ export class Listener {
 		let duplicated: Set<string> = new Set()
 		let found: { [key: string]: { versions: Set<string>, ids: string[] } } = {}
 		const currentDepts = currentDepsResult.unwrap()!
-		for (let dep of walker.dependencies) {
+		for (let dep of this.nodeStore.dependencies) {
 			if (currentDepts[dep.tableName]) {
 				const deps = currentDepts[dep.tableName]
 				const crateName = dep.packageName ?? dep.name
@@ -116,14 +119,14 @@ export class Listener {
 
 		if (duplicated.size !== 0) {
 			for (let crate of duplicated) {
-				const message = crate + " has multiple versions: " + Array.from(found[crate].versions).join(", ")
+				const message = "Found multiple versions: " + Array.from(found[crate].versions).join(", ")
 				const diags = found[crate].ids.map(id => new Diagnostic(this.nodeStore.range(id)!, message, DiagnosticSeverity.Information))
 				this.diagnosticStore.add(ctx.path, ...diags)
 			}
 			this.diagnosticStore.set(ctx.uri)
 		}
 
-		let promises = dependenciesDecorations(ctx, walker.dependencies)
+		let promises = dependenciesDecorations(ctx, this.nodeStore.dependencies)
 
 		promises.forEach(p => p.then(this.outputPromiseHandler.bind(this)))
 	}
@@ -195,17 +198,63 @@ export class Listener {
 
 	async onDidChangeActiveEditor(editor: TextEditor | undefined) {
 		if (!editor) return
-		if (!editor.document.fileName.endsWith("Cargo.toml")) return
+		if (!editor.document.fileName.endsWith("Cargo.toml")) {
+			this.nodeStore.reset()
+			return
+		}
 		// this.nodeStore.reset()
 		this.init(editor.document)
 		await this.onChange(editor.document)
 	}
 
-	//TODO
-	async onDidLockFileChange(_uri: Uri) { }
+	async onDidLockFileChange() {
+		if (!window.activeTextEditor) return
+		if (!window.activeTextEditor.document.fileName.endsWith("Cargo.toml")) return
+		if (!this.nodeStore.path) return
+
+		const ctx = {
+			extensionContext: this.ctx,
+			path: window.activeTextEditor.document.uri.path,
+			version: window.activeTextEditor.document.version,
+			uri: window.activeTextEditor.document.uri
+		}
+
+		const currentDepsResult = await async(cargoTreeCommandCache.call(this.nodeStore.path, cargoTree, this.nodeStore.path))
+		if (currentDepsResult.isErr()) {
+			return
+		}
+		//resume check
+		if (!window.activeTextEditor) return
+		if (!window.activeTextEditor.document.fileName.endsWith("Cargo.toml")) return
+		if (!this.nodeStore.path) return
+		if (this.nodeStore.skip(ctx.path)) return
+		if (this.nodeStore.version !== ctx.version) return
+
+		const currentDeps = currentDepsResult.unwrap()!
+		let taints: string[] = []
+		for (let dep of this.nodeStore.dependencies) {
+			if (currentDeps[dep.tableName]) {
+				const deps = currentDeps[dep.tableName]
+				const crateName = dep.packageName ?? dep.name
+				if (deps[crateName]) {
+					if (dep.currentVersion !== deps[crateName].version) {
+						dep.currentVersion = deps[crateName].version
+						//the node is ditry
+						this.nodeStore.taint(dep.id)
+						taints.push(dep.id)
+					}
+				}
+			}
+		}
+		if (taints.length === 0) return
+		this.setWaitingNodes(taints)
+
+		let promises = dependenciesDecorations(ctx, this.nodeStore.dependencies)
+
+		promises.forEach(p => p.then(this.outputPromiseHandler.bind(this)))
+	}
 
 	onDidCloseTextDocument(document: TextDocument) {
-		// this.nodeStore.reset()
 		if (!document.fileName.endsWith("Cargo.toml")) return
 		if (this.nodeStore.skip(document.uri.path)) {
 			return
