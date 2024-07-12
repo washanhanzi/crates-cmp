@@ -1,4 +1,5 @@
-import { DiagnosticSeverity } from "vscode"
+import { DiagnosticSeverity, Range } from "vscode"
+import { Ctx } from "./ctx"
 
 export enum CargoTomlTable {
 	PACKAGE = 'package',
@@ -12,7 +13,6 @@ export enum CargoTomlTable {
 	DEPENDENCIES = "dependencies",
 	DEV_DEPENDENCIES = "dev-dependencies",
 	BUILD_DEPENDENCIES = "build-dependencies",
-	TARGET_DEPENDENCIES = "target.dependencies"
 }
 
 export enum DependencyItemType {
@@ -41,33 +41,33 @@ export enum DependencyDecorationStatus {
 	LATEST = "Latest",
 	OUTDATED = "Outdated",
 	LOADING = "Loading",
+	NOT_INSTALLED = "Not Installed",
 	UNKOWN = "Unkown"
 }
 
 export type DependencyDecorationWithCtx = {
-	uri: string,
-	version: number,
+	ctx: Ctx
 	decoration: DependencyDecoration
 }
 
 export type DependencyDecoration = {
 	id: string,
-	current: string,
+	current?: string,
 	currentMax?: string,
 	latest: string,
 	status: DependencyDecorationStatus
 }
 
 export type DependencyDiagnosticWithCtx = {
-	uri: string,
-	version: number,
+	ctx: Ctx,
 	diagnostic: DependencyDiagnostic
 }
+
 
 export type DependencyDiagnostic = {
 	id: string,
 	type: DependencyItemType
-	servity: DiagnosticSeverity
+	severity: DiagnosticSeverity
 	message: string
 	source: string
 }

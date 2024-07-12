@@ -1,7 +1,7 @@
 import { async } from "@washanhanzi/result-enum"
 import { executeCommand } from "./command"
 import { Uri, window, Range, TextDocument } from "vscode"
-import { CargoTomlTable, DependencyItemType, DependencyNode } from "@entity"
+import { CargoTomlTable, DependencyItemType, DependencyNode } from "@/entity"
 import { squezze } from "util/squzze"
 import { delay } from "util/delay"
 
@@ -60,10 +60,10 @@ export class CargoTomlWalker {
 					}
 					break
 				case "target":
-					if (this.enterDependencies(node, CargoTomlTable.TARGET_DEPENDENCIES)) {
+					if (this.enterDependencies(node, CargoTomlTable.DEPENDENCIES)) {
 						for (let child of node.children) {
 							for (let grandChild of child.children) {
-								this.onDependencies(nodeId(node.name, child.name, grandChild.name), grandChild, CargoTomlTable.TARGET_DEPENDENCIES, child.name)
+								this.onDependencies(nodeId(node.name, child.name, grandChild.name), grandChild, CargoTomlTable.DEPENDENCIES, child.name)
 							}
 						}
 					}
@@ -242,17 +242,15 @@ export class NodeStore {
 
 	//added and updated track the dependency crate nodes
 	//we must process all added nodes to clear the tree
-	//updated nodes only track for the node with latest version, we only need to process latest version to clear the tree
+	//updated nodes only tracked by the latest version
 	private added: Set<string> = new Set()
 	private updated: Map<string, number> = new Map()
-
-	clean: Set<number> = new Set()
 
 	constructor() {
 		this.m = {}
 	}
 
-	close() {
+	reset() {
 		this.uri = undefined
 	}
 
@@ -267,6 +265,8 @@ export class NodeStore {
 			this.m = {}
 			this.uri = uri
 			this.currentDeleted.clear()
+			this.added.clear()
+			this.updated.clear()
 			return
 		}
 		this.currentDeleted.clear()

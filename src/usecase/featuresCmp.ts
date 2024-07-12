@@ -1,5 +1,5 @@
-import { Metadata } from "@entity"
-import { metadata } from "@repository"
+import { Metadata } from "@/entity"
+import { metadata } from "@/repository"
 import { async } from "@washanhanzi/result-enum"
 import { satisfies } from "semver"
 import { ExtensionContext } from "vscode"

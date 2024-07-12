@@ -1,3 +1,5 @@
 export * from "./versionCmp"
 export * from "./featuresCmp"
-export * from "./dependenciesDecorations"
+export * from "./dependencyDecoration"
+export * from "./searchCrate"
+export * from "./dependencyDiagnostic"

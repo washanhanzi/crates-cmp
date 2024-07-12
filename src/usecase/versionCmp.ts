@@ -1,4 +1,4 @@
-import { metadata } from "@repository"
+import { metadata } from "@/repository"
 import { ExtensionContext } from "vscode"
 
 export async function versionCmp(ctx: ExtensionContext, crateName: string) {

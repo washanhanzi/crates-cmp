@@ -1,6 +1,6 @@
-import { DependencyDiagnostic, DependencyDiagnosticWithCtx, DependencyItemType, DependencyNode } from "@entity"
-import { Ctx } from "@entity/ctx"
-import { metadata } from "@repository"
+import { DependencyDiagnostic, DependencyDiagnosticWithCtx, DependencyItemType, DependencyNode } from "@/entity"
+import { Ctx } from "@/entity"
+import { metadata } from "@/repository"
 import { satisfies } from "semver"
 import { DiagnosticSeverity, ExtensionContext } from "vscode"
 
@@ -21,10 +21,11 @@ export async function dependenciesDiagnostics(ctx: Ctx, input: DependencyNode[])
 		}
 		if (!satisfiedVersion) {
 			res.push({
-				uri: ctx.path, version: ctx.version, diagnostic: {
+				ctx: ctx,
+				diagnostic: {
 					id: d.id,
 					type: DependencyItemType.VERSION,
-					servity: DiagnosticSeverity.Error,
+					severity: DiagnosticSeverity.Error,
 					source: "extension/crates-cmp",
 					message: "Version not found, latest stable is " + m.latestStable
 				}
@@ -34,10 +35,11 @@ export async function dependenciesDiagnostics(ctx: Ctx, input: DependencyNode[])
 			for (let f of d.features) {
 				if (!m.features[satisfiedVersion].includes(f)) {
 					res.push({
-						uri: ctx.path, version: ctx.version, diagnostic: {
+						ctx: ctx,
+						diagnostic: {
 							id: d.id,
 							type: DependencyItemType.FEATURE,
-							servity: DiagnosticSeverity.Error,
+							severity: DiagnosticSeverity.Error,
 							source: "extension/crates-cmp",
 							message: `Feature \"${f}\" not found, available features are ` + m.features[satisfiedVersion].join(", ")
 						}

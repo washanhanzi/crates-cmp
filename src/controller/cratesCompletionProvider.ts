@@ -4,7 +4,7 @@ import { featuresCompletionList } from "./featuresCompletionList"
 import { crateNameCompletionList } from "./crateNameCompletionList"
 import { DependenciesWalker, symbolTree, SymbolTreeNode } from "./symbolTree"
 import { squezze } from "util/squzze"
-import { CargoTomlTable } from "@entity"
+import { CargoTomlTable } from "@/entity"
 export class CratesCompletionProvider implements CompletionItemProvider {
 
 	private context: ExtensionContext

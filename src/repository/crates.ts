@@ -1,4 +1,4 @@
-import { Metadata, SearchCrateOutput } from '@entity'
+import { Metadata, SearchCrateOutput } from '@/entity'
 import ky from "ky"
 import { prerelease, satisfies } from "semver"
 

@@ -19,33 +19,9 @@
 		"noImplicitAny": false,
 		"baseUrl": "./src",
 		"paths": {
-			"@entity": [
-				"entity/index"
-			],
-			"@entity/*": [
-				"entity/*"
-			],
-			"@usecase": [
-				"usecase/index"
-			],
-			"@usecase/*": [
-				"usecase/*"
-			],
-			"@repository": [
-				"repository/index"
-			],
-			"@repository/*": [
-				"repository/*"
-			],
-			"@controller": [
-				"controller/index"
-			],
-			"@controller/*": [
-				"controller/*"
-			],
-			"@util": [
-				"util/index"
-			],
+			"@/*": [
+				"./*"
+			]
 		}
 	},
 	"exclude": [

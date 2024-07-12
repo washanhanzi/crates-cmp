@@ -1,4 +1,4 @@
-import { DependencyDecoration, DependencyDecorationStatus } from "@entity"
+import { DependencyDecoration, DependencyDecorationStatus } from "@/entity"
 import { TextEditorDecorationType, window } from "vscode"
 
 type DecorationState = {
@@ -20,6 +20,11 @@ export class DecorationStore {
 			this.uri = uri
 			return
 		}
+	}
+
+	reset() {
+		this.state = {}
+		this.uri = undefined
 	}
 
 	delete(id: string) {
@@ -91,6 +96,16 @@ export function loadingDecoration() {
 	return window.createTextEditorDecorationType({
 		after: {
 			contentText: 'Waiting...',
+			color: 'grey',
+			margin: '0 0 0 4em' // Add some margin to the left
+		}
+	})
+}
+
+export function notInstalledDecoration() {
+	return window.createTextEditorDecorationType({
+		after: {
+			contentText: 'Not Installed',
 			color: 'grey',
 			margin: '0 0 0 4em' // Add some margin to the left
 		}

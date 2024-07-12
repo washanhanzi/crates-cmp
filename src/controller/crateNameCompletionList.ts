@@ -1,5 +1,5 @@
-import { sortString } from "@util"
-import { searchCrate } from "@usecase/searchCrate"
+import { sortString } from "@/util"
+import { searchCrate } from "@/usecase"
 import { async } from "@washanhanzi/result-enum"
 import { window, Position, TextDocument, Range, CompletionItem, CompletionItemKind } from "vscode"
 

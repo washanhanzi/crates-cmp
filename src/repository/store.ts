@@ -1,6 +1,6 @@
 import { ExtensionContext } from "vscode"
 import { sparseIndexMetadata } from "./crates"
-import { Metadata } from "@entity/crates"
+import { Metadata } from "@/entity"
 
 export async function metadata(ctx: ExtensionContext, crate: string, force: boolean = false) {
 	const key = getKey(crate)

@@ -1,5 +1,22 @@
 # Change Log
 
+## [0.0.36] - 2024-07-12
+
+### Added
+
+= show decoration for not installed crates
+- show diagnostic for installed crate with multiple versions
+
+### Fixed
+
+- same crate with multiple versions
+
+## [0.0.35] - 2024-07-11
+
+### Fixed
+
+- same crate in different toml table
+
 ## [0.0.34] - 2024-07-10
 
 ### Fixed

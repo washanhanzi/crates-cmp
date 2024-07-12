@@ -1,5 +1,5 @@
-import { addQuotes, sortString } from "@util"
-import { featuresCmp } from "@usecase"
+import { addQuotes, sortString } from "@/util"
+import { featuresCmp } from "@/usecase"
 import { async } from "@washanhanzi/result-enum"
 import { CompletionItem, CompletionItemKind, ExtensionContext, window, Range, CompletionList } from "vscode"
 
