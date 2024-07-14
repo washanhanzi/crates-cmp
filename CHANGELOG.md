@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.40] - 2024-07-14
+
+### Fixed
+
+- ui didn't update correctly when the file is changed
+
 ## [0.0.39] - 2024-07-13
 
 ### Changed

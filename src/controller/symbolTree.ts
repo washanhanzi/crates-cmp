@@ -302,7 +302,12 @@ export class NodeStore {
 	}
 
 	set(id: string, node: TreeNode, rev: number) {
-		if (this.nodes[id] && this.nodes[id].value !== node.value) {
+		if (this.nodes[id] &&
+			(
+				this.nodes[id].value !== node.value ||
+				!this.nodes[id].range.isEqual(node.range)
+			)
+		) {
 			this.addUpdated(id, rev)
 		}
 		if (!this.nodes[id]) {

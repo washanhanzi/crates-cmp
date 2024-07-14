@@ -34,6 +34,7 @@ export class Listener {
 		if (this.nodeStore.skip(document.uri.path)) {
 			return
 		}
+		//document has been updated
 		if (document.version !== documentVersion) {
 			return
 		}
@@ -44,12 +45,15 @@ export class Listener {
 			rev: this.nodeStore.incRev(),
 			uri: document.uri
 		}
+
 		const walker = new DependenciesTraverser(tree, document, this.nodeStore, ctx.rev)
 		walker.walk()
 		this.nodeStore.finishWalk()
 
 		//clear decorations for deleted nodes
 		this.clearDecoration(this.nodeStore.deletedIds())
+
+		//updated range
 
 		//tree is clean
 		if (this.nodeStore.isClean()) {
@@ -122,6 +126,7 @@ export class Listener {
 		if (
 			document.fileName.endsWith("Cargo.toml")
 		) {
+			if (this.nodeStore.path === document.uri.path && this.nodeStore.documentVersion === document.version) return
 			this.init(document)
 			await this.onChange(document)
 		}
@@ -197,7 +202,6 @@ export class Listener {
 		//resume check
 		if (!window.activeTextEditor) return
 		if (!window.activeTextEditor.document.fileName.endsWith("Cargo.toml")) return
-		if (!this.nodeStore.path) return
 		if (this.nodeStore.skip(ctx.path)) return
 
 		//cargo command exit with 0, remove error diagnostics
