@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.42] - 2024-07-23
+
+### Fixed
+
+- correctly handle Cargo.lock file update
+
 ## [0.0.41] - 2024-07-23
 
 ### Changed

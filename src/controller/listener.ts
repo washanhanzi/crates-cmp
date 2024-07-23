@@ -20,11 +20,10 @@ export class Listener {
 	}
 
 	async onDidChangeActiveEditor(editor: TextEditor | undefined) {
+		if (this.state.path !== undefined) { this.state.reset() }
 		if (!editor) return
-		if (!editor.document.fileName.endsWith("Cargo.toml")) {
-			this.state.reset()
-			return
-		}
+		if (!editor.document.fileName.endsWith("Cargo.toml")) return
+
 		this.state.init(editor.document)
 		await this.state.parseDocument(this.ctx, editor.document)
 	}

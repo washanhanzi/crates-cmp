@@ -35,6 +35,7 @@ class DocumentState {
         this.version = document.version
     }
 
+    //TODO when there is a error diagnostic on this file, there is no need to parse again
     async parseDocument(extensionCtx: ExtensionContext, document: TextDocument) {
         const tree = await symbolTree(document.uri)
         if (this.noResumeDocTree()) return
@@ -163,12 +164,13 @@ class DocumentState {
         }
         const currentDepts = currentDepsResult.unwrap()
 
-        for (let id of this.docTree.dirtyIds()) {
+        const duplicated = this.depTree.populateCurrentWithoutDoc(ctx.rev, currentDepts)
+
+        for (let id of this.depTree.dirtyIds()) {
             this.decorations.setLoading(id, this.docTree.range(id))
             this.diagnostic.delete(ctx.uri, id)
         }
 
-        const duplicated = this.depTree.populateCurrentWithoutDoc(ctx.rev, currentDepts)
         if (duplicated.size !== 0) {
             for (let [key, value] of duplicated) {
                 this.diagnostic.add(
