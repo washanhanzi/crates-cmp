@@ -35,6 +35,7 @@ export type DependencyNode = {
 	//dependencies, dev-dependencies, build-dependencies, target.dependencies
 	tableName: CargoTomlTable
 	platform?: string
+	rev?: number
 }
 
 export enum DependencyDecorationStatus {

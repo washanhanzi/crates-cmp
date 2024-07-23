@@ -1,5 +1,5 @@
 import { DependencyDecoration, DependencyDecorationStatus } from "@/entity"
-import { TextEditorDecorationType, window } from "vscode"
+import { Range, TextEditorDecorationType, window } from "vscode"
 
 type DecorationState = {
 	status: DependencyDecorationStatus,
@@ -7,24 +7,24 @@ type DecorationState = {
 	decoration: TextEditorDecorationType
 }
 
-export class DecorationStore {
-	private uri: string | undefined
+class DecorationStore {
+	private path: string | undefined
 	private state: { [key: string]: DecorationState }
 	constructor() {
 		this.state = {}
 	}
 
-	init(uri: string) {
-		if (this.uri !== uri) {
+	init(path: string) {
+		if (this.path !== path) {
 			this.state = {}
-			this.uri = uri
+			this.path = path
 			return
 		}
 	}
 
 	reset() {
 		this.state = {}
-		this.uri = undefined
+		this.path = undefined
 	}
 
 	delete(id: string) {
@@ -41,7 +41,50 @@ export class DecorationStore {
 	set(id: string, state: DecorationState) {
 		this.state[id] = state
 	}
+
+	decorateDependency(id: string, range: Range, deco?: DependencyDecoration) {
+		if (deco === undefined) {
+			const d = this.get(id)
+			if (d) {
+				window.activeTextEditor?.setDecorations(d.decoration, [range])
+			}
+			return
+		}
+		const d = this.get(id)
+		if (d) {
+			d.decoration.dispose()
+		}
+		let dt
+		switch (deco.status) {
+			case DependencyDecorationStatus.LATEST:
+				dt = latestDecoration(deco.latest)
+				break
+			case DependencyDecorationStatus.OUTDATED:
+				dt = outdatedDecoration(deco)
+				break
+			case DependencyDecorationStatus.LOADING:
+				dt = loadingDecoration()
+				break
+			case DependencyDecorationStatus.NOT_INSTALLED:
+				dt = notInstalledDecoration()
+				break
+		}
+		this.set(id, { latest: deco.latest, status: deco.status, decoration: dt })
+		window.activeTextEditor?.setDecorations(dt, [range])
+	}
+
+	setLoading(id: string, range?: Range) {
+		if (range === undefined) return
+		this.decorateDependency(id, range, { id: id, latest: "", status: DependencyDecorationStatus.LOADING })
+	}
+
+	setNotInstalled(id: string, range?: Range) {
+		if (range === undefined) return
+		this.decorateDependency(id, range, { id: id, latest: "", status: DependencyDecorationStatus.NOT_INSTALLED })
+	}
 }
+
+export const decorationStore = new DecorationStore()
 
 export function latestDecoration(latest: string) {
 	return window.createTextEditorDecorationType({
@@ -77,16 +120,6 @@ export function outdatedDecoration(deco: DependencyDecoration) {
 		after: {
 			contentText: '⬆️ ' + deco.current + "==>" + deco.latest,
 			color: 'yellow',
-			margin: '0 0 0 4em' // Add some margin to the left
-		}
-	})
-}
-
-export function errorDecoration(latest: string) {
-	return window.createTextEditorDecorationType({
-		after: {
-			contentText: '❌ ' + latest,
-			color: 'red',
 			margin: '0 0 0 4em' // Add some margin to the left
 		}
 	})

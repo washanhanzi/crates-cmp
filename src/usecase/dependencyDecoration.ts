@@ -25,29 +25,25 @@ async function dependencyDecoration(ctx: Ctx, input: DependencyNode): Promise<De
 
 	let res: DependencyDecoration = {
 		id: input.id,
+		//current won't be undefined
 		current: input.currentVersion,
 		latest: "",
 		status: DependencyDecorationStatus.UNKOWN
 	}
 
-	if (!res.current) {
-		res.status = DependencyDecorationStatus.NOT_INSTALLED
-		return { ctx: ctx, decoration: res }
-	}
-
 	//stable
-	if (prerelease(res.current) === null) {
+	if (prerelease(res.current!) === null) {
 		//outdated
 		if (input.currentVersion !== m.latestStable) {
 			res.status = DependencyDecorationStatus.OUTDATED
 			res.latest = m.latestStable
 			//return latest stable
-			if (major(res.current) === major(m.latestStable)) {
+			if (major(res.current!) === major(m.latestStable)) {
 				return { ctx: ctx, decoration: res }
 			} else {
 				//return the max version that satisfy the input version
 				for (let v of m.versions) {
-					if (satisfies(v, res.current)) {
+					if (satisfies(v, res.current!)) {
 						res.currentMax = v
 						return { ctx: ctx, decoration: res }
 					}
@@ -63,12 +59,12 @@ async function dependencyDecoration(ctx: Ctx, input: DependencyNode): Promise<De
 		res.status = DependencyDecorationStatus.OUTDATED
 		res.latest = m.latestPrerelease!
 		//return latest prerelease
-		if (satisfies(m.latestPrerelease!, res.current)) {
+		if (satisfies(m.latestPrerelease!, res.current!)) {
 			return { ctx: ctx, decoration: res }
 		} else {
 			//return the max version that satisfy the input version
 			for (let v of m.versions) {
-				if (satisfies(v, res.current)) {
+				if (satisfies(v, res.current!)) {
 					res.currentMax = v
 					return { ctx: ctx, decoration: res }
 				}

@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.41] - 2024-07-23
+
+### Changed
+
+- nothing change, code refactor
+
 ## [0.0.40] - 2024-07-14
 
 ### Fixed

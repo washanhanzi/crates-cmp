@@ -16,10 +16,11 @@ type CargoTreeOutputItem = {
 	deduplicated?: boolean
 }
 
-type ParsedCargoTreeOutput = {
+export type ParsedCargoTreeOutput = {
 	[CargoTomlTable.DEPENDENCIES]: { [key: string]: CargoTreeOutputItem },
 	[CargoTomlTable.DEV_DEPENDENCIES]: { [key: string]: CargoTreeOutputItem },
 	[CargoTomlTable.BUILD_DEPENDENCIES]: { [key: string]: CargoTreeOutputItem },
+	duplicated: Map<string, string[]>
 }
 
 
@@ -31,6 +32,7 @@ export function parseCargoTreeOutput(input: string): ParsedCargoTreeOutput {
 		[CargoTomlTable.DEPENDENCIES]: {},
 		[CargoTomlTable.BUILD_DEPENDENCIES]: {},
 		[CargoTomlTable.DEV_DEPENDENCIES]: {},
+		duplicated: new Map()
 	}
 
 	let currentSection: CargoTomlTable = CargoTomlTable.DEPENDENCIES// Start with 'dependencies' as default
@@ -78,15 +80,28 @@ export function parseCargoTreeOutput(input: string): ParsedCargoTreeOutput {
 		}
 	}
 
+
+	let depVersion = new Map<string, Set<string>>()
 	lines.forEach(line => {
 		determineSection(line)
 		if (currentSection && (line.trim().startsWith('├──') || line.trim().startsWith('└──'))) {
 			const parsedLine = parseLine(line)
 			if (parsedLine) {
 				result[currentSection][parsedLine.name] = parsedLine
+				if (depVersion.has(parsedLine.name)) {
+					depVersion.get(parsedLine.name)!.add(parsedLine.version)
+				} else {
+					depVersion.set(parsedLine.name, new Set([parsedLine.version]))
+				}
 			}
 		}
 	})
+
+	for (let [k, v] of depVersion) {
+		if (v.size > 1) {
+			result.duplicated.set(k, Array.from(v))
+		}
+	}
 
 	return result
 }
