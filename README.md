@@ -11,6 +11,14 @@
 
 - If you saw a lot of empty strings in scenario like `serde = ""`, I believe it's the auto completion from `Even Better Toml`'s `cargo.toml` schema.
 
+## Configuration
+
+```json
+{
+    "crates-cmp.crates.sparse-index.url": "https://index.crates.io"
+}
+```
+
 ## Features
 
 - [x] Version code completion

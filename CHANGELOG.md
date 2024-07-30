@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.45] - 2024-07-30
+
+### Added
+
+- config for sparse index url
+
 ## [0.0.44] - 2024-07-30
 
 ### Fixed

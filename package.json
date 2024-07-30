@@ -2,7 +2,7 @@
   "name": "crates-cmp",
   "displayName": "crates-cmp",
   "description": "Code completion for Cargo.toml",
-  "version": "0.0.44",
+  "version": "0.0.45",
   "icon": "image/icon.webp",
   "publisher": "washan",
   "license": "SEE LICENSE IN LICENSE",
@@ -43,7 +43,19 @@
           "strings": "on"
         }
       }
-    }
+    },
+    "configuration": [
+      {
+        "title": "crates-cmp",
+        "properties": {
+          "crates-cmp.crates.sparse-index.url": {
+            "type": "string",
+            "description": "url for crates sparse index",
+            "default": "https://index.crates.io"
+          }
+        }
+      }
+    ]
   },
   "scripts": {
     "build": "pnpm run package && vsce package --no-dependencies",

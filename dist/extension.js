@@ -1,11 +1,4655 @@
-"use strict";var Qs=Object.create;var he=Object.defineProperty;var Zs=Object.getOwnPropertyDescriptor;var en=Object.getOwnPropertyNames;var tn=Object.getPrototypeOf,rn=Object.prototype.hasOwnProperty;var m=(r,e)=>()=>(e||r((e={exports:{}}).exports,e),e.exports),sn=(r,e)=>{for(var t in e)he(r,t,{get:e[t],enumerable:!0})},wt=(r,e,t,s)=>{if(e&&typeof e=="object"||typeof e=="function")for(let n of en(e))!rn.call(r,n)&&n!==t&&he(r,n,{get:()=>e[n],enumerable:!(s=Zs(e,n))||s.enumerable});return r};var me=(r,e,t)=>(t=r!=null?Qs(tn(r)):{},wt(e||!r||!r.__esModule?he(t,"default",{value:r,enumerable:!0}):t,r)),nn=r=>wt(he({},"__esModule",{value:!0}),r);var ee=m((Za,Vt)=>{var un="2.0.0",dn=Number.MAX_SAFE_INTEGER||9007199254740991,pn=16,fn=250,hn=["major","premajor","minor","preminor","patch","prepatch","prerelease"];Vt.exports={MAX_LENGTH:256,MAX_SAFE_COMPONENT_LENGTH:pn,MAX_SAFE_BUILD_LENGTH:fn,MAX_SAFE_INTEGER:dn,RELEASE_TYPES:hn,SEMVER_SPEC_VERSION:un,FLAG_INCLUDE_PRERELEASE:1,FLAG_LOOSE:2}});var te=m((ec,Ft)=>{var mn=typeof process=="object"&&process.env&&process.env.NODE_DEBUG&&/\bsemver\b/i.test(process.env.NODE_DEBUG)?(...r)=>console.error("SEMVER",...r):()=>{};Ft.exports=mn});var G=m((O,jt)=>{var{MAX_SAFE_COMPONENT_LENGTH:Ge,MAX_SAFE_BUILD_LENGTH:gn,MAX_LENGTH:En}=ee(),yn=te();O=jt.exports={};var Tn=O.re=[],vn=O.safeRe=[],p=O.src=[],f=O.t={},xn=0,Xe="[a-zA-Z0-9-]",Nn=[["\\s",1],["\\d",En],[Xe,gn]],wn=r=>{for(let[e,t]of Nn)r=r.split(`${e}*`).join(`${e}{0,${t}}`).split(`${e}+`).join(`${e}{1,${t}}`);return r},g=(r,e,t)=>{let s=wn(e),n=xn++;yn(r,n,e),f[r]=n,p[n]=e,Tn[n]=new RegExp(e,t?"g":void 0),vn[n]=new RegExp(s,t?"g":void 0)};g("NUMERICIDENTIFIER","0|[1-9]\\d*");g("NUMERICIDENTIFIERLOOSE","\\d+");g("NONNUMERICIDENTIFIER",`\\d*[a-zA-Z-]${Xe}*`);g("MAINVERSION",`(${p[f.NUMERICIDENTIFIER]})\\.(${p[f.NUMERICIDENTIFIER]})\\.(${p[f.NUMERICIDENTIFIER]})`);g("MAINVERSIONLOOSE",`(${p[f.NUMERICIDENTIFIERLOOSE]})\\.(${p[f.NUMERICIDENTIFIERLOOSE]})\\.(${p[f.NUMERICIDENTIFIERLOOSE]})`);g("PRERELEASEIDENTIFIER",`(?:${p[f.NUMERICIDENTIFIER]}|${p[f.NONNUMERICIDENTIFIER]})`);g("PRERELEASEIDENTIFIERLOOSE",`(?:${p[f.NUMERICIDENTIFIERLOOSE]}|${p[f.NONNUMERICIDENTIFIER]})`);g("PRERELEASE",`(?:-(${p[f.PRERELEASEIDENTIFIER]}(?:\\.${p[f.PRERELEASEIDENTIFIER]})*))`);g("PRERELEASELOOSE",`(?:-?(${p[f.PRERELEASEIDENTIFIERLOOSE]}(?:\\.${p[f.PRERELEASEIDENTIFIERLOOSE]})*))`);g("BUILDIDENTIFIER",`${Xe}+`);g("BUILD",`(?:\\+(${p[f.BUILDIDENTIFIER]}(?:\\.${p[f.BUILDIDENTIFIER]})*))`);g("FULLPLAIN",`v?${p[f.MAINVERSION]}${p[f.PRERELEASE]}?${p[f.BUILD]}?`);g("FULL",`^${p[f.FULLPLAIN]}$`);g("LOOSEPLAIN",`[v=\\s]*${p[f.MAINVERSIONLOOSE]}${p[f.PRERELEASELOOSE]}?${p[f.BUILD]}?`);g("LOOSE",`^${p[f.LOOSEPLAIN]}$`);g("GTLT","((?:<|>)?=?)");g("XRANGEIDENTIFIERLOOSE",`${p[f.NUMERICIDENTIFIERLOOSE]}|x|X|\\*`);g("XRANGEIDENTIFIER",`${p[f.NUMERICIDENTIFIER]}|x|X|\\*`);g("XRANGEPLAIN",`[v=\\s]*(${p[f.XRANGEIDENTIFIER]})(?:\\.(${p[f.XRANGEIDENTIFIER]})(?:\\.(${p[f.XRANGEIDENTIFIER]})(?:${p[f.PRERELEASE]})?${p[f.BUILD]}?)?)?`);g("XRANGEPLAINLOOSE",`[v=\\s]*(${p[f.XRANGEIDENTIFIERLOOSE]})(?:\\.(${p[f.XRANGEIDENTIFIERLOOSE]})(?:\\.(${p[f.XRANGEIDENTIFIERLOOSE]})(?:${p[f.PRERELEASELOOSE]})?${p[f.BUILD]}?)?)?`);g("XRANGE",`^${p[f.GTLT]}\\s*${p[f.XRANGEPLAIN]}$`);g("XRANGELOOSE",`^${p[f.GTLT]}\\s*${p[f.XRANGEPLAINLOOSE]}$`);g("COERCEPLAIN",`(^|[^\\d])(\\d{1,${Ge}})(?:\\.(\\d{1,${Ge}}))?(?:\\.(\\d{1,${Ge}}))?`);g("COERCE",`${p[f.COERCEPLAIN]}(?:$|[^\\d])`);g("COERCEFULL",p[f.COERCEPLAIN]+`(?:${p[f.PRERELEASE]})?(?:${p[f.BUILD]})?(?:$|[^\\d])`);g("COERCERTL",p[f.COERCE],!0);g("COERCERTLFULL",p[f.COERCEFULL],!0);g("LONETILDE","(?:~>?)");g("TILDETRIM",`(\\s*)${p[f.LONETILDE]}\\s+`,!0);O.tildeTrimReplace="$1~";g("TILDE",`^${p[f.LONETILDE]}${p[f.XRANGEPLAIN]}$`);g("TILDELOOSE",`^${p[f.LONETILDE]}${p[f.XRANGEPLAINLOOSE]}$`);g("LONECARET","(?:\\^)");g("CARETTRIM",`(\\s*)${p[f.LONECARET]}\\s+`,!0);O.caretTrimReplace="$1^";g("CARET",`^${p[f.LONECARET]}${p[f.XRANGEPLAIN]}$`);g("CARETLOOSE",`^${p[f.LONECARET]}${p[f.XRANGEPLAINLOOSE]}$`);g("COMPARATORLOOSE",`^${p[f.GTLT]}\\s*(${p[f.LOOSEPLAIN]})$|^$`);g("COMPARATOR",`^${p[f.GTLT]}\\s*(${p[f.FULLPLAIN]})$|^$`);g("COMPARATORTRIM",`(\\s*)${p[f.GTLT]}\\s*(${p[f.LOOSEPLAIN]}|${p[f.XRANGEPLAIN]})`,!0);O.comparatorTrimReplace="$1$2$3";g("HYPHENRANGE",`^\\s*(${p[f.XRANGEPLAIN]})\\s+-\\s+(${p[f.XRANGEPLAIN]})\\s*$`);g("HYPHENRANGELOOSE",`^\\s*(${p[f.XRANGEPLAINLOOSE]})\\s+-\\s+(${p[f.XRANGEPLAINLOOSE]})\\s*$`);g("STAR","(<|>)?=?\\s*\\*");g("GTE0","^\\s*>=\\s*0\\.0\\.0\\s*$");g("GTE0PRE","^\\s*>=\\s*0\\.0\\.0-0\\s*$")});var ve=m((tc,Mt)=>{var Rn=Object.freeze({loose:!0}),In=Object.freeze({}),Sn=r=>r?typeof r!="object"?Rn:r:In;Mt.exports=Sn});var We=m((rc,Wt)=>{var Gt=/^[0-9]+$/,Xt=(r,e)=>{let t=Gt.test(r),s=Gt.test(e);return t&&s&&(r=+r,e=+e),r===e?0:t&&!s?-1:s&&!t?1:r<e?-1:1},Cn=(r,e)=>Xt(e,r);Wt.exports={compareIdentifiers:Xt,rcompareIdentifiers:Cn}});var T=m((sc,Kt)=>{var xe=te(),{MAX_LENGTH:Bt,MAX_SAFE_INTEGER:Ne}=ee(),{safeRe:Ht,t:zt}=G(),Dn=ve(),{compareIdentifiers:X}=We(),Be=class r{constructor(e,t){if(t=Dn(t),e instanceof r){if(e.loose===!!t.loose&&e.includePrerelease===!!t.includePrerelease)return e;e=e.version}else if(typeof e!="string")throw new TypeError(`Invalid version. Must be a string. Got type "${typeof e}".`);if(e.length>Bt)throw new TypeError(`version is longer than ${Bt} characters`);xe("SemVer",e,t),this.options=t,this.loose=!!t.loose,this.includePrerelease=!!t.includePrerelease;let s=e.trim().match(t.loose?Ht[zt.LOOSE]:Ht[zt.FULL]);if(!s)throw new TypeError(`Invalid Version: ${e}`);if(this.raw=e,this.major=+s[1],this.minor=+s[2],this.patch=+s[3],this.major>Ne||this.major<0)throw new TypeError("Invalid major version");if(this.minor>Ne||this.minor<0)throw new TypeError("Invalid minor version");if(this.patch>Ne||this.patch<0)throw new TypeError("Invalid patch version");s[4]?this.prerelease=s[4].split(".").map(n=>{if(/^[0-9]+$/.test(n)){let i=+n;if(i>=0&&i<Ne)return i}return n}):this.prerelease=[],this.build=s[5]?s[5].split("."):[],this.format()}format(){return this.version=`${this.major}.${this.minor}.${this.patch}`,this.prerelease.length&&(this.version+=`-${this.prerelease.join(".")}`),this.version}toString(){return this.version}compare(e){if(xe("SemVer.compare",this.version,this.options,e),!(e instanceof r)){if(typeof e=="string"&&e===this.version)return 0;e=new r(e,this.options)}return e.version===this.version?0:this.compareMain(e)||this.comparePre(e)}compareMain(e){return e instanceof r||(e=new r(e,this.options)),X(this.major,e.major)||X(this.minor,e.minor)||X(this.patch,e.patch)}comparePre(e){if(e instanceof r||(e=new r(e,this.options)),this.prerelease.length&&!e.prerelease.length)return-1;if(!this.prerelease.length&&e.prerelease.length)return 1;if(!this.prerelease.length&&!e.prerelease.length)return 0;let t=0;do{let s=this.prerelease[t],n=e.prerelease[t];if(xe("prerelease compare",t,s,n),s===void 0&&n===void 0)return 0;if(n===void 0)return 1;if(s===void 0)return-1;if(s===n)continue;return X(s,n)}while(++t)}compareBuild(e){e instanceof r||(e=new r(e,this.options));let t=0;do{let s=this.build[t],n=e.build[t];if(xe("build compare",t,s,n),s===void 0&&n===void 0)return 0;if(n===void 0)return 1;if(s===void 0)return-1;if(s===n)continue;return X(s,n)}while(++t)}inc(e,t,s){switch(e){case"premajor":this.prerelease.length=0,this.patch=0,this.minor=0,this.major++,this.inc("pre",t,s);break;case"preminor":this.prerelease.length=0,this.patch=0,this.minor++,this.inc("pre",t,s);break;case"prepatch":this.prerelease.length=0,this.inc("patch",t,s),this.inc("pre",t,s);break;case"prerelease":this.prerelease.length===0&&this.inc("patch",t,s),this.inc("pre",t,s);break;case"major":(this.minor!==0||this.patch!==0||this.prerelease.length===0)&&this.major++,this.minor=0,this.patch=0,this.prerelease=[];break;case"minor":(this.patch!==0||this.prerelease.length===0)&&this.minor++,this.patch=0,this.prerelease=[];break;case"patch":this.prerelease.length===0&&this.patch++,this.prerelease=[];break;case"pre":{let n=Number(s)?1:0;if(!t&&s===!1)throw new Error("invalid increment argument: identifier is empty");if(this.prerelease.length===0)this.prerelease=[n];else{let i=this.prerelease.length;for(;--i>=0;)typeof this.prerelease[i]=="number"&&(this.prerelease[i]++,i=-2);if(i===-1){if(t===this.prerelease.join(".")&&s===!1)throw new Error("invalid increment argument: identifier already exists");this.prerelease.push(n)}}if(t){let i=[t,n];s===!1&&(i=[t]),X(this.prerelease[0],t)===0?isNaN(this.prerelease[1])&&(this.prerelease=i):this.prerelease=i}break}default:throw new Error(`invalid increment argument: ${e}`)}return this.raw=this.format(),this.build.length&&(this.raw+=`+${this.build.join(".")}`),this}};Kt.exports=Be});var U=m((nc,Jt)=>{var Yt=T(),bn=(r,e,t=!1)=>{if(r instanceof Yt)return r;try{return new Yt(r,e)}catch(s){if(!t)return null;throw s}};Jt.exports=bn});var Zt=m((ic,Qt)=>{var On=U(),$n=(r,e)=>{let t=On(r,e);return t?t.version:null};Qt.exports=$n});var tr=m((oc,er)=>{var An=U(),Ln=(r,e)=>{let t=An(r.trim().replace(/^[=v]+/,""),e);return t?t.version:null};er.exports=Ln});var nr=m((ac,sr)=>{var rr=T(),Pn=(r,e,t,s,n)=>{typeof t=="string"&&(n=s,s=t,t=void 0);try{return new rr(r instanceof rr?r.version:r,t).inc(e,s,n).version}catch{return null}};sr.exports=Pn});var ar=m((cc,or)=>{var ir=U(),qn=(r,e)=>{let t=ir(r,null,!0),s=ir(e,null,!0),n=t.compare(s);if(n===0)return null;let i=n>0,o=i?t:s,a=i?s:t,c=!!o.prerelease.length;if(!!a.prerelease.length&&!c)return!a.patch&&!a.minor?"major":o.patch?"patch":o.minor?"minor":"major";let u=c?"pre":"";return t.major!==s.major?u+"major":t.minor!==s.minor?u+"minor":t.patch!==s.patch?u+"patch":"prerelease"};or.exports=qn});var lr=m((lc,cr)=>{var kn=T(),_n=(r,e)=>new kn(r,e).major;cr.exports=_n});var dr=m((uc,ur)=>{var Un=T(),Vn=(r,e)=>new Un(r,e).minor;ur.exports=Vn});var fr=m((dc,pr)=>{var Fn=T(),jn=(r,e)=>new Fn(r,e).patch;pr.exports=jn});var mr=m((pc,hr)=>{var Mn=U(),Gn=(r,e)=>{let t=Mn(r,e);return t&&t.prerelease.length?t.prerelease:null};hr.exports=Gn});var R=m((fc,Er)=>{var gr=T(),Xn=(r,e,t)=>new gr(r,t).compare(new gr(e,t));Er.exports=Xn});var Tr=m((hc,yr)=>{var Wn=R(),Bn=(r,e,t)=>Wn(e,r,t);yr.exports=Bn});var xr=m((mc,vr)=>{var Hn=R(),zn=(r,e)=>Hn(r,e,!0);vr.exports=zn});var we=m((gc,wr)=>{var Nr=T(),Kn=(r,e,t)=>{let s=new Nr(r,t),n=new Nr(e,t);return s.compare(n)||s.compareBuild(n)};wr.exports=Kn});var Ir=m((Ec,Rr)=>{var Yn=we(),Jn=(r,e)=>r.sort((t,s)=>Yn(t,s,e));Rr.exports=Jn});var Cr=m((yc,Sr)=>{var Qn=we(),Zn=(r,e)=>r.sort((t,s)=>Qn(s,t,e));Sr.exports=Zn});var re=m((Tc,Dr)=>{var ei=R(),ti=(r,e,t)=>ei(r,e,t)>0;Dr.exports=ti});var Re=m((vc,br)=>{var ri=R(),si=(r,e,t)=>ri(r,e,t)<0;br.exports=si});var He=m((xc,Or)=>{var ni=R(),ii=(r,e,t)=>ni(r,e,t)===0;Or.exports=ii});var ze=m((Nc,$r)=>{var oi=R(),ai=(r,e,t)=>oi(r,e,t)!==0;$r.exports=ai});var Ie=m((wc,Ar)=>{var ci=R(),li=(r,e,t)=>ci(r,e,t)>=0;Ar.exports=li});var Se=m((Rc,Lr)=>{var ui=R(),di=(r,e,t)=>ui(r,e,t)<=0;Lr.exports=di});var Ke=m((Ic,Pr)=>{var pi=He(),fi=ze(),hi=re(),mi=Ie(),gi=Re(),Ei=Se(),yi=(r,e,t,s)=>{switch(e){case"===":return typeof r=="object"&&(r=r.version),typeof t=="object"&&(t=t.version),r===t;case"!==":return typeof r=="object"&&(r=r.version),typeof t=="object"&&(t=t.version),r!==t;case"":case"=":case"==":return pi(r,t,s);case"!=":return fi(r,t,s);case">":return hi(r,t,s);case">=":return mi(r,t,s);case"<":return gi(r,t,s);case"<=":return Ei(r,t,s);default:throw new TypeError(`Invalid operator: ${e}`)}};Pr.exports=yi});var kr=m((Sc,qr)=>{var Ti=T(),vi=U(),{safeRe:Ce,t:De}=G(),xi=(r,e)=>{if(r instanceof Ti)return r;if(typeof r=="number"&&(r=String(r)),typeof r!="string")return null;e=e||{};let t=null;if(!e.rtl)t=r.match(e.includePrerelease?Ce[De.COERCEFULL]:Ce[De.COERCE]);else{let c=e.includePrerelease?Ce[De.COERCERTLFULL]:Ce[De.COERCERTL],l;for(;(l=c.exec(r))&&(!t||t.index+t[0].length!==r.length);)(!t||l.index+l[0].length!==t.index+t[0].length)&&(t=l),c.lastIndex=l.index+l[1].length+l[2].length;c.lastIndex=-1}if(t===null)return null;let s=t[2],n=t[3]||"0",i=t[4]||"0",o=e.includePrerelease&&t[5]?`-${t[5]}`:"",a=e.includePrerelease&&t[6]?`+${t[6]}`:"";return vi(`${s}.${n}.${i}${o}${a}`,e)};qr.exports=xi});var Ur=m((Cc,_r)=>{var Ye=class{constructor(){this.max=1e3,this.map=new Map}get(e){let t=this.map.get(e);if(t!==void 0)return this.map.delete(e),this.map.set(e,t),t}delete(e){return this.map.delete(e)}set(e,t){if(!this.delete(e)&&t!==void 0){if(this.map.size>=this.max){let n=this.map.keys().next().value;this.delete(n)}this.map.set(e,t)}return this}};_r.exports=Ye});var I=m((Dc,Mr)=>{var Je=class r{constructor(e,t){if(t=wi(t),e instanceof r)return e.loose===!!t.loose&&e.includePrerelease===!!t.includePrerelease?e:new r(e.raw,t);if(e instanceof Qe)return this.raw=e.value,this.set=[[e]],this.format(),this;if(this.options=t,this.loose=!!t.loose,this.includePrerelease=!!t.includePrerelease,this.raw=e.trim().split(/\s+/).join(" "),this.set=this.raw.split("||").map(s=>this.parseRange(s.trim())).filter(s=>s.length),!this.set.length)throw new TypeError(`Invalid SemVer Range: ${this.raw}`);if(this.set.length>1){let s=this.set[0];if(this.set=this.set.filter(n=>!Fr(n[0])),this.set.length===0)this.set=[s];else if(this.set.length>1){for(let n of this.set)if(n.length===1&&Oi(n[0])){this.set=[n];break}}}this.format()}format(){return this.range=this.set.map(e=>e.join(" ").trim()).join("||").trim(),this.range}toString(){return this.range}parseRange(e){let s=((this.options.includePrerelease&&Di)|(this.options.loose&&bi))+":"+e,n=Vr.get(s);if(n)return n;let i=this.options.loose,o=i?N[v.HYPHENRANGELOOSE]:N[v.HYPHENRANGE];e=e.replace(o,Fi(this.options.includePrerelease)),y("hyphen replace",e),e=e.replace(N[v.COMPARATORTRIM],Ii),y("comparator trim",e),e=e.replace(N[v.TILDETRIM],Si),y("tilde trim",e),e=e.replace(N[v.CARETTRIM],Ci),y("caret trim",e);let a=e.split(" ").map(d=>$i(d,this.options)).join(" ").split(/\s+/).map(d=>Vi(d,this.options));i&&(a=a.filter(d=>(y("loose invalid filter",d,this.options),!!d.match(N[v.COMPARATORLOOSE])))),y("range list",a);let c=new Map,l=a.map(d=>new Qe(d,this.options));for(let d of l){if(Fr(d))return[d];c.set(d.value,d)}c.size>1&&c.has("")&&c.delete("");let u=[...c.values()];return Vr.set(s,u),u}intersects(e,t){if(!(e instanceof r))throw new TypeError("a Range is required");return this.set.some(s=>jr(s,t)&&e.set.some(n=>jr(n,t)&&s.every(i=>n.every(o=>i.intersects(o,t)))))}test(e){if(!e)return!1;if(typeof e=="string")try{e=new Ri(e,this.options)}catch{return!1}for(let t=0;t<this.set.length;t++)if(ji(this.set[t],e,this.options))return!0;return!1}};Mr.exports=Je;var Ni=Ur(),Vr=new Ni,wi=ve(),Qe=se(),y=te(),Ri=T(),{safeRe:N,t:v,comparatorTrimReplace:Ii,tildeTrimReplace:Si,caretTrimReplace:Ci}=G(),{FLAG_INCLUDE_PRERELEASE:Di,FLAG_LOOSE:bi}=ee(),Fr=r=>r.value==="<0.0.0-0",Oi=r=>r.value==="",jr=(r,e)=>{let t=!0,s=r.slice(),n=s.pop();for(;t&&s.length;)t=s.every(i=>n.intersects(i,e)),n=s.pop();return t},$i=(r,e)=>(y("comp",r,e),r=Pi(r,e),y("caret",r),r=Ai(r,e),y("tildes",r),r=ki(r,e),y("xrange",r),r=Ui(r,e),y("stars",r),r),x=r=>!r||r.toLowerCase()==="x"||r==="*",Ai=(r,e)=>r.trim().split(/\s+/).map(t=>Li(t,e)).join(" "),Li=(r,e)=>{let t=e.loose?N[v.TILDELOOSE]:N[v.TILDE];return r.replace(t,(s,n,i,o,a)=>{y("tilde",r,s,n,i,o,a);let c;return x(n)?c="":x(i)?c=`>=${n}.0.0 <${+n+1}.0.0-0`:x(o)?c=`>=${n}.${i}.0 <${n}.${+i+1}.0-0`:a?(y("replaceTilde pr",a),c=`>=${n}.${i}.${o}-${a} <${n}.${+i+1}.0-0`):c=`>=${n}.${i}.${o} <${n}.${+i+1}.0-0`,y("tilde return",c),c})},Pi=(r,e)=>r.trim().split(/\s+/).map(t=>qi(t,e)).join(" "),qi=(r,e)=>{y("caret",r,e);let t=e.loose?N[v.CARETLOOSE]:N[v.CARET],s=e.includePrerelease?"-0":"";return r.replace(t,(n,i,o,a,c)=>{y("caret",r,n,i,o,a,c);let l;return x(i)?l="":x(o)?l=`>=${i}.0.0${s} <${+i+1}.0.0-0`:x(a)?i==="0"?l=`>=${i}.${o}.0${s} <${i}.${+o+1}.0-0`:l=`>=${i}.${o}.0${s} <${+i+1}.0.0-0`:c?(y("replaceCaret pr",c),i==="0"?o==="0"?l=`>=${i}.${o}.${a}-${c} <${i}.${o}.${+a+1}-0`:l=`>=${i}.${o}.${a}-${c} <${i}.${+o+1}.0-0`:l=`>=${i}.${o}.${a}-${c} <${+i+1}.0.0-0`):(y("no pr"),i==="0"?o==="0"?l=`>=${i}.${o}.${a}${s} <${i}.${o}.${+a+1}-0`:l=`>=${i}.${o}.${a}${s} <${i}.${+o+1}.0-0`:l=`>=${i}.${o}.${a} <${+i+1}.0.0-0`),y("caret return",l),l})},ki=(r,e)=>(y("replaceXRanges",r,e),r.split(/\s+/).map(t=>_i(t,e)).join(" ")),_i=(r,e)=>{r=r.trim();let t=e.loose?N[v.XRANGELOOSE]:N[v.XRANGE];return r.replace(t,(s,n,i,o,a,c)=>{y("xRange",r,s,n,i,o,a,c);let l=x(i),u=l||x(o),d=u||x(a),E=d;return n==="="&&E&&(n=""),c=e.includePrerelease?"-0":"",l?n===">"||n==="<"?s="<0.0.0-0":s="*":n&&E?(u&&(o=0),a=0,n===">"?(n=">=",u?(i=+i+1,o=0,a=0):(o=+o+1,a=0)):n==="<="&&(n="<",u?i=+i+1:o=+o+1),n==="<"&&(c="-0"),s=`${n+i}.${o}.${a}${c}`):u?s=`>=${i}.0.0${c} <${+i+1}.0.0-0`:d&&(s=`>=${i}.${o}.0${c} <${i}.${+o+1}.0-0`),y("xRange return",s),s})},Ui=(r,e)=>(y("replaceStars",r,e),r.trim().replace(N[v.STAR],"")),Vi=(r,e)=>(y("replaceGTE0",r,e),r.trim().replace(N[e.includePrerelease?v.GTE0PRE:v.GTE0],"")),Fi=r=>(e,t,s,n,i,o,a,c,l,u,d,E)=>(x(s)?t="":x(n)?t=`>=${s}.0.0${r?"-0":""}`:x(i)?t=`>=${s}.${n}.0${r?"-0":""}`:o?t=`>=${t}`:t=`>=${t}${r?"-0":""}`,x(l)?c="":x(u)?c=`<${+l+1}.0.0-0`:x(d)?c=`<${l}.${+u+1}.0-0`:E?c=`<=${l}.${u}.${d}-${E}`:r?c=`<${l}.${u}.${+d+1}-0`:c=`<=${c}`,`${t} ${c}`.trim()),ji=(r,e,t)=>{for(let s=0;s<r.length;s++)if(!r[s].test(e))return!1;if(e.prerelease.length&&!t.includePrerelease){for(let s=0;s<r.length;s++)if(y(r[s].semver),r[s].semver!==Qe.ANY&&r[s].semver.prerelease.length>0){let n=r[s].semver;if(n.major===e.major&&n.minor===e.minor&&n.patch===e.patch)return!0}return!1}return!0}});var se=m((bc,zr)=>{var ne=Symbol("SemVer ANY"),tt=class r{static get ANY(){return ne}constructor(e,t){if(t=Gr(t),e instanceof r){if(e.loose===!!t.loose)return e;e=e.value}e=e.trim().split(/\s+/).join(" "),et("comparator",e,t),this.options=t,this.loose=!!t.loose,this.parse(e),this.semver===ne?this.value="":this.value=this.operator+this.semver.version,et("comp",this)}parse(e){let t=this.options.loose?Xr[Wr.COMPARATORLOOSE]:Xr[Wr.COMPARATOR],s=e.match(t);if(!s)throw new TypeError(`Invalid comparator: ${e}`);this.operator=s[1]!==void 0?s[1]:"",this.operator==="="&&(this.operator=""),s[2]?this.semver=new Br(s[2],this.options.loose):this.semver=ne}toString(){return this.value}test(e){if(et("Comparator.test",e,this.options.loose),this.semver===ne||e===ne)return!0;if(typeof e=="string")try{e=new Br(e,this.options)}catch{return!1}return Ze(e,this.operator,this.semver,this.options)}intersects(e,t){if(!(e instanceof r))throw new TypeError("a Comparator is required");return this.operator===""?this.value===""?!0:new Hr(e.value,t).test(this.value):e.operator===""?e.value===""?!0:new Hr(this.value,t).test(e.semver):(t=Gr(t),t.includePrerelease&&(this.value==="<0.0.0-0"||e.value==="<0.0.0-0")||!t.includePrerelease&&(this.value.startsWith("<0.0.0")||e.value.startsWith("<0.0.0"))?!1:!!(this.operator.startsWith(">")&&e.operator.startsWith(">")||this.operator.startsWith("<")&&e.operator.startsWith("<")||this.semver.version===e.semver.version&&this.operator.includes("=")&&e.operator.includes("=")||Ze(this.semver,"<",e.semver,t)&&this.operator.startsWith(">")&&e.operator.startsWith("<")||Ze(this.semver,">",e.semver,t)&&this.operator.startsWith("<")&&e.operator.startsWith(">")))}};zr.exports=tt;var Gr=ve(),{safeRe:Xr,t:Wr}=G(),Ze=Ke(),et=te(),Br=T(),Hr=I()});var ie=m((Oc,Kr)=>{var Mi=I(),Gi=(r,e,t)=>{try{e=new Mi(e,t)}catch{return!1}return e.test(r)};Kr.exports=Gi});var Jr=m(($c,Yr)=>{var Xi=I(),Wi=(r,e)=>new Xi(r,e).set.map(t=>t.map(s=>s.value).join(" ").trim().split(" "));Yr.exports=Wi});var Zr=m((Ac,Qr)=>{var Bi=T(),Hi=I(),zi=(r,e,t)=>{let s=null,n=null,i=null;try{i=new Hi(e,t)}catch{return null}return r.forEach(o=>{i.test(o)&&(!s||n.compare(o)===-1)&&(s=o,n=new Bi(s,t))}),s};Qr.exports=zi});var ts=m((Lc,es)=>{var Ki=T(),Yi=I(),Ji=(r,e,t)=>{let s=null,n=null,i=null;try{i=new Yi(e,t)}catch{return null}return r.forEach(o=>{i.test(o)&&(!s||n.compare(o)===1)&&(s=o,n=new Ki(s,t))}),s};es.exports=Ji});var ns=m((Pc,ss)=>{var rt=T(),Qi=I(),rs=re(),Zi=(r,e)=>{r=new Qi(r,e);let t=new rt("0.0.0");if(r.test(t)||(t=new rt("0.0.0-0"),r.test(t)))return t;t=null;for(let s=0;s<r.set.length;++s){let n=r.set[s],i=null;n.forEach(o=>{let a=new rt(o.semver.version);switch(o.operator){case">":a.prerelease.length===0?a.patch++:a.prerelease.push(0),a.raw=a.format();case"":case">=":(!i||rs(a,i))&&(i=a);break;case"<":case"<=":break;default:throw new Error(`Unexpected operation: ${o.operator}`)}}),i&&(!t||rs(t,i))&&(t=i)}return t&&r.test(t)?t:null};ss.exports=Zi});var os=m((qc,is)=>{var eo=I(),to=(r,e)=>{try{return new eo(r,e).range||"*"}catch{return null}};is.exports=to});var be=m((kc,us)=>{var ro=T(),ls=se(),{ANY:so}=ls,no=I(),io=ie(),as=re(),cs=Re(),oo=Se(),ao=Ie(),co=(r,e,t,s)=>{r=new ro(r,s),e=new no(e,s);let n,i,o,a,c;switch(t){case">":n=as,i=oo,o=cs,a=">",c=">=";break;case"<":n=cs,i=ao,o=as,a="<",c="<=";break;default:throw new TypeError('Must provide a hilo val of "<" or ">"')}if(io(r,e,s))return!1;for(let l=0;l<e.set.length;++l){let u=e.set[l],d=null,E=null;if(u.forEach(h=>{h.semver===so&&(h=new ls(">=0.0.0")),d=d||h,E=E||h,n(h.semver,d.semver,s)?d=h:o(h.semver,E.semver,s)&&(E=h)}),d.operator===a||d.operator===c||(!E.operator||E.operator===a)&&i(r,E.semver))return!1;if(E.operator===c&&o(r,E.semver))return!1}return!0};us.exports=co});var ps=m((_c,ds)=>{var lo=be(),uo=(r,e,t)=>lo(r,e,">",t);ds.exports=uo});var hs=m((Uc,fs)=>{var po=be(),fo=(r,e,t)=>po(r,e,"<",t);fs.exports=fo});var Es=m((Vc,gs)=>{var ms=I(),ho=(r,e,t)=>(r=new ms(r,t),e=new ms(e,t),r.intersects(e,t));gs.exports=ho});var Ts=m((Fc,ys)=>{var mo=ie(),go=R();ys.exports=(r,e,t)=>{let s=[],n=null,i=null,o=r.sort((u,d)=>go(u,d,t));for(let u of o)mo(u,e,t)?(i=u,n||(n=u)):(i&&s.push([n,i]),i=null,n=null);n&&s.push([n,null]);let a=[];for(let[u,d]of s)u===d?a.push(u):!d&&u===o[0]?a.push("*"):d?u===o[0]?a.push(`<=${d}`):a.push(`${u} - ${d}`):a.push(`>=${u}`);let c=a.join(" || "),l=typeof e.raw=="string"?e.raw:String(e);return c.length<l.length?c:e}});var Is=m((jc,Rs)=>{var vs=I(),nt=se(),{ANY:st}=nt,oe=ie(),it=R(),Eo=(r,e,t={})=>{if(r===e)return!0;r=new vs(r,t),e=new vs(e,t);let s=!1;e:for(let n of r.set){for(let i of e.set){let o=To(n,i,t);if(s=s||o!==null,o)continue e}if(s)return!1}return!0},yo=[new nt(">=0.0.0-0")],xs=[new nt(">=0.0.0")],To=(r,e,t)=>{if(r===e)return!0;if(r.length===1&&r[0].semver===st){if(e.length===1&&e[0].semver===st)return!0;t.includePrerelease?r=yo:r=xs}if(e.length===1&&e[0].semver===st){if(t.includePrerelease)return!0;e=xs}let s=new Set,n,i;for(let h of r)h.operator===">"||h.operator===">="?n=Ns(n,h,t):h.operator==="<"||h.operator==="<="?i=ws(i,h,t):s.add(h.semver);if(s.size>1)return null;let o;if(n&&i){if(o=it(n.semver,i.semver,t),o>0)return null;if(o===0&&(n.operator!==">="||i.operator!=="<="))return null}for(let h of s){if(n&&!oe(h,String(n),t)||i&&!oe(h,String(i),t))return null;for(let b of e)if(!oe(h,String(b),t))return!1;return!0}let a,c,l,u,d=i&&!t.includePrerelease&&i.semver.prerelease.length?i.semver:!1,E=n&&!t.includePrerelease&&n.semver.prerelease.length?n.semver:!1;d&&d.prerelease.length===1&&i.operator==="<"&&d.prerelease[0]===0&&(d=!1);for(let h of e){if(u=u||h.operator===">"||h.operator===">=",l=l||h.operator==="<"||h.operator==="<=",n){if(E&&h.semver.prerelease&&h.semver.prerelease.length&&h.semver.major===E.major&&h.semver.minor===E.minor&&h.semver.patch===E.patch&&(E=!1),h.operator===">"||h.operator===">="){if(a=Ns(n,h,t),a===h&&a!==n)return!1}else if(n.operator===">="&&!oe(n.semver,String(h),t))return!1}if(i){if(d&&h.semver.prerelease&&h.semver.prerelease.length&&h.semver.major===d.major&&h.semver.minor===d.minor&&h.semver.patch===d.patch&&(d=!1),h.operator==="<"||h.operator==="<="){if(c=ws(i,h,t),c===h&&c!==i)return!1}else if(i.operator==="<="&&!oe(i.semver,String(h),t))return!1}if(!h.operator&&(i||n)&&o!==0)return!1}return!(n&&l&&!i&&o!==0||i&&u&&!n&&o!==0||E||d)},Ns=(r,e,t)=>{if(!r)return e;let s=it(r.semver,e.semver,t);return s>0?r:s<0||e.operator===">"&&r.operator===">="?e:r},ws=(r,e,t)=>{if(!r)return e;let s=it(r.semver,e.semver,t);return s<0?r:s>0||e.operator==="<"&&r.operator==="<="?e:r};Rs.exports=Eo});var ae=m((Mc,Ds)=>{var ot=G(),Ss=ee(),vo=T(),Cs=We(),xo=U(),No=Zt(),wo=tr(),Ro=nr(),Io=ar(),So=lr(),Co=dr(),Do=fr(),bo=mr(),Oo=R(),$o=Tr(),Ao=xr(),Lo=we(),Po=Ir(),qo=Cr(),ko=re(),_o=Re(),Uo=He(),Vo=ze(),Fo=Ie(),jo=Se(),Mo=Ke(),Go=kr(),Xo=se(),Wo=I(),Bo=ie(),Ho=Jr(),zo=Zr(),Ko=ts(),Yo=ns(),Jo=os(),Qo=be(),Zo=ps(),ea=hs(),ta=Es(),ra=Ts(),sa=Is();Ds.exports={parse:xo,valid:No,clean:wo,inc:Ro,diff:Io,major:So,minor:Co,patch:Do,prerelease:bo,compare:Oo,rcompare:$o,compareLoose:Ao,compareBuild:Lo,sort:Po,rsort:qo,gt:ko,lt:_o,eq:Uo,neq:Vo,gte:Fo,lte:jo,cmp:Mo,coerce:Go,Comparator:Xo,Range:Wo,satisfies:Bo,toComparators:Ho,maxSatisfying:zo,minSatisfying:Ko,minVersion:Yo,validRange:Jo,outside:Qo,gtr:Zo,ltr:ea,intersects:ta,simplifyRange:ra,subset:sa,SemVer:vo,re:ot.re,src:ot.src,tokens:ot.t,SEMVER_SPEC_VERSION:Ss.SEMVER_SPEC_VERSION,RELEASE_TYPES:Ss.RELEASE_TYPES,compareIdentifiers:Cs.compareIdentifiers,rcompareIdentifiers:Cs.rcompareIdentifiers}});var ga={};sn(ga,{activate:()=>ha,deactivate:()=>ma});module.exports=nn(ga);var q=require("vscode");function F(r){return'"'+r+'"'}function Rt(r){return r===void 0?!0:typeof r=="string"||Array.isArray(r)?r.length===0:typeof r=="object"&&r!==null?Object.keys(r).length===0:!1}var _e="abcdefghijklmnopqrstuvwxyz";function j(r){if(r<0||!Number.isInteger(r))throw new Error("Input must be a non-negative integer.");let e=Math.floor(r/_e.length),t=_e[r%_e.length];return"z".repeat(e)+t}var It=require("child_process");function St(r){return new Promise((e,t)=>{let s=(0,It.exec)(r),n="",i="";s.stdout?.on("data",o=>{n+=o}),s.stderr?.on("data",o=>{i+=o}),s.on("exit",o=>{o===0?e(n):t(new Error(i))}),s.on("close",o=>{o===0?e(n):t(new Error(i||"Unknown error"))}),s.on("error",o=>{console.error("Failed to start subprocess:",o),t(o)})})}var Y=class extends Error{constructor(e,t,s){let n=e.status||e.status===0?e.status:"",i=e.statusText||"",o=`${n} ${i}`.trim(),a=o?`status code ${o}`:"an unknown error";super(`Request failed with ${a}: ${t.method} ${t.url}`),Object.defineProperty(this,"response",{enumerable:!0,configurable:!0,writable:!0,value:void 0}),Object.defineProperty(this,"request",{enumerable:!0,configurable:!0,writable:!0,value:void 0}),Object.defineProperty(this,"options",{enumerable:!0,configurable:!0,writable:!0,value:void 0}),this.name="HTTPError",this.response=e,this.request=t,this.options=s}};var M=class extends Error{constructor(e){super(`Request timed out: ${e.method} ${e.url}`),Object.defineProperty(this,"request",{enumerable:!0,configurable:!0,writable:!0,value:void 0}),this.name="TimeoutError",this.request=e}};var J=r=>r!==null&&typeof r=="object";var Q=(...r)=>{for(let e of r)if((!J(e)||Array.isArray(e))&&e!==void 0)throw new TypeError("The `options` argument must be an object");return ge({},...r)},Ue=(r={},e={})=>{let t=new globalThis.Headers(r),s=e instanceof globalThis.Headers,n=new globalThis.Headers(e);for(let[i,o]of n.entries())s&&o==="undefined"||o===void 0?t.delete(i):t.set(i,o);return t},ge=(...r)=>{let e={},t={};for(let s of r)if(Array.isArray(s))Array.isArray(e)||(e=[]),e=[...e,...s];else if(J(s)){for(let[n,i]of Object.entries(s))J(i)&&n in e&&(i=ge(e[n],i)),e={...e,[n]:i};J(s.headers)&&(t=Ue(t,s.headers),e.headers=t)}return e};var Ct=(()=>{let r=!1,e=!1,t=typeof globalThis.ReadableStream=="function",s=typeof globalThis.Request=="function";if(t&&s)try{e=new globalThis.Request("https://empty.invalid",{body:new globalThis.ReadableStream,method:"POST",get duplex(){return r=!0,"half"}}).headers.has("Content-Type")}catch(n){if(n instanceof Error&&n.message==="unsupported BodyInit type")return!1;throw n}return r&&!e})(),Dt=typeof globalThis.AbortController=="function",bt=typeof globalThis.ReadableStream=="function",Ot=typeof globalThis.FormData=="function",Ee=["get","post","put","patch","head","delete"],on=()=>{};on();var $t={json:"application/json",text:"text/*",formData:"multipart/form-data",arrayBuffer:"*/*",blob:"*/*"},ye=2147483647,Te=Symbol("stop"),At={json:!0,parseJson:!0,stringifyJson:!0,searchParams:!0,prefixUrl:!0,retry:!0,timeout:!0,hooks:!0,throwHttpErrors:!0,onDownloadProgress:!0,fetch:!0},Lt={method:!0,headers:!0,body:!0,mode:!0,credentials:!0,cache:!0,redirect:!0,referrer:!0,referrerPolicy:!0,integrity:!0,keepalive:!0,signal:!0,window:!0,dispatcher:!0,duplex:!0,priority:!0};var qt=r=>Ee.includes(r)?r.toUpperCase():r,an=["get","put","head","delete","options","trace"],cn=[408,413,429,500,502,503,504],kt=[413,429,503],Pt={limit:2,methods:an,statusCodes:cn,afterStatusCodes:kt,maxRetryAfter:Number.POSITIVE_INFINITY,backoffLimit:Number.POSITIVE_INFINITY,delay:r=>.3*2**(r-1)*1e3},_t=(r={})=>{if(typeof r=="number")return{...Pt,limit:r};if(r.methods&&!Array.isArray(r.methods))throw new Error("retry.methods must be an array");if(r.statusCodes&&!Array.isArray(r.statusCodes))throw new Error("retry.statusCodes must be an array");return{...Pt,...r,afterStatusCodes:kt}};async function Ve(r,e,t,s){return new Promise((n,i)=>{let o=setTimeout(()=>{t&&t.abort(),i(new M(r))},s.timeout);s.fetch(r,e).then(n).catch(i).then(()=>{clearTimeout(o)})})}async function Fe(r,{signal:e}){return new Promise((t,s)=>{e&&(e.throwIfAborted(),e.addEventListener("abort",n,{once:!0}));function n(){clearTimeout(i),s(e.reason)}let i=setTimeout(()=>{e?.removeEventListener("abort",n),t()},r)})}var Ut=(r,e)=>{let t={};for(let s in e)!(s in Lt)&&!(s in At)&&!(s in r)&&(t[s]=e[s]);return t};var Z=class r{static create(e,t){let s=new r(e,t),n=async()=>{if(typeof s._options.timeout=="number"&&s._options.timeout>ye)throw new RangeError(`The \`timeout\` option cannot be greater than ${ye}`);await Promise.resolve();let a=await s._fetch();for(let c of s._options.hooks.afterResponse){let l=await c(s.request,s._options,s._decorateResponse(a.clone()));l instanceof globalThis.Response&&(a=l)}if(s._decorateResponse(a),!a.ok&&s._options.throwHttpErrors){let c=new Y(a,s.request,s._options);for(let l of s._options.hooks.beforeError)c=await l(c);throw c}if(s._options.onDownloadProgress){if(typeof s._options.onDownloadProgress!="function")throw new TypeError("The `onDownloadProgress` option must be a function");if(!bt)throw new Error("Streams are not supported in your environment. `ReadableStream` is missing.");return s._stream(a.clone(),s._options.onDownloadProgress)}return a},o=s._options.retry.methods.includes(s.request.method.toLowerCase())?s._retry(n):n();for(let[a,c]of Object.entries($t))o[a]=async()=>{s.request.headers.set("accept",s.request.headers.get("accept")||c);let u=(await o).clone();if(a==="json"){if(u.status===204||(await u.clone().arrayBuffer()).byteLength===0)return"";if(t.parseJson)return t.parseJson(await u.text())}return u[a]()};return o}constructor(e,t={}){Object.defineProperty(this,"request",{enumerable:!0,configurable:!0,writable:!0,value:void 0}),Object.defineProperty(this,"abortController",{enumerable:!0,configurable:!0,writable:!0,value:void 0}),Object.defineProperty(this,"_retryCount",{enumerable:!0,configurable:!0,writable:!0,value:0}),Object.defineProperty(this,"_input",{enumerable:!0,configurable:!0,writable:!0,value:void 0}),Object.defineProperty(this,"_options",{enumerable:!0,configurable:!0,writable:!0,value:void 0}),this._input=e;let s=this._input instanceof Request&&"credentials"in Request.prototype?this._input.credentials:void 0;if(this._options={...s&&{credentials:s},...t,headers:Ue(this._input.headers,t.headers),hooks:ge({beforeRequest:[],beforeRetry:[],beforeError:[],afterResponse:[]},t.hooks),method:qt(t.method??this._input.method),prefixUrl:String(t.prefixUrl||""),retry:_t(t.retry),throwHttpErrors:t.throwHttpErrors!==!1,timeout:t.timeout??1e4,fetch:t.fetch??globalThis.fetch.bind(globalThis)},typeof this._input!="string"&&!(this._input instanceof URL||this._input instanceof globalThis.Request))throw new TypeError("`input` must be a string, URL, or Request");if(this._options.prefixUrl&&typeof this._input=="string"){if(this._input.startsWith("/"))throw new Error("`input` must not begin with a slash when using `prefixUrl`");this._options.prefixUrl.endsWith("/")||(this._options.prefixUrl+="/"),this._input=this._options.prefixUrl+this._input}if(Dt){if(this.abortController=new globalThis.AbortController,this._options.signal){let n=this._options.signal;this._options.signal.addEventListener("abort",()=>{this.abortController.abort(n.reason)})}this._options.signal=this.abortController.signal}if(Ct&&(this._options.duplex="half"),this._options.json!==void 0&&(this._options.body=this._options.stringifyJson?.(this._options.json)??JSON.stringify(this._options.json),this._options.headers.set("content-type",this._options.headers.get("content-type")??"application/json")),this.request=new globalThis.Request(this._input,this._options),this._options.searchParams){let i="?"+(typeof this._options.searchParams=="string"?this._options.searchParams.replace(/^\?/,""):new URLSearchParams(this._options.searchParams).toString()),o=this.request.url.replace(/(?:\?.*?)?(?=#|$)/,i);(Ot&&this._options.body instanceof globalThis.FormData||this._options.body instanceof URLSearchParams)&&!(this._options.headers&&this._options.headers["content-type"])&&this.request.headers.delete("content-type"),this.request=new globalThis.Request(new globalThis.Request(o,{...this.request}),this._options)}}_calculateRetryDelay(e){if(this._retryCount++,this._retryCount<=this._options.retry.limit&&!(e instanceof M)){if(e instanceof Y){if(!this._options.retry.statusCodes.includes(e.response.status))return 0;let s=e.response.headers.get("Retry-After");if(s&&this._options.retry.afterStatusCodes.includes(e.response.status)){let n=Number(s)*1e3;Number.isNaN(n)&&(n=Date.parse(s)-Date.now());let i=this._options.retry.maxRetryAfter??n;return n<i?n:i}if(e.response.status===413)return 0}let t=this._options.retry.delay(this._retryCount);return Math.min(this._options.retry.backoffLimit,t)}return 0}_decorateResponse(e){return this._options.parseJson&&(e.json=async()=>this._options.parseJson(await e.text())),e}async _retry(e){try{return await e()}catch(t){let s=Math.min(this._calculateRetryDelay(t),ye);if(s!==0&&this._retryCount>0){await Fe(s,{signal:this._options.signal});for(let n of this._options.hooks.beforeRetry)if(await n({request:this.request,options:this._options,error:t,retryCount:this._retryCount})===Te)return;return this._retry(e)}throw t}}async _fetch(){for(let s of this._options.hooks.beforeRequest){let n=await s(this.request,this._options);if(n instanceof Request){this.request=n;break}if(n instanceof Response)return n}let e=Ut(this.request,this._options),t=this.request;return this.request=t.clone(),this._options.timeout===!1?this._options.fetch(t,e):Ve(t,e,this.abortController,this._options)}_stream(e,t){let s=Number(e.headers.get("content-length"))||0,n=0;return e.status===204?(t&&t({percent:1,totalBytes:s,transferredBytes:n},new Uint8Array),new globalThis.Response(null,{status:e.status,statusText:e.statusText,headers:e.headers})):new globalThis.Response(new globalThis.ReadableStream({async start(i){let o=e.body.getReader();t&&t({percent:0,transferredBytes:0,totalBytes:s},new Uint8Array);async function a(){let{done:c,value:l}=await o.read();if(c){i.close();return}if(t){n+=l.byteLength;let u=s===0?0:n/s;t({percent:u,transferredBytes:n,totalBytes:s},l)}i.enqueue(l),await a()}await a()}}),{status:e.status,statusText:e.statusText,headers:e.headers})}};var je=r=>{let e=(t,s)=>Z.create(t,Q(r,s));for(let t of Ee)e[t]=(s,n)=>Z.create(s,Q(r,n,{method:t}));return e.create=t=>je(Q(t)),e.extend=t=>je(Q(r,t)),e.stop=Te,e},ln=je(),Me=ln;var ce=me(ae()),na="https://index.crates.io";async function at(r,e=na){let t=r.replace(/"/g,"").toLocaleLowerCase(),s="";t.length<=2?s=t.length.toString():t.length===3?s="3/"+t.substring(0,1):s=t.substring(0,2)+"/"+t.substring(2,4);let n=await Me.get(`${e}/${s}/${t}`);if(n.status!==200)throw new Error(`get crates metadata error: statusCode=${n.status} ${await n.text()}`);let i=(await n.text()).split(`
-`).filter(E=>E),o=[],a={},c={},l=[],u=null,d=null;for(let E=i.length-1;E>=0;E--){let h=JSON.parse(i[E]);if(h.yanked===!1){o.push(h.vers),u===null&&(0,ce.prerelease)(h.vers)===null?u=h.vers:d===null&&(0,ce.prerelease)(h.vers)!==null&&(d=h.vers),h.rust_version&&(c[h.vers]=h.rust_version);let b=Object.keys(h.features).filter(K=>K==="default"?(l=h.features.default,!1):!0),Nt=[];h.features2&&(Nt=Object.keys(h.features2)),a[h.vers]=[...b,...Nt];for(let K of h.deps)K.optional&&(0,ce.satisfies)(h.vers,K.req)&&a[h.vers].push(K.name)}}return{name:r,versions:o,features:a,defaultFeatures:l,rustVersion:c,createdAt:new Date().getUTCMilliseconds(),latestStable:u,latestPrerelease:d}}async function ct(r){if(r==="")return[];let e=await Me.get("https://crates.io/api/v1/crates?page=1&per_page=30&q="+r,{headers:{"User-Agent":"VSCodeExtension/crates-cmp"}});if(e.status!==200)throw new Error(`search crate error: statusCode=${e.status} ${await e.text()}`);return(await e.json()).crates}async function $(r,e,t=!1){let s=ia(e);if(t){let i=await at(e);return r.globalState.update(s,i),i}let n=r.globalState.get(s);if(!n||n.createdAt>new Date().getUTCMilliseconds()-1e3*60*10){let i=await at(e);return r.globalState.update(s,i),i}return n}function ia(r){return`crates-cmp:metadata:${r}`}async function bs(r,e){return(await $(r,e)).versions}var le=Symbol("None"),ue=class r{val;constructor(e){this.val=e}get[Symbol.toStringTag](){return"Option"}*[Symbol.iterator](){this.isSome()&&(yield this.val)}isSome(){return this.val!==le}isNone(){return this.val===le}expect(e){if(this.isNone())throw new Error(e);return this.val}unwrap(){if(this.isNone())throw new Error("Unwrap called on None");return this.val}unwrapOr(e){return this.isNone()?e:this.val}unwrapOrElse(e){return this.isNone()?e():this.val}map(e){return this.isSome()?new r(e(this.val)):this}mapOr(e,t){return this.isSome()?t(this.val):e}or(e){return this.isSome()?this:e}okOr(e){return this.isSome()?W(this.val):B(e)}peek(){return this.val}flatten(){return this.val instanceof r?this.val:this}static from(e){let t=e();return t==null?new r(le):new r(t)}static async fromAsync(e){let t=await e();return t==null?new r(le):new r(t)}};function Oe(r){return new ue(r)}Object.defineProperty(Oe,Symbol.hasInstance,{value:r=>typeof r!="object"?!1:r?.isSome()||!1});function $e(){return new ue(le)}Object.defineProperty($e,Symbol.hasInstance,{value:r=>typeof r!="object"?!1:r?.isNone()||!1});var H=class r{val;constructor(e){this.val=e}get[Symbol.toStringTag](){return"Result"}*[Symbol.iterator](){this.isOk()&&(yield this.val)}isOk(){return!(this.val instanceof Error||this.val&&typeof this.val=="object"&&Error.isPrototypeOf(this.val))}isErr(){return this.val instanceof Error||this.val&&typeof this.val=="object"&&Error.isPrototypeOf(this.val)}formatError(e){throw e.stack=`${e.message}: ${this.val.stack?`
-	`+this.val.stack.split(`
-`).join(`
-	`):this.val.message}`,e}expect(e){return this.isErr()&&this.formatError(new Error(e)),this.val}expectErr(e){return this.isOk()&&this.formatError(new Error(e)),this.val}unwrap(){return this.isErr()&&this.formatError(new Error(`Unwrap called on ${this.val.name}`)),this.val}unwrapErr(){if(this.isOk())throw new Error(`UnwrapError called on value - ${this.val}`);return this.val}unwrapOr(e){return this.isErr()?e:this.val}unwrapOrElse(e){return this.isErr()?e(this.val):this.val}map(e){return this.isOk()?new r(e(this.val)):this}mapErr(e){return this.isOk()?this:new r(e(this.val))}mapOr(e,t){return this.isOk()?t(this.val):e}or(e){return this.isOk()?this:e}ok(){return this.isOk()?Oe(this.val):$e()}peek(){return this.val}throw(){if(this.isErr())throw this.val}flatten(){return this.val instanceof r?this.val:this}static from(e){try{return new r(e())}catch(t){return new r(t)}}static async fromAsync(e){try{return new r(await e())}catch(t){return new r(t)}}static partition(e){return e.reduce((t,s)=>(s.isOk()?t.ok.push(s.unwrap()):t.err.push(s.unwrapErr()),t),{ok:[],err:[]})}};function W(r){return new H(r)}Object.defineProperty(W,Symbol.hasInstance,{value:r=>typeof r!="object"?!1:r?.isOk()||!1});function B(r){return typeof r=="string"?new H(new Error(r)):new H(r)}Object.defineProperty(B,Symbol.hasInstance,{value:r=>typeof r!="object"?!1:r?.isErr()||!1});async function w(r){try{let e=await r;return W(e)}catch(e){return B(e)}}var Os=me(ae());async function $s(r,e,t,s){if(e==="")return[];let n=await w($(r,e));if(n.isErr())throw n.unwrapErr();let i=n.unwrap();if(t==="")return i.features[i.latestStable]??[];let o=oa(i,t);if(o.length===0)return[];if(s&&s.length!==0){let a={};for(let c of s)a[c]=!0;return o.filter(c=>!a[c])}return o}function oa(r,e){let t=r.features[e]??[];if(t.length===0){for(let s of r.versions)if((0,Os.satisfies)(s,e)){t=r.features[s]??[];break}}return t}function As(r){return/^[<>~=]/.test(r)&&r.includes("*")}var A=me(ae());function Ls(r,e){if(e.length===0)return[];let t=[];for(let s of e)t.push(aa(r,s));return t}async function aa(r,e){let t=await $(r.extensionContext,e.name);t[e.version.value]||(t=await $(r.extensionContext,e.name,!0));let s={state:"Unknown",...e.version};if((0,A.prerelease)(s.installed)===null){if(s.installed!==t.latestStable){if(s.latest=t.latestStable,(0,A.major)(s.installed)===(0,A.major)(t.latestStable))return s.state="Outdated",{ctx:r,version:s};for(let n of t.versions)if((0,A.satisfies)(n,s.installed))return s.currentMax=n,s.currentMax===s.installed?s.state="Locked":s.state="LockandNotOutdated",{ctx:r,version:s}}return s.state="Latest",s.latest=t.latestStable,{ctx:r,version:s}}if(s.installed!==t.latestPrerelease){if(s.state="Outdated",s.latest=t.latestPrerelease,(0,A.satisfies)(t.latestPrerelease,s.installed))return{ctx:r,version:s};for(let n of t.versions)if((0,A.satisfies)(n,s.installed))return s.currentMax=n,s.currentMax===s.installed?s.state="Locked":s.state="LockandNotOutdated",{ctx:r,version:s};return{ctx:r,version:s}}return s.state="Latest",s.latest=t.latestPrerelease,{ctx:r,version:s}}async function Ps(r){return ct(r)}var L=me(ae()),z=require("vscode");async function qs(r,e){if(e.length===0)return[];let t=[];for await(let s of e){let n=await $(r.extensionContext,s.name,!1),i,o=(0,L.minVersion)(s.version.value),a=!1;if((0,L.prerelease)(o)!==null&&(a=!0),!a&&(0,L.gt)(o,n.latestStable))return[{ctx:r,version:{latest:n.latestStable,state:"NotExist",diagnostic:{severity:z.DiagnosticSeverity.Error,source:"extension/crates-cmp",message:"Version not found, latest stable is "+n.latestStable},...s.version}}];if(a&&!n.latestPrerelease)return[{ctx:r,version:{latest:n.latestStable,state:"NotExist",diagnostic:{severity:z.DiagnosticSeverity.Error,source:"extension/crates-cmp",message:"Prerelease not found, latest stable is "+n.latestStable},...s.version}}];if(a&&(0,L.gt)(o,n.latestPrerelease))return[{ctx:r,version:{latest:n.latestPrerelease,state:"NotExist",diagnostic:{severity:z.DiagnosticSeverity.Error,source:"extension/crates-cmp",message:"Prerelease not found, latest prelease is "+n.latestStable},...s.version}}];for(let c of n.versions){let l=s.version.value;if(As(l)||(l="^"+l),c===s.version.value||(0,L.satisfies)(c,l)){i=c;break}}if(!i)return[{ctx:r,version:{latest:n.latestStable,state:"NotExist",diagnostic:{severity:z.DiagnosticSeverity.Error,source:"extension/crates-cmp",message:"Version not found, latest stable is "+n.latestStable},...s.version}}];if(i&&s.features.length!==0){for(let c of s.features)if(!n.features[i].includes(c.value))return[{ctx:r,feature:{state:"NotExist",diagnostic:{severity:z.DiagnosticSeverity.Error,source:"extension/crates-cmp",message:`Feature "${c.value}" not found, available features are `+n.features[i].join(", ")},...c}}]}}return t}async function ut(r){let e=await St(`cargo tree --manifest-path ${r} --depth 1 --all-features`).catch(t=>{throw t});return la(e)}function la(r){let e=r.split(`
-`),t={dependencies:{},"build-dependencies":{},"dev-dependencies":{},duplicated:new Map},s="dependencies";function n(a){let c=a.trim();c==="[build-dependencies]"?s="build-dependencies":c==="[dev-dependencies]"&&(s="dev-dependencies")}function i(a){let c=!1,l=!1,u,d=a.trim().split(/\s+/);if(d.length<3)return null;let E=d[1],h=d[2].startsWith("v")?d[2].substring(1):d[2];for(let b of d.slice(3))b==="(*)"?c=!0:b==="(proc-macro)"?l=!0:b.startsWith("(")&&b.endsWith(")")&&(u=b.slice(1,-1));return{name:E,version:h,path:u,procMacro:l,deduplicated:c}}let o=new Map;e.forEach(a=>{if(n(a),s&&(a.trim().startsWith("\u251C\u2500\u2500")||a.trim().startsWith("\u2514\u2500\u2500"))){let c=i(a);c&&(t[s][c.name]=c,o.has(c.name)?o.get(c.name).add(c.version):o.set(c.name,new Set([c.version])))}});for(let[a,c]of o)c.size>1&&t.duplicated.set(a,Array.from(c));return t}var dt=class{path=void 0;dependencies=new Map;dirtyNodes=new Map;notFoundNodes=new Set;isEmpty(){return this.dependencies.size===0}checkAndDelDirty(e,t){return this.dirtyNodes.has(e)&&this.dirtyNodes.get(e)<=t?(this.dirtyNodes.delete(e),!0):!1}reset(){this.dependencies.clear(),this.dirtyNodes.clear(),this.notFoundNodes.clear()}init(e,t){e!==this.path&&(this.dependencies.clear(),this.dirtyNodes.clear(),this.notFoundNodes.clear())}getDependencies(){return this.dependencies}populateUserInput(e,t,s){for(let n of[...s.added,...s.valueUpdated]){let i=t[n];i&&(this.dependencies.set(n,{...i}),this.dirtyNodes.set(n,e))}for(let n of s.deleted)this.dependencies.delete(n)}populateCurrent(e,t){for(let n of this.dirtyNodes.keys()){if(!this.dirtyNodes.get(n))continue;let i=this.dependencies.get(n),o=i.packageName??i.name,a=t[i.table][o]??void 0;if(!a){this.notFoundNodes.add(n);continue}this.dependencies.set(n,{...i,version:{...i.version,installed:a.version,dependencyId:n}})}let s=[];if(t.duplicated.size!==0)for(let[n,i]of this.dependencies.entries()){let o=i.packageName??i.name;t.duplicated.has(o)&&s.push({rangeId:i.version.id,dependencyId:n,crates:t.duplicated.get(o)})}return s}populateCurrentWithoutDoc(e,t){for(let n of this.dependencies.values()){let i=n.packageName??n.name;t[n.table][i]&&n.version.installed!==t[n.table][i].version&&(this.dependencies.set(n.id,{...n,version:{...n.version,installed:t[n.table][i].version,dependencyId:n.id}}),this.dirtyNodes.set(n.id,e))}let s=[];if(t.duplicated.size!==0)for(let[n,i]of this.dependencies.entries()){let o=i.packageName??i.name;t.duplicated.has(o)&&s.push({rangeId:i.version.id,dependencyId:n,crates:t.duplicated.get(o)})}return s}dirtyIds(){return Array.from(this.dirtyNodes.keys())}isClean(){return this.dirtyNodes.size===0}notFoundIds(){return Array.from(this.notFoundNodes)}dirtyDeps(e=0){let t=[];for(let[s,n]of this.dirtyNodes.entries()){if(n>e)return[];let i=this.dependencies.get(s);t.push(i)}return t}dependency(e){return this.dependencies.get(e)}updateVersion(e,t){let s=this.dependencies.get(e);s&&this.dependencies.set(e,{...s,version:t})}updateFeature(e,t){let s=this.dependencies.get(e);if(s){for(let n=0;n<s.features.length;n++)if(s.features[n].id===t.id){s.features[n]=t;break}}}},ks=new dt;var k=require("vscode");async function pt(r,e,t){let s=await w(bs(r,e));if(s.isErr())return k.window.showErrorMessage(s.unwrapErr().message),[];let n=s.unwrap().map((i,o)=>{let a=new k.CompletionItem(F(i),k.CompletionItemKind.Constant);return a.insertText=F(i),a.sortText=j(o++),a.preselect=o===0,a.range=t,a});return new k.CompletionList(n)}var _=require("vscode");async function _s(r,e,t,s,n){let i=await w($s(r,e,t,s));if(i.isErr())return _.window.showErrorMessage(i.unwrapErr().message),[];let o=i.unwrap().map((a,c)=>{let l=new _.CompletionItem(F(a),_.CompletionItemKind.Constant);return l.insertText=F(a),l.sortText=j(c++),l.preselect=c===0,l.range=n,l});return new _.CompletionList(o)}var P=require("vscode");async function Us(r,e){let t=ua(r,e),s=await w(Ps(t));if(s.isErr())return P.window.showErrorMessage(s.unwrapErr().message),[];let[n,i]=da(t);return s.unwrap().map((a,c)=>{let l=new P.CompletionItem(a.name,P.CompletionItemKind.Constant);return l.insertText=a.name,l.documentation=a.description,l.detail="max version: "+a.max_version,l.sortText=j(c++),l.preselect=c===0,l.range=new P.Range(e.line,n,e.line,i),l})}function ua(r,e){let t=new P.Range(e.line,0,e.line,e.character);return r.getText(t)}function da(r){let e=-1,t=-1;for(let s=0;s<r.length;s++)r[s].trim()!==""&&(e===-1&&(e=s),t=s);return[e,t]}var Vs=require("vscode");function Fs(r,e){return new Promise((t,s)=>{Vs.commands.executeCommand(r,e).then(n=>{Rt(n)&&s("symbol provider unavailable"),t(n)},n=>s(n))})}var Gs=require("vscode");var js=require("vscode");function C(r){return r&&new js.Range(r.start.translate(0,1),r.end.translate(0,-1))}function Ms(r){return new Promise(e=>setTimeout(e,r))}var ft=class{enterTable(e,t){return!0}enterDependencies(e,t){return!0}onPackage(e,t){}onDependencies(e,t,s,n){}onFeatures(e,t){}onWorkspace(e,t){}onLib(e,t){}onBin(e,t){}onProfile(e,t){}onBadges(e,t){}onOther(e,t){}tree;constructor(e){this.tree=e}walk(){for(let e of this.tree)switch(e.name){case"package":this.enterTable(e,"package")&&this.onPackage(e.name,e);break;case"dependencies":this.enterDependencies(e,"dependencies")&&this.onDependencies(e.name,e,"dependencies");break;case"dev-dependencies":this.enterDependencies(e,"dev-dependencies")&&this.onDependencies(e.name,e,"dev-dependencies");break;case"build-dependencies":this.enterDependencies(e,"build-dependencies")&&this.onDependencies(e.name,e,"build-dependencies");break;case"target":if(this.enterDependencies(e,"dependencies"))for(let t of e.children)for(let s of t.children)this.onDependencies(V(e.name,t.name,s.name),s,"dependencies",t.name);case"features":this.enterTable(e,"features")&&this.onFeatures(e.name,e);break;case"workspace":this.enterTable(e,"workspace")&&this.onWorkspace(e.name,e);break;case"lib":this.enterTable(e,"lib")&&this.onLib(e.name,e);break;case"bin":this.enterTable(e,"bin")&&this.onBin(e.name,e);break;case"profile":this.enterTable(e,"profile")&&this.onProfile(e.name,e);break;case"badges":this.enterTable(e,"badges")&&this.onBadges(e.name,e);break;default:this.enterTable(e,"other")&&this.onOther(e.name,e);break}}},de=class extends ft{enterCrate(e){return!0}onCrate(e,t,s,n){}onDependencies(e,t,s,n){for(let i of t.children)this.enterCrate(i)&&this.onCrate(V(e,i.name),i,s,n)}};async function Le(r){for(let e=0;e<5;e++){let t=await w(Fs("vscode.executeDocumentSymbolProvider",r));if(console.log("waiting for Even better toml"),t.isOk())return t.unwrap();await Ms(500)}return Gs.window.showErrorMessage("Require `Even Better TOML` extension"),[]}var Ae=class extends de{identifiers=[];doc;docTree;constructor(e,t,s){super(e),this.doc=t,this.docTree=s}enterTable(e,t){return!1}enterDependencies(e,t){return!0}enterCrate(e){return!0}onCrate(e,t,s,n){let i=t.name,o={id:e,name:i,version:{id:"",value:"",dependencyId:""},features:[],table:s,platform:n},a=[],c=this.doc.getText(t.range).replace(/(\r\n|\r|\n)/g,">");if(this.docTree.visitDependency(o.id,c,t.range),this.docTree.visitNode(o.id,{id:e,table:s,range:t.range,value:c,dependency:{dependencyId:o.id,key:"crate"}}),a.push(o.id),t.children.length===0){let l=this.doc.getText(C(t.range));o.version={id:e,value:l,dependencyId:e},this.docTree.visitNode(o.id,{id:e,table:s,range:t.range,value:c,dependency:{dependencyId:o.id,key:"simpleVersion"}}),this.docTree.addDependency(o),this.docTree.setRnages(t.range,a);return}for(let l of t.children){if(l.name==="version"){let u=this.doc.getText(C(l.range)),d=V(o.id,l.name);o.version={id:d,value:u,dependencyId:o.id},this.docTree.visitNode(d,{id:d,table:s,value:u,range:l.range,dependency:{dependencyId:o.id,key:"version"}}),a.push(d);continue}if(l.name==="features"){if(l.children.length!==0)for(let u of l.children){let d=this.doc.getText(C(u.range)),E=V(o.id,l.name,u.name);this.docTree.visitNode(E,{id:E,table:s,value:d,range:u.range,dependency:{dependencyId:o.id,key:"feature"}}),o.features.push({id:E,value:d,dependencyId:o.id}),a.push(E)}else{let u=this.doc.getText(C(l.range)),d=V(o.id,l.name);this.docTree.visitNode(d,{id:d,table:s,value:u,range:l.range,dependency:{dependencyId:o.id,key:"feature"}}),o.features.push({id:d,value:u,dependencyId:o.id}),a.push(d)}continue}if(l.name==="package"){let u=V(o.id,l.name),d=this.doc.getText(C(l.range));o.packageName=d,this.docTree.visitNode(u,{id:u,table:s,value:d,range:l.range,dependency:{dependencyId:o.id,key:"package"}}),a.push(u)}if(l.name==="path"){let u=V(o.id,l.name),d=this.doc.getText(C(l.range));o.path={id:u,dependencyId:o.id,value:d},this.docTree.visitNode(u,{id:u,table:s,value:d,range:l.range,dependency:{dependencyId:o.id,key:"path"}}),a.push(u)}}this.docTree.addDependency(o),this.docTree.setRnages(t.range,a)}};function V(...r){return r.join(".")}var Pe=class{context;constructor(e){this.context=e}provideCompletionItems(e,t,s,n){return new Promise(async i=>{let o=await this.completionItems(e,t,s,n);i(o)})}async completionItems(e,t,s,n){let i=await Le(e.uri);if(i.length===0)return[];let o=new ht(i,t);if(o.walk(),!o.crateName)return await Us(e,t);if(o.versionNode&&o.versionNode.range.contains(t))return await pt(this.context,o.crateName,o.versionNode.range);if(o.featuresNode&&o.featuresNode.children.length!==0){if(o.featuresNode.range.contains(t)){let a=e.getText(C(o.versionNode?.range)),c,l=[];for(let u of o.featuresNode.children){if(u.range.contains(t)){c=u.range;continue}l.push(e.getText(C(u.range)))}return await _s(this.context,o.crateName,a,l,c)}return[]}return o.isComplexDependencyBlock?[]:await pt(this.context,o.crateName,o.crateRange)}},ht=class extends de{isComplexDependencyBlock=!1;crateName;crateRange;versionNode;featuresNode;position;constructor(e,t){super(e),this.position=t}enterTable(e,t){return!1}enterDependencies(e,t){return!!e.range.contains(this.position)}enterCrate(e){return!!e.range.contains(this.position)}onCrate(e,t){if(this.crateName=t.name,this.crateRange=t.range,t.children.length!==0){this.isComplexDependencyBlock=!0;for(let s of t.children){if(s.name==="version"){this.versionNode=s;continue}if(s.name==="features"){this.featuresNode=s;continue}}}this.enterCrate=s=>!1}};var zs=require("vscode");var S=require("vscode");var qe=require("vscode"),mt=class{path;state;constructor(){this.state={}}init(e){if(this.path!==e){this.state={},this.path=e;return}}reset(){this.state={},this.path=void 0}delete(e){this.state[e]&&(this.state[e].decoration.dispose(),delete this.state[e])}get(e){return this.state[e]}set(e,t){this.state[e]=t}decorateDependency(e,t,s){if(s===void 0){let o=this.get(e);o&&qe.window.activeTextEditor?.setDecorations(o.decoration,[t]);return}let n=this.get(e);n&&n.decoration.dispose();let i=fa(s);this.set(e,{decoration:i}),qe.window.activeTextEditor?.setDecorations(i,[t])}setLoading(e,t){t!==void 0&&this.decorateDependency(e,t,{text:"Waiting...",color:"grey"})}setNotInstalled(e,t){t!==void 0&&this.decorateDependency(e,t,{text:"Not Installed",color:"grey"})}},Xs=new mt;function fa(r){return qe.window.createTextEditorDecorationType({after:{contentText:r.text,color:r.color,margin:"0 0 0 4em"}})}function Ws(r){switch(r.state){case"Latest":return{text:"\u2705 "+r.latest,color:"green"};case"Outdated":return{text:"\u2B06\uFE0F "+r.installed+"==>"+r.latest,color:"yellow"};case"Locked":return{text:"\u{1F512} "+r.installed+", "+r.latest,color:"orange"};case"LockandNotOutdated":return{text:"\u{1F512} "+r.installed+"==>"+r.currentMax+", "+r.latest,color:"orange"}}}var pe=require("vscode"),gt=class{collection;state=new Map;constructor(){this.collection=pe.languages.createDiagnosticCollection("crates-cmp")}add(e,t,s){let n=this.state.get(e);if(n){n.set(s.id,new pe.Diagnostic(t,s.message,s.severity));return}let i=new Map;i.set(s.id,new pe.Diagnostic(t,s.message,s.severity)),this.state.set(e,i)}delete(e,t){let s=this.state.get(e.path);s&&s.delete(t)&&this.collection.set(e,Array.from(s.values()))}render(e){let t=this.state.get(e.path);t?this.collection.set(e,Array.from(t.values())):this.collection.set(e,void 0)}clear(e){let t=this.state.get(e.path);t&&t.clear()}},Bs=new gt;var Et=class{path="";nodes=new Map;notVisitedNode=new Set;dependencyNodes={};rangeStore=new yt;added=new Set;valueUpdated=new Set;rangeUpdated=new Set;dependencyIds=[];deleted=new Set;setRnages(e,t){this.rangeStore.set(e.start.line,e.end.line,t)}isEmpty(){return this.nodes.size===0}reset(){this.path="",this.nodes.clear(),this.notVisitedNode.clear(),this.dependencyNodes={},this.added.clear(),this.valueUpdated.clear(),this.rangeUpdated.clear(),this.dependencyIds.length=0,this.deleted.clear()}init(e){if(this.rangeStore.clear(),this.dependencyNodes={},this.path!==e){this.nodes.clear(),this.path=e,this.added.clear(),this.valueUpdated.clear(),this.rangeUpdated.clear(),this.deleted.clear(),this.dependencyIds.length=0;return}this.added.clear(),this.valueUpdated.clear(),this.rangeUpdated.clear(),this.deleted.clear();for(let t of this.nodes.keys())this.notVisitedNode.add(t);for(let t of this.dependencyIds)this.deleted.add(t);this.dependencyIds.length=0}visitDependency(e,t,s){this.dependencyIds.push(e),this.deleted.delete(e);let n=this.nodes.get(e);n?(n.value!==t&&this.valueUpdated.add(e),n.range.isEqual(s)||this.rangeUpdated.add(e)):this.added.add(e)}addDependency(e){this.dependencyNodes[e.id]=e}visitNode(e,t){this.notVisitedNode.delete(e),this.nodes.set(e,t)}finalize(){for(let e of this.notVisitedNode)this.nodes.delete(e);return this.dependencyNodes}deletedIds(){return Array.from(this.deleted)}dirtyIds(){return[...this.added,...this.valueUpdated]}isClean(){return this.dirtyIds().length===0}rangeUpdatedIds(){return Array.from(this.rangeUpdated)}node(e){return this.nodes.get(e)}nodeFromRange(e){let t=this.rangeStore.ids(e.start.line);if(t)for(let s=t.length-1;s>=0;s--){let n=t[s],i=this.node(n);if(i&&i.range.isSingleLine&&i.range.start.line===e.start.line&&i.range.start.isBefore(e.start)&&i.range.end.isAfter(e.end))return i}}range(e){let t=this.nodes.get(e);return t?t.range:void 0}getAllChanges(){return{added:Array.from(this.added),valueUpdated:Array.from(this.valueUpdated),rangeUpdated:Array.from(this.rangeUpdated),deleted:Array.from(this.deleted)}}},yt=class{ranges=new Map;set(e,t,s){for(let n=e;n<=t;n++)this.ranges.set(n,s)}clear(){this.ranges.clear()}ids(e){return this.ranges.get(e)}},Hs=new Et;var Tt=class{docTree=Hs;depTree=ks;decorations=Xs;diagnostic=Bs;path;version=0;rev=0;reset(){this.path=void 0,this.docTree.reset(),this.depTree.reset(),this.decorations.reset()}init(e){this.path!==e.uri.path&&(this.rev=0),this.path=e.uri.path,this.docTree.init(this.path),this.decorations.init(this.path),this.version=e.version}async parseDocument(e,t){let s=await Le(t.uri);if(this.noResumeDocTree())return;let n={extensionContext:e,path:this.path,rev:this.incRev(),uri:t.uri};new Ae(s,t,this.docTree).walk();let o=this.docTree.finalize();if(this.docTree.isEmpty())return;for(let u of this.docTree.dirtyIds())this.decorations.setLoading(u,this.docTree.range(u)),this.diagnostic.delete(n.uri,u);for(let u of this.docTree.deletedIds())this.decorations.delete(u),this.diagnostic.delete(n.uri,u);for(let u of this.docTree.rangeUpdatedIds())this.decorations.decorateDependency(u,this.docTree.range(u));if(this.docTree.isClean())return;this.depTree.populateUserInput(n.rev,o,this.docTree.getAllChanges());let a=await w(ut(n.path));if(this.noResumeDepTree())return;if(a.isErr())return await this.afterCargoErr(n);let c=a.unwrap(),l=this.depTree.populateCurrent(n.rev,c);this.afterCargoOk(n,l)}async afterCargoErr(e){let t=this.depTree.dirtyDeps(this.rev);if(t.length===0)return;let s=await qs(e,t);s.length!==0&&(s.filter(n=>{let i="";return"version"in n&&(i=n.version.dependencyId),"feature"in n&&(i=n.feature.dependencyId),this.depTree.checkAndDelDirty(i,n.ctx.rev)}).forEach(n=>{let i="",o="",a="",c=S.DiagnosticSeverity.Hint;"version"in n&&(i=n.version.dependencyId,o=n.version.id,a=n.version.diagnostic.message,c=n.version.diagnostic.severity,this.depTree.updateVersion(n.version.dependencyId,n.version)),"feature"in n&&(i=n.feature.dependencyId,o=n.feature.id,a=n.feature.diagnostic.message,c=n.feature.diagnostic.severity,this.depTree.updateFeature(n.feature.dependencyId,n.feature)),this.decorations.delete(i),this.diagnostic.add(n.ctx.path,this.docTree.range(o),{id:i,message:a,severity:c})}),this.diagnostic.render(e.uri))}afterCargoOk(e,t){if(t.length!==0){for(let i of t)this.diagnostic.add(e.path,this.docTree.range(i.rangeId),{id:i.dependencyId,severity:S.DiagnosticSeverity.Information,message:`Found multiple versions: ${i.crates.join(", ")}`});this.diagnostic.render(e.uri)}else this.diagnostic.clear(e.uri),this.diagnostic.render(e.uri);for(let i of this.depTree.notFoundIds())this.depTree.checkAndDelDirty(i,e.rev)&&this.decorations.setNotInstalled(i,this.docTree.range(i));let s=this.depTree.dirtyDeps(this.rev);if(s.length===0)return;Ls(e,s).forEach(i=>i.then(this.outputPromiseHandler.bind(this)))}async parseDependencies(e,t){if(!this.depTree.isClean())return;let s={extensionContext:e,path:this.path,rev:this.incRev(),uri:t.uri},n=await w(ut(s.path));if(this.noResumeDepTree())return;if(n.isErr())return await this.afterCargoErr(s);let i=n.unwrap(),o=this.depTree.populateCurrentWithoutDoc(s.rev,i);for(let a of this.depTree.dirtyIds())this.decorations.setLoading(a,this.docTree.range(a)),this.diagnostic.delete(s.uri,a);this.afterCargoOk(s,o)}outputPromiseHandler(e){if(this.depTree.checkAndDelDirty(e.version.dependencyId,e.ctx.rev)){let t=Ws(e.version);if(!t)return;this.depTree.updateVersion(e.version.dependencyId,e.version),this.decorations.decorateDependency(e.version.dependencyId,this.docTree.range(e.version.dependencyId),t)}}incRev(){return this.rev=this.rev+1,this.rev}noResumeDocTree(){if(!S.window.activeTextEditor||(S.window.activeTextEditor.document.fileName.endsWith("Cargo.toml"),S.window.activeTextEditor.document.uri.path!==this.path)||S.window.activeTextEditor.document.version<this.version)return!0}noResumeDepTree(){if(!S.window.activeTextEditor||(S.window.activeTextEditor.document.fileName.endsWith("Cargo.toml"),S.window.activeTextEditor.document.uri.path!==this.path)||this.depTree.isEmpty())return!0}nodeFromRange(e){return this.docTree.nodeFromRange(e)}dependency(e){return this.depTree.dependency(e)}},fe=new Tt;var ke=class{ctx;state=fe;constructor(e){this.ctx=e}async onDidSaveTextDocument(e){e.fileName.endsWith("Cargo.toml")&&(this.state.init(e),await this.state.parseDocument(this.ctx,e))}async onDidChangeActiveEditor(e){this.state.path!==void 0&&this.state.reset(),e&&e.document.fileName.endsWith("Cargo.toml")&&(this.state.init(e.document),await this.state.parseDocument(this.ctx,e.document))}async onDidLockFileChange(){this.state.noResumeDepTree()||await this.state.parseDependencies(this.ctx,zs.window.activeTextEditor.document)}onDidCloseTextDocument(e){e.fileName.endsWith("Cargo.toml")&&e.uri.path===this.state.path&&this.state.reset()}};var Ks=require("vscode"),vt=class{client=void 0;dependencies={};async init(){let e=Ks.extensions.getExtension("rust-lang.rust-analyzer");if(!e)throw new Error("Require Rust Analyzer");let t=await e.activate();if(!t.client)throw new Error("Require Rust Analyzer");t.client.start(),this.client=t.client}stop(){if(this.client)return this.client.stop()}async dependencyList(){let e=await this.client?.sendRequest("rust-analyzer/fetchDependencyList",{});for(let t of e.crates)this.dependencies[t.name]=t}dependency(e){return this.dependencies[e]}languageClient(){return this.client}},Ys=new vt;var D=require("vscode");var xt=class{state=fe;constructor(e){this.state=e}static providedCodeActionKinds=[D.CodeActionKind.RefactorRewrite];provideCodeActions(e,t){let s=this.state.nodeFromRange(t);if(s&&s.dependency){let n=this.state.dependency(s.dependency?.dependencyId),i=[];switch(s.dependency.key){case"simpleVersion":case"version":switch(n?.version.state??"Unknown"){case"NotExist":let a=new D.CodeAction(n.version.latest,D.CodeActionKind.QuickFix);a.edit=new D.WorkspaceEdit,a.edit.replace(e.uri,s.range,'"'+n.version.latest+'"'),i.push(a);break;case"Outdated":let c=new D.CodeAction(n.version.latest,D.CodeActionKind.RefactorRewrite);c.edit=new D.WorkspaceEdit,c.edit.replace(e.uri,s.range,'"'+n.version.latest+'"'),i.push(c);break}}return i}}},Js=new xt(fe);async function ha(r){let e={language:"toml",pattern:"**/Cargo.toml"},t=new ke(r);r.subscriptions.push(q.window.onDidChangeActiveTextEditor(t.onDidChangeActiveEditor,t),q.workspace.onDidSaveTextDocument(t.onDidSaveTextDocument,t),q.workspace.onDidCloseTextDocument(t.onDidCloseTextDocument,t),q.workspace.createFileSystemWatcher("**/Cargo.lock").onDidChange(t.onDidLockFileChange,t),q.languages.registerCodeActionsProvider(e,Js),q.languages.registerCompletionItemProvider(e,new Pe(r),'"',".","+","-","0","1","2","3","4","5","6","7","8","9"))}function ma(){return Ys.stop()}0&&(module.exports={activate,deactivate});
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __commonJS = (cb, mod) => function __require() {
+  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/constants.js
+var require_constants = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/constants.js"(exports2, module2) {
+    var SEMVER_SPEC_VERSION = "2.0.0";
+    var MAX_LENGTH = 256;
+    var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || /* istanbul ignore next */
+    9007199254740991;
+    var MAX_SAFE_COMPONENT_LENGTH = 16;
+    var MAX_SAFE_BUILD_LENGTH = MAX_LENGTH - 6;
+    var RELEASE_TYPES = [
+      "major",
+      "premajor",
+      "minor",
+      "preminor",
+      "patch",
+      "prepatch",
+      "prerelease"
+    ];
+    module2.exports = {
+      MAX_LENGTH,
+      MAX_SAFE_COMPONENT_LENGTH,
+      MAX_SAFE_BUILD_LENGTH,
+      MAX_SAFE_INTEGER,
+      RELEASE_TYPES,
+      SEMVER_SPEC_VERSION,
+      FLAG_INCLUDE_PRERELEASE: 1,
+      FLAG_LOOSE: 2
+    };
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/debug.js
+var require_debug = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/debug.js"(exports2, module2) {
+    var debug = typeof process === "object" && process.env && process.env.NODE_DEBUG && /\bsemver\b/i.test(process.env.NODE_DEBUG) ? (...args) => console.error("SEMVER", ...args) : () => {
+    };
+    module2.exports = debug;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/re.js
+var require_re = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/re.js"(exports2, module2) {
+    var {
+      MAX_SAFE_COMPONENT_LENGTH,
+      MAX_SAFE_BUILD_LENGTH,
+      MAX_LENGTH
+    } = require_constants();
+    var debug = require_debug();
+    exports2 = module2.exports = {};
+    var re = exports2.re = [];
+    var safeRe = exports2.safeRe = [];
+    var src = exports2.src = [];
+    var t = exports2.t = {};
+    var R = 0;
+    var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
+    var safeRegexReplacements = [
+      ["\\s", 1],
+      ["\\d", MAX_LENGTH],
+      [LETTERDASHNUMBER, MAX_SAFE_BUILD_LENGTH]
+    ];
+    var makeSafeRegex = (value) => {
+      for (const [token, max] of safeRegexReplacements) {
+        value = value.split(`${token}*`).join(`${token}{0,${max}}`).split(`${token}+`).join(`${token}{1,${max}}`);
+      }
+      return value;
+    };
+    var createToken = (name, value, isGlobal) => {
+      const safe = makeSafeRegex(value);
+      const index = R++;
+      debug(name, index, value);
+      t[name] = index;
+      src[index] = value;
+      re[index] = new RegExp(value, isGlobal ? "g" : void 0);
+      safeRe[index] = new RegExp(safe, isGlobal ? "g" : void 0);
+    };
+    createToken("NUMERICIDENTIFIER", "0|[1-9]\\d*");
+    createToken("NUMERICIDENTIFIERLOOSE", "\\d+");
+    createToken("NONNUMERICIDENTIFIER", `\\d*[a-zA-Z-]${LETTERDASHNUMBER}*`);
+    createToken("MAINVERSION", `(${src[t.NUMERICIDENTIFIER]})\\.(${src[t.NUMERICIDENTIFIER]})\\.(${src[t.NUMERICIDENTIFIER]})`);
+    createToken("MAINVERSIONLOOSE", `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.(${src[t.NUMERICIDENTIFIERLOOSE]})\\.(${src[t.NUMERICIDENTIFIERLOOSE]})`);
+    createToken("PRERELEASEIDENTIFIER", `(?:${src[t.NUMERICIDENTIFIER]}|${src[t.NONNUMERICIDENTIFIER]})`);
+    createToken("PRERELEASEIDENTIFIERLOOSE", `(?:${src[t.NUMERICIDENTIFIERLOOSE]}|${src[t.NONNUMERICIDENTIFIER]})`);
+    createToken("PRERELEASE", `(?:-(${src[t.PRERELEASEIDENTIFIER]}(?:\\.${src[t.PRERELEASEIDENTIFIER]})*))`);
+    createToken("PRERELEASELOOSE", `(?:-?(${src[t.PRERELEASEIDENTIFIERLOOSE]}(?:\\.${src[t.PRERELEASEIDENTIFIERLOOSE]})*))`);
+    createToken("BUILDIDENTIFIER", `${LETTERDASHNUMBER}+`);
+    createToken("BUILD", `(?:\\+(${src[t.BUILDIDENTIFIER]}(?:\\.${src[t.BUILDIDENTIFIER]})*))`);
+    createToken("FULLPLAIN", `v?${src[t.MAINVERSION]}${src[t.PRERELEASE]}?${src[t.BUILD]}?`);
+    createToken("FULL", `^${src[t.FULLPLAIN]}$`);
+    createToken("LOOSEPLAIN", `[v=\\s]*${src[t.MAINVERSIONLOOSE]}${src[t.PRERELEASELOOSE]}?${src[t.BUILD]}?`);
+    createToken("LOOSE", `^${src[t.LOOSEPLAIN]}$`);
+    createToken("GTLT", "((?:<|>)?=?)");
+    createToken("XRANGEIDENTIFIERLOOSE", `${src[t.NUMERICIDENTIFIERLOOSE]}|x|X|\\*`);
+    createToken("XRANGEIDENTIFIER", `${src[t.NUMERICIDENTIFIER]}|x|X|\\*`);
+    createToken("XRANGEPLAIN", `[v=\\s]*(${src[t.XRANGEIDENTIFIER]})(?:\\.(${src[t.XRANGEIDENTIFIER]})(?:\\.(${src[t.XRANGEIDENTIFIER]})(?:${src[t.PRERELEASE]})?${src[t.BUILD]}?)?)?`);
+    createToken("XRANGEPLAINLOOSE", `[v=\\s]*(${src[t.XRANGEIDENTIFIERLOOSE]})(?:\\.(${src[t.XRANGEIDENTIFIERLOOSE]})(?:\\.(${src[t.XRANGEIDENTIFIERLOOSE]})(?:${src[t.PRERELEASELOOSE]})?${src[t.BUILD]}?)?)?`);
+    createToken("XRANGE", `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAIN]}$`);
+    createToken("XRANGELOOSE", `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAINLOOSE]}$`);
+    createToken("COERCEPLAIN", `${"(^|[^\\d])(\\d{1,"}${MAX_SAFE_COMPONENT_LENGTH}})(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?`);
+    createToken("COERCE", `${src[t.COERCEPLAIN]}(?:$|[^\\d])`);
+    createToken("COERCEFULL", src[t.COERCEPLAIN] + `(?:${src[t.PRERELEASE]})?(?:${src[t.BUILD]})?(?:$|[^\\d])`);
+    createToken("COERCERTL", src[t.COERCE], true);
+    createToken("COERCERTLFULL", src[t.COERCEFULL], true);
+    createToken("LONETILDE", "(?:~>?)");
+    createToken("TILDETRIM", `(\\s*)${src[t.LONETILDE]}\\s+`, true);
+    exports2.tildeTrimReplace = "$1~";
+    createToken("TILDE", `^${src[t.LONETILDE]}${src[t.XRANGEPLAIN]}$`);
+    createToken("TILDELOOSE", `^${src[t.LONETILDE]}${src[t.XRANGEPLAINLOOSE]}$`);
+    createToken("LONECARET", "(?:\\^)");
+    createToken("CARETTRIM", `(\\s*)${src[t.LONECARET]}\\s+`, true);
+    exports2.caretTrimReplace = "$1^";
+    createToken("CARET", `^${src[t.LONECARET]}${src[t.XRANGEPLAIN]}$`);
+    createToken("CARETLOOSE", `^${src[t.LONECARET]}${src[t.XRANGEPLAINLOOSE]}$`);
+    createToken("COMPARATORLOOSE", `^${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]})$|^$`);
+    createToken("COMPARATOR", `^${src[t.GTLT]}\\s*(${src[t.FULLPLAIN]})$|^$`);
+    createToken("COMPARATORTRIM", `(\\s*)${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]}|${src[t.XRANGEPLAIN]})`, true);
+    exports2.comparatorTrimReplace = "$1$2$3";
+    createToken("HYPHENRANGE", `^\\s*(${src[t.XRANGEPLAIN]})\\s+-\\s+(${src[t.XRANGEPLAIN]})\\s*$`);
+    createToken("HYPHENRANGELOOSE", `^\\s*(${src[t.XRANGEPLAINLOOSE]})\\s+-\\s+(${src[t.XRANGEPLAINLOOSE]})\\s*$`);
+    createToken("STAR", "(<|>)?=?\\s*\\*");
+    createToken("GTE0", "^\\s*>=\\s*0\\.0\\.0\\s*$");
+    createToken("GTE0PRE", "^\\s*>=\\s*0\\.0\\.0-0\\s*$");
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/parse-options.js
+var require_parse_options = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/parse-options.js"(exports2, module2) {
+    var looseOption = Object.freeze({ loose: true });
+    var emptyOpts = Object.freeze({});
+    var parseOptions = (options) => {
+      if (!options) {
+        return emptyOpts;
+      }
+      if (typeof options !== "object") {
+        return looseOption;
+      }
+      return options;
+    };
+    module2.exports = parseOptions;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/identifiers.js
+var require_identifiers = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/identifiers.js"(exports2, module2) {
+    var numeric = /^[0-9]+$/;
+    var compareIdentifiers = (a, b) => {
+      const anum = numeric.test(a);
+      const bnum = numeric.test(b);
+      if (anum && bnum) {
+        a = +a;
+        b = +b;
+      }
+      return a === b ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b ? -1 : 1;
+    };
+    var rcompareIdentifiers = (a, b) => compareIdentifiers(b, a);
+    module2.exports = {
+      compareIdentifiers,
+      rcompareIdentifiers
+    };
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/classes/semver.js
+var require_semver = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/classes/semver.js"(exports2, module2) {
+    var debug = require_debug();
+    var { MAX_LENGTH, MAX_SAFE_INTEGER } = require_constants();
+    var { safeRe: re, t } = require_re();
+    var parseOptions = require_parse_options();
+    var { compareIdentifiers } = require_identifiers();
+    var SemVer = class _SemVer {
+      constructor(version, options) {
+        options = parseOptions(options);
+        if (version instanceof _SemVer) {
+          if (version.loose === !!options.loose && version.includePrerelease === !!options.includePrerelease) {
+            return version;
+          } else {
+            version = version.version;
+          }
+        } else if (typeof version !== "string") {
+          throw new TypeError(`Invalid version. Must be a string. Got type "${typeof version}".`);
+        }
+        if (version.length > MAX_LENGTH) {
+          throw new TypeError(
+            `version is longer than ${MAX_LENGTH} characters`
+          );
+        }
+        debug("SemVer", version, options);
+        this.options = options;
+        this.loose = !!options.loose;
+        this.includePrerelease = !!options.includePrerelease;
+        const m = version.trim().match(options.loose ? re[t.LOOSE] : re[t.FULL]);
+        if (!m) {
+          throw new TypeError(`Invalid Version: ${version}`);
+        }
+        this.raw = version;
+        this.major = +m[1];
+        this.minor = +m[2];
+        this.patch = +m[3];
+        if (this.major > MAX_SAFE_INTEGER || this.major < 0) {
+          throw new TypeError("Invalid major version");
+        }
+        if (this.minor > MAX_SAFE_INTEGER || this.minor < 0) {
+          throw new TypeError("Invalid minor version");
+        }
+        if (this.patch > MAX_SAFE_INTEGER || this.patch < 0) {
+          throw new TypeError("Invalid patch version");
+        }
+        if (!m[4]) {
+          this.prerelease = [];
+        } else {
+          this.prerelease = m[4].split(".").map((id) => {
+            if (/^[0-9]+$/.test(id)) {
+              const num = +id;
+              if (num >= 0 && num < MAX_SAFE_INTEGER) {
+                return num;
+              }
+            }
+            return id;
+          });
+        }
+        this.build = m[5] ? m[5].split(".") : [];
+        this.format();
+      }
+      format() {
+        this.version = `${this.major}.${this.minor}.${this.patch}`;
+        if (this.prerelease.length) {
+          this.version += `-${this.prerelease.join(".")}`;
+        }
+        return this.version;
+      }
+      toString() {
+        return this.version;
+      }
+      compare(other) {
+        debug("SemVer.compare", this.version, this.options, other);
+        if (!(other instanceof _SemVer)) {
+          if (typeof other === "string" && other === this.version) {
+            return 0;
+          }
+          other = new _SemVer(other, this.options);
+        }
+        if (other.version === this.version) {
+          return 0;
+        }
+        return this.compareMain(other) || this.comparePre(other);
+      }
+      compareMain(other) {
+        if (!(other instanceof _SemVer)) {
+          other = new _SemVer(other, this.options);
+        }
+        return compareIdentifiers(this.major, other.major) || compareIdentifiers(this.minor, other.minor) || compareIdentifiers(this.patch, other.patch);
+      }
+      comparePre(other) {
+        if (!(other instanceof _SemVer)) {
+          other = new _SemVer(other, this.options);
+        }
+        if (this.prerelease.length && !other.prerelease.length) {
+          return -1;
+        } else if (!this.prerelease.length && other.prerelease.length) {
+          return 1;
+        } else if (!this.prerelease.length && !other.prerelease.length) {
+          return 0;
+        }
+        let i = 0;
+        do {
+          const a = this.prerelease[i];
+          const b = other.prerelease[i];
+          debug("prerelease compare", i, a, b);
+          if (a === void 0 && b === void 0) {
+            return 0;
+          } else if (b === void 0) {
+            return 1;
+          } else if (a === void 0) {
+            return -1;
+          } else if (a === b) {
+            continue;
+          } else {
+            return compareIdentifiers(a, b);
+          }
+        } while (++i);
+      }
+      compareBuild(other) {
+        if (!(other instanceof _SemVer)) {
+          other = new _SemVer(other, this.options);
+        }
+        let i = 0;
+        do {
+          const a = this.build[i];
+          const b = other.build[i];
+          debug("build compare", i, a, b);
+          if (a === void 0 && b === void 0) {
+            return 0;
+          } else if (b === void 0) {
+            return 1;
+          } else if (a === void 0) {
+            return -1;
+          } else if (a === b) {
+            continue;
+          } else {
+            return compareIdentifiers(a, b);
+          }
+        } while (++i);
+      }
+      // preminor will bump the version up to the next minor release, and immediately
+      // down to pre-release. premajor and prepatch work the same way.
+      inc(release, identifier, identifierBase) {
+        switch (release) {
+          case "premajor":
+            this.prerelease.length = 0;
+            this.patch = 0;
+            this.minor = 0;
+            this.major++;
+            this.inc("pre", identifier, identifierBase);
+            break;
+          case "preminor":
+            this.prerelease.length = 0;
+            this.patch = 0;
+            this.minor++;
+            this.inc("pre", identifier, identifierBase);
+            break;
+          case "prepatch":
+            this.prerelease.length = 0;
+            this.inc("patch", identifier, identifierBase);
+            this.inc("pre", identifier, identifierBase);
+            break;
+          case "prerelease":
+            if (this.prerelease.length === 0) {
+              this.inc("patch", identifier, identifierBase);
+            }
+            this.inc("pre", identifier, identifierBase);
+            break;
+          case "major":
+            if (this.minor !== 0 || this.patch !== 0 || this.prerelease.length === 0) {
+              this.major++;
+            }
+            this.minor = 0;
+            this.patch = 0;
+            this.prerelease = [];
+            break;
+          case "minor":
+            if (this.patch !== 0 || this.prerelease.length === 0) {
+              this.minor++;
+            }
+            this.patch = 0;
+            this.prerelease = [];
+            break;
+          case "patch":
+            if (this.prerelease.length === 0) {
+              this.patch++;
+            }
+            this.prerelease = [];
+            break;
+          case "pre": {
+            const base = Number(identifierBase) ? 1 : 0;
+            if (!identifier && identifierBase === false) {
+              throw new Error("invalid increment argument: identifier is empty");
+            }
+            if (this.prerelease.length === 0) {
+              this.prerelease = [base];
+            } else {
+              let i = this.prerelease.length;
+              while (--i >= 0) {
+                if (typeof this.prerelease[i] === "number") {
+                  this.prerelease[i]++;
+                  i = -2;
+                }
+              }
+              if (i === -1) {
+                if (identifier === this.prerelease.join(".") && identifierBase === false) {
+                  throw new Error("invalid increment argument: identifier already exists");
+                }
+                this.prerelease.push(base);
+              }
+            }
+            if (identifier) {
+              let prerelease4 = [identifier, base];
+              if (identifierBase === false) {
+                prerelease4 = [identifier];
+              }
+              if (compareIdentifiers(this.prerelease[0], identifier) === 0) {
+                if (isNaN(this.prerelease[1])) {
+                  this.prerelease = prerelease4;
+                }
+              } else {
+                this.prerelease = prerelease4;
+              }
+            }
+            break;
+          }
+          default:
+            throw new Error(`invalid increment argument: ${release}`);
+        }
+        this.raw = this.format();
+        if (this.build.length) {
+          this.raw += `+${this.build.join(".")}`;
+        }
+        return this;
+      }
+    };
+    module2.exports = SemVer;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/parse.js
+var require_parse = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/parse.js"(exports2, module2) {
+    var SemVer = require_semver();
+    var parse = (version, options, throwErrors = false) => {
+      if (version instanceof SemVer) {
+        return version;
+      }
+      try {
+        return new SemVer(version, options);
+      } catch (er) {
+        if (!throwErrors) {
+          return null;
+        }
+        throw er;
+      }
+    };
+    module2.exports = parse;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/valid.js
+var require_valid = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/valid.js"(exports2, module2) {
+    var parse = require_parse();
+    var valid = (version, options) => {
+      const v = parse(version, options);
+      return v ? v.version : null;
+    };
+    module2.exports = valid;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/clean.js
+var require_clean = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/clean.js"(exports2, module2) {
+    var parse = require_parse();
+    var clean = (version, options) => {
+      const s = parse(version.trim().replace(/^[=v]+/, ""), options);
+      return s ? s.version : null;
+    };
+    module2.exports = clean;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/inc.js
+var require_inc = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/inc.js"(exports2, module2) {
+    var SemVer = require_semver();
+    var inc = (version, release, options, identifier, identifierBase) => {
+      if (typeof options === "string") {
+        identifierBase = identifier;
+        identifier = options;
+        options = void 0;
+      }
+      try {
+        return new SemVer(
+          version instanceof SemVer ? version.version : version,
+          options
+        ).inc(release, identifier, identifierBase).version;
+      } catch (er) {
+        return null;
+      }
+    };
+    module2.exports = inc;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/diff.js
+var require_diff = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/diff.js"(exports2, module2) {
+    var parse = require_parse();
+    var diff = (version1, version2) => {
+      const v1 = parse(version1, null, true);
+      const v2 = parse(version2, null, true);
+      const comparison = v1.compare(v2);
+      if (comparison === 0) {
+        return null;
+      }
+      const v1Higher = comparison > 0;
+      const highVersion = v1Higher ? v1 : v2;
+      const lowVersion = v1Higher ? v2 : v1;
+      const highHasPre = !!highVersion.prerelease.length;
+      const lowHasPre = !!lowVersion.prerelease.length;
+      if (lowHasPre && !highHasPre) {
+        if (!lowVersion.patch && !lowVersion.minor) {
+          return "major";
+        }
+        if (highVersion.patch) {
+          return "patch";
+        }
+        if (highVersion.minor) {
+          return "minor";
+        }
+        return "major";
+      }
+      const prefix = highHasPre ? "pre" : "";
+      if (v1.major !== v2.major) {
+        return prefix + "major";
+      }
+      if (v1.minor !== v2.minor) {
+        return prefix + "minor";
+      }
+      if (v1.patch !== v2.patch) {
+        return prefix + "patch";
+      }
+      return "prerelease";
+    };
+    module2.exports = diff;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/major.js
+var require_major = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/major.js"(exports2, module2) {
+    var SemVer = require_semver();
+    var major2 = (a, loose) => new SemVer(a, loose).major;
+    module2.exports = major2;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/minor.js
+var require_minor = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/minor.js"(exports2, module2) {
+    var SemVer = require_semver();
+    var minor = (a, loose) => new SemVer(a, loose).minor;
+    module2.exports = minor;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/patch.js
+var require_patch = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/patch.js"(exports2, module2) {
+    var SemVer = require_semver();
+    var patch = (a, loose) => new SemVer(a, loose).patch;
+    module2.exports = patch;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/prerelease.js
+var require_prerelease = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/prerelease.js"(exports2, module2) {
+    var parse = require_parse();
+    var prerelease4 = (version, options) => {
+      const parsed = parse(version, options);
+      return parsed && parsed.prerelease.length ? parsed.prerelease : null;
+    };
+    module2.exports = prerelease4;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/compare.js
+var require_compare = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/compare.js"(exports2, module2) {
+    var SemVer = require_semver();
+    var compare = (a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose));
+    module2.exports = compare;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/rcompare.js
+var require_rcompare = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/rcompare.js"(exports2, module2) {
+    var compare = require_compare();
+    var rcompare = (a, b, loose) => compare(b, a, loose);
+    module2.exports = rcompare;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/compare-loose.js
+var require_compare_loose = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/compare-loose.js"(exports2, module2) {
+    var compare = require_compare();
+    var compareLoose = (a, b) => compare(a, b, true);
+    module2.exports = compareLoose;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/compare-build.js
+var require_compare_build = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/compare-build.js"(exports2, module2) {
+    var SemVer = require_semver();
+    var compareBuild = (a, b, loose) => {
+      const versionA = new SemVer(a, loose);
+      const versionB = new SemVer(b, loose);
+      return versionA.compare(versionB) || versionA.compareBuild(versionB);
+    };
+    module2.exports = compareBuild;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/sort.js
+var require_sort = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/sort.js"(exports2, module2) {
+    var compareBuild = require_compare_build();
+    var sort = (list, loose) => list.sort((a, b) => compareBuild(a, b, loose));
+    module2.exports = sort;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/rsort.js
+var require_rsort = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/rsort.js"(exports2, module2) {
+    var compareBuild = require_compare_build();
+    var rsort = (list, loose) => list.sort((a, b) => compareBuild(b, a, loose));
+    module2.exports = rsort;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/gt.js
+var require_gt = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/gt.js"(exports2, module2) {
+    var compare = require_compare();
+    var gt2 = (a, b, loose) => compare(a, b, loose) > 0;
+    module2.exports = gt2;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/lt.js
+var require_lt = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/lt.js"(exports2, module2) {
+    var compare = require_compare();
+    var lt = (a, b, loose) => compare(a, b, loose) < 0;
+    module2.exports = lt;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/eq.js
+var require_eq = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/eq.js"(exports2, module2) {
+    var compare = require_compare();
+    var eq = (a, b, loose) => compare(a, b, loose) === 0;
+    module2.exports = eq;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/neq.js
+var require_neq = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/neq.js"(exports2, module2) {
+    var compare = require_compare();
+    var neq = (a, b, loose) => compare(a, b, loose) !== 0;
+    module2.exports = neq;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/gte.js
+var require_gte = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/gte.js"(exports2, module2) {
+    var compare = require_compare();
+    var gte = (a, b, loose) => compare(a, b, loose) >= 0;
+    module2.exports = gte;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/lte.js
+var require_lte = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/lte.js"(exports2, module2) {
+    var compare = require_compare();
+    var lte = (a, b, loose) => compare(a, b, loose) <= 0;
+    module2.exports = lte;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/cmp.js
+var require_cmp = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/cmp.js"(exports2, module2) {
+    var eq = require_eq();
+    var neq = require_neq();
+    var gt2 = require_gt();
+    var gte = require_gte();
+    var lt = require_lt();
+    var lte = require_lte();
+    var cmp = (a, op, b, loose) => {
+      switch (op) {
+        case "===":
+          if (typeof a === "object") {
+            a = a.version;
+          }
+          if (typeof b === "object") {
+            b = b.version;
+          }
+          return a === b;
+        case "!==":
+          if (typeof a === "object") {
+            a = a.version;
+          }
+          if (typeof b === "object") {
+            b = b.version;
+          }
+          return a !== b;
+        case "":
+        case "=":
+        case "==":
+          return eq(a, b, loose);
+        case "!=":
+          return neq(a, b, loose);
+        case ">":
+          return gt2(a, b, loose);
+        case ">=":
+          return gte(a, b, loose);
+        case "<":
+          return lt(a, b, loose);
+        case "<=":
+          return lte(a, b, loose);
+        default:
+          throw new TypeError(`Invalid operator: ${op}`);
+      }
+    };
+    module2.exports = cmp;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/coerce.js
+var require_coerce = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/coerce.js"(exports2, module2) {
+    var SemVer = require_semver();
+    var parse = require_parse();
+    var { safeRe: re, t } = require_re();
+    var coerce = (version, options) => {
+      if (version instanceof SemVer) {
+        return version;
+      }
+      if (typeof version === "number") {
+        version = String(version);
+      }
+      if (typeof version !== "string") {
+        return null;
+      }
+      options = options || {};
+      let match = null;
+      if (!options.rtl) {
+        match = version.match(options.includePrerelease ? re[t.COERCEFULL] : re[t.COERCE]);
+      } else {
+        const coerceRtlRegex = options.includePrerelease ? re[t.COERCERTLFULL] : re[t.COERCERTL];
+        let next;
+        while ((next = coerceRtlRegex.exec(version)) && (!match || match.index + match[0].length !== version.length)) {
+          if (!match || next.index + next[0].length !== match.index + match[0].length) {
+            match = next;
+          }
+          coerceRtlRegex.lastIndex = next.index + next[1].length + next[2].length;
+        }
+        coerceRtlRegex.lastIndex = -1;
+      }
+      if (match === null) {
+        return null;
+      }
+      const major2 = match[2];
+      const minor = match[3] || "0";
+      const patch = match[4] || "0";
+      const prerelease4 = options.includePrerelease && match[5] ? `-${match[5]}` : "";
+      const build = options.includePrerelease && match[6] ? `+${match[6]}` : "";
+      return parse(`${major2}.${minor}.${patch}${prerelease4}${build}`, options);
+    };
+    module2.exports = coerce;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/lrucache.js
+var require_lrucache = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/internal/lrucache.js"(exports2, module2) {
+    var LRUCache = class {
+      constructor() {
+        this.max = 1e3;
+        this.map = /* @__PURE__ */ new Map();
+      }
+      get(key) {
+        const value = this.map.get(key);
+        if (value === void 0) {
+          return void 0;
+        } else {
+          this.map.delete(key);
+          this.map.set(key, value);
+          return value;
+        }
+      }
+      delete(key) {
+        return this.map.delete(key);
+      }
+      set(key, value) {
+        const deleted = this.delete(key);
+        if (!deleted && value !== void 0) {
+          if (this.map.size >= this.max) {
+            const firstKey = this.map.keys().next().value;
+            this.delete(firstKey);
+          }
+          this.map.set(key, value);
+        }
+        return this;
+      }
+    };
+    module2.exports = LRUCache;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/classes/range.js
+var require_range = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/classes/range.js"(exports2, module2) {
+    var Range10 = class _Range {
+      constructor(range, options) {
+        options = parseOptions(options);
+        if (range instanceof _Range) {
+          if (range.loose === !!options.loose && range.includePrerelease === !!options.includePrerelease) {
+            return range;
+          } else {
+            return new _Range(range.raw, options);
+          }
+        }
+        if (range instanceof Comparator) {
+          this.raw = range.value;
+          this.set = [[range]];
+          this.format();
+          return this;
+        }
+        this.options = options;
+        this.loose = !!options.loose;
+        this.includePrerelease = !!options.includePrerelease;
+        this.raw = range.trim().split(/\s+/).join(" ");
+        this.set = this.raw.split("||").map((r) => this.parseRange(r.trim())).filter((c) => c.length);
+        if (!this.set.length) {
+          throw new TypeError(`Invalid SemVer Range: ${this.raw}`);
+        }
+        if (this.set.length > 1) {
+          const first = this.set[0];
+          this.set = this.set.filter((c) => !isNullSet(c[0]));
+          if (this.set.length === 0) {
+            this.set = [first];
+          } else if (this.set.length > 1) {
+            for (const c of this.set) {
+              if (c.length === 1 && isAny(c[0])) {
+                this.set = [c];
+                break;
+              }
+            }
+          }
+        }
+        this.format();
+      }
+      format() {
+        this.range = this.set.map((comps) => comps.join(" ").trim()).join("||").trim();
+        return this.range;
+      }
+      toString() {
+        return this.range;
+      }
+      parseRange(range) {
+        const memoOpts = (this.options.includePrerelease && FLAG_INCLUDE_PRERELEASE) | (this.options.loose && FLAG_LOOSE);
+        const memoKey = memoOpts + ":" + range;
+        const cached = cache.get(memoKey);
+        if (cached) {
+          return cached;
+        }
+        const loose = this.options.loose;
+        const hr = loose ? re[t.HYPHENRANGELOOSE] : re[t.HYPHENRANGE];
+        range = range.replace(hr, hyphenReplace(this.options.includePrerelease));
+        debug("hyphen replace", range);
+        range = range.replace(re[t.COMPARATORTRIM], comparatorTrimReplace);
+        debug("comparator trim", range);
+        range = range.replace(re[t.TILDETRIM], tildeTrimReplace);
+        debug("tilde trim", range);
+        range = range.replace(re[t.CARETTRIM], caretTrimReplace);
+        debug("caret trim", range);
+        let rangeList = range.split(" ").map((comp) => parseComparator(comp, this.options)).join(" ").split(/\s+/).map((comp) => replaceGTE0(comp, this.options));
+        if (loose) {
+          rangeList = rangeList.filter((comp) => {
+            debug("loose invalid filter", comp, this.options);
+            return !!comp.match(re[t.COMPARATORLOOSE]);
+          });
+        }
+        debug("range list", rangeList);
+        const rangeMap = /* @__PURE__ */ new Map();
+        const comparators = rangeList.map((comp) => new Comparator(comp, this.options));
+        for (const comp of comparators) {
+          if (isNullSet(comp)) {
+            return [comp];
+          }
+          rangeMap.set(comp.value, comp);
+        }
+        if (rangeMap.size > 1 && rangeMap.has("")) {
+          rangeMap.delete("");
+        }
+        const result = [...rangeMap.values()];
+        cache.set(memoKey, result);
+        return result;
+      }
+      intersects(range, options) {
+        if (!(range instanceof _Range)) {
+          throw new TypeError("a Range is required");
+        }
+        return this.set.some((thisComparators) => {
+          return isSatisfiable(thisComparators, options) && range.set.some((rangeComparators) => {
+            return isSatisfiable(rangeComparators, options) && thisComparators.every((thisComparator) => {
+              return rangeComparators.every((rangeComparator) => {
+                return thisComparator.intersects(rangeComparator, options);
+              });
+            });
+          });
+        });
+      }
+      // if ANY of the sets match ALL of its comparators, then pass
+      test(version) {
+        if (!version) {
+          return false;
+        }
+        if (typeof version === "string") {
+          try {
+            version = new SemVer(version, this.options);
+          } catch (er) {
+            return false;
+          }
+        }
+        for (let i = 0; i < this.set.length; i++) {
+          if (testSet(this.set[i], version, this.options)) {
+            return true;
+          }
+        }
+        return false;
+      }
+    };
+    module2.exports = Range10;
+    var LRU = require_lrucache();
+    var cache = new LRU();
+    var parseOptions = require_parse_options();
+    var Comparator = require_comparator();
+    var debug = require_debug();
+    var SemVer = require_semver();
+    var {
+      safeRe: re,
+      t,
+      comparatorTrimReplace,
+      tildeTrimReplace,
+      caretTrimReplace
+    } = require_re();
+    var { FLAG_INCLUDE_PRERELEASE, FLAG_LOOSE } = require_constants();
+    var isNullSet = (c) => c.value === "<0.0.0-0";
+    var isAny = (c) => c.value === "";
+    var isSatisfiable = (comparators, options) => {
+      let result = true;
+      const remainingComparators = comparators.slice();
+      let testComparator = remainingComparators.pop();
+      while (result && remainingComparators.length) {
+        result = remainingComparators.every((otherComparator) => {
+          return testComparator.intersects(otherComparator, options);
+        });
+        testComparator = remainingComparators.pop();
+      }
+      return result;
+    };
+    var parseComparator = (comp, options) => {
+      debug("comp", comp, options);
+      comp = replaceCarets(comp, options);
+      debug("caret", comp);
+      comp = replaceTildes(comp, options);
+      debug("tildes", comp);
+      comp = replaceXRanges(comp, options);
+      debug("xrange", comp);
+      comp = replaceStars(comp, options);
+      debug("stars", comp);
+      return comp;
+    };
+    var isX = (id) => !id || id.toLowerCase() === "x" || id === "*";
+    var replaceTildes = (comp, options) => {
+      return comp.trim().split(/\s+/).map((c) => replaceTilde(c, options)).join(" ");
+    };
+    var replaceTilde = (comp, options) => {
+      const r = options.loose ? re[t.TILDELOOSE] : re[t.TILDE];
+      return comp.replace(r, (_, M, m, p, pr) => {
+        debug("tilde", comp, _, M, m, p, pr);
+        let ret;
+        if (isX(M)) {
+          ret = "";
+        } else if (isX(m)) {
+          ret = `>=${M}.0.0 <${+M + 1}.0.0-0`;
+        } else if (isX(p)) {
+          ret = `>=${M}.${m}.0 <${M}.${+m + 1}.0-0`;
+        } else if (pr) {
+          debug("replaceTilde pr", pr);
+          ret = `>=${M}.${m}.${p}-${pr} <${M}.${+m + 1}.0-0`;
+        } else {
+          ret = `>=${M}.${m}.${p} <${M}.${+m + 1}.0-0`;
+        }
+        debug("tilde return", ret);
+        return ret;
+      });
+    };
+    var replaceCarets = (comp, options) => {
+      return comp.trim().split(/\s+/).map((c) => replaceCaret(c, options)).join(" ");
+    };
+    var replaceCaret = (comp, options) => {
+      debug("caret", comp, options);
+      const r = options.loose ? re[t.CARETLOOSE] : re[t.CARET];
+      const z = options.includePrerelease ? "-0" : "";
+      return comp.replace(r, (_, M, m, p, pr) => {
+        debug("caret", comp, _, M, m, p, pr);
+        let ret;
+        if (isX(M)) {
+          ret = "";
+        } else if (isX(m)) {
+          ret = `>=${M}.0.0${z} <${+M + 1}.0.0-0`;
+        } else if (isX(p)) {
+          if (M === "0") {
+            ret = `>=${M}.${m}.0${z} <${M}.${+m + 1}.0-0`;
+          } else {
+            ret = `>=${M}.${m}.0${z} <${+M + 1}.0.0-0`;
+          }
+        } else if (pr) {
+          debug("replaceCaret pr", pr);
+          if (M === "0") {
+            if (m === "0") {
+              ret = `>=${M}.${m}.${p}-${pr} <${M}.${m}.${+p + 1}-0`;
+            } else {
+              ret = `>=${M}.${m}.${p}-${pr} <${M}.${+m + 1}.0-0`;
+            }
+          } else {
+            ret = `>=${M}.${m}.${p}-${pr} <${+M + 1}.0.0-0`;
+          }
+        } else {
+          debug("no pr");
+          if (M === "0") {
+            if (m === "0") {
+              ret = `>=${M}.${m}.${p}${z} <${M}.${m}.${+p + 1}-0`;
+            } else {
+              ret = `>=${M}.${m}.${p}${z} <${M}.${+m + 1}.0-0`;
+            }
+          } else {
+            ret = `>=${M}.${m}.${p} <${+M + 1}.0.0-0`;
+          }
+        }
+        debug("caret return", ret);
+        return ret;
+      });
+    };
+    var replaceXRanges = (comp, options) => {
+      debug("replaceXRanges", comp, options);
+      return comp.split(/\s+/).map((c) => replaceXRange(c, options)).join(" ");
+    };
+    var replaceXRange = (comp, options) => {
+      comp = comp.trim();
+      const r = options.loose ? re[t.XRANGELOOSE] : re[t.XRANGE];
+      return comp.replace(r, (ret, gtlt, M, m, p, pr) => {
+        debug("xRange", comp, ret, gtlt, M, m, p, pr);
+        const xM = isX(M);
+        const xm = xM || isX(m);
+        const xp = xm || isX(p);
+        const anyX = xp;
+        if (gtlt === "=" && anyX) {
+          gtlt = "";
+        }
+        pr = options.includePrerelease ? "-0" : "";
+        if (xM) {
+          if (gtlt === ">" || gtlt === "<") {
+            ret = "<0.0.0-0";
+          } else {
+            ret = "*";
+          }
+        } else if (gtlt && anyX) {
+          if (xm) {
+            m = 0;
+          }
+          p = 0;
+          if (gtlt === ">") {
+            gtlt = ">=";
+            if (xm) {
+              M = +M + 1;
+              m = 0;
+              p = 0;
+            } else {
+              m = +m + 1;
+              p = 0;
+            }
+          } else if (gtlt === "<=") {
+            gtlt = "<";
+            if (xm) {
+              M = +M + 1;
+            } else {
+              m = +m + 1;
+            }
+          }
+          if (gtlt === "<") {
+            pr = "-0";
+          }
+          ret = `${gtlt + M}.${m}.${p}${pr}`;
+        } else if (xm) {
+          ret = `>=${M}.0.0${pr} <${+M + 1}.0.0-0`;
+        } else if (xp) {
+          ret = `>=${M}.${m}.0${pr} <${M}.${+m + 1}.0-0`;
+        }
+        debug("xRange return", ret);
+        return ret;
+      });
+    };
+    var replaceStars = (comp, options) => {
+      debug("replaceStars", comp, options);
+      return comp.trim().replace(re[t.STAR], "");
+    };
+    var replaceGTE0 = (comp, options) => {
+      debug("replaceGTE0", comp, options);
+      return comp.trim().replace(re[options.includePrerelease ? t.GTE0PRE : t.GTE0], "");
+    };
+    var hyphenReplace = (incPr) => ($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr) => {
+      if (isX(fM)) {
+        from = "";
+      } else if (isX(fm)) {
+        from = `>=${fM}.0.0${incPr ? "-0" : ""}`;
+      } else if (isX(fp)) {
+        from = `>=${fM}.${fm}.0${incPr ? "-0" : ""}`;
+      } else if (fpr) {
+        from = `>=${from}`;
+      } else {
+        from = `>=${from}${incPr ? "-0" : ""}`;
+      }
+      if (isX(tM)) {
+        to = "";
+      } else if (isX(tm)) {
+        to = `<${+tM + 1}.0.0-0`;
+      } else if (isX(tp)) {
+        to = `<${tM}.${+tm + 1}.0-0`;
+      } else if (tpr) {
+        to = `<=${tM}.${tm}.${tp}-${tpr}`;
+      } else if (incPr) {
+        to = `<${tM}.${tm}.${+tp + 1}-0`;
+      } else {
+        to = `<=${to}`;
+      }
+      return `${from} ${to}`.trim();
+    };
+    var testSet = (set, version, options) => {
+      for (let i = 0; i < set.length; i++) {
+        if (!set[i].test(version)) {
+          return false;
+        }
+      }
+      if (version.prerelease.length && !options.includePrerelease) {
+        for (let i = 0; i < set.length; i++) {
+          debug(set[i].semver);
+          if (set[i].semver === Comparator.ANY) {
+            continue;
+          }
+          if (set[i].semver.prerelease.length > 0) {
+            const allowed = set[i].semver;
+            if (allowed.major === version.major && allowed.minor === version.minor && allowed.patch === version.patch) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+      return true;
+    };
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/classes/comparator.js
+var require_comparator = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/classes/comparator.js"(exports2, module2) {
+    var ANY = Symbol("SemVer ANY");
+    var Comparator = class _Comparator {
+      static get ANY() {
+        return ANY;
+      }
+      constructor(comp, options) {
+        options = parseOptions(options);
+        if (comp instanceof _Comparator) {
+          if (comp.loose === !!options.loose) {
+            return comp;
+          } else {
+            comp = comp.value;
+          }
+        }
+        comp = comp.trim().split(/\s+/).join(" ");
+        debug("comparator", comp, options);
+        this.options = options;
+        this.loose = !!options.loose;
+        this.parse(comp);
+        if (this.semver === ANY) {
+          this.value = "";
+        } else {
+          this.value = this.operator + this.semver.version;
+        }
+        debug("comp", this);
+      }
+      parse(comp) {
+        const r = this.options.loose ? re[t.COMPARATORLOOSE] : re[t.COMPARATOR];
+        const m = comp.match(r);
+        if (!m) {
+          throw new TypeError(`Invalid comparator: ${comp}`);
+        }
+        this.operator = m[1] !== void 0 ? m[1] : "";
+        if (this.operator === "=") {
+          this.operator = "";
+        }
+        if (!m[2]) {
+          this.semver = ANY;
+        } else {
+          this.semver = new SemVer(m[2], this.options.loose);
+        }
+      }
+      toString() {
+        return this.value;
+      }
+      test(version) {
+        debug("Comparator.test", version, this.options.loose);
+        if (this.semver === ANY || version === ANY) {
+          return true;
+        }
+        if (typeof version === "string") {
+          try {
+            version = new SemVer(version, this.options);
+          } catch (er) {
+            return false;
+          }
+        }
+        return cmp(version, this.operator, this.semver, this.options);
+      }
+      intersects(comp, options) {
+        if (!(comp instanceof _Comparator)) {
+          throw new TypeError("a Comparator is required");
+        }
+        if (this.operator === "") {
+          if (this.value === "") {
+            return true;
+          }
+          return new Range10(comp.value, options).test(this.value);
+        } else if (comp.operator === "") {
+          if (comp.value === "") {
+            return true;
+          }
+          return new Range10(this.value, options).test(comp.semver);
+        }
+        options = parseOptions(options);
+        if (options.includePrerelease && (this.value === "<0.0.0-0" || comp.value === "<0.0.0-0")) {
+          return false;
+        }
+        if (!options.includePrerelease && (this.value.startsWith("<0.0.0") || comp.value.startsWith("<0.0.0"))) {
+          return false;
+        }
+        if (this.operator.startsWith(">") && comp.operator.startsWith(">")) {
+          return true;
+        }
+        if (this.operator.startsWith("<") && comp.operator.startsWith("<")) {
+          return true;
+        }
+        if (this.semver.version === comp.semver.version && this.operator.includes("=") && comp.operator.includes("=")) {
+          return true;
+        }
+        if (cmp(this.semver, "<", comp.semver, options) && this.operator.startsWith(">") && comp.operator.startsWith("<")) {
+          return true;
+        }
+        if (cmp(this.semver, ">", comp.semver, options) && this.operator.startsWith("<") && comp.operator.startsWith(">")) {
+          return true;
+        }
+        return false;
+      }
+    };
+    module2.exports = Comparator;
+    var parseOptions = require_parse_options();
+    var { safeRe: re, t } = require_re();
+    var cmp = require_cmp();
+    var debug = require_debug();
+    var SemVer = require_semver();
+    var Range10 = require_range();
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/satisfies.js
+var require_satisfies = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/functions/satisfies.js"(exports2, module2) {
+    var Range10 = require_range();
+    var satisfies5 = (version, range, options) => {
+      try {
+        range = new Range10(range, options);
+      } catch (er) {
+        return false;
+      }
+      return range.test(version);
+    };
+    module2.exports = satisfies5;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/to-comparators.js
+var require_to_comparators = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/to-comparators.js"(exports2, module2) {
+    var Range10 = require_range();
+    var toComparators = (range, options) => new Range10(range, options).set.map((comp) => comp.map((c) => c.value).join(" ").trim().split(" "));
+    module2.exports = toComparators;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/max-satisfying.js
+var require_max_satisfying = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/max-satisfying.js"(exports2, module2) {
+    var SemVer = require_semver();
+    var Range10 = require_range();
+    var maxSatisfying = (versions, range, options) => {
+      let max = null;
+      let maxSV = null;
+      let rangeObj = null;
+      try {
+        rangeObj = new Range10(range, options);
+      } catch (er) {
+        return null;
+      }
+      versions.forEach((v) => {
+        if (rangeObj.test(v)) {
+          if (!max || maxSV.compare(v) === -1) {
+            max = v;
+            maxSV = new SemVer(max, options);
+          }
+        }
+      });
+      return max;
+    };
+    module2.exports = maxSatisfying;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/min-satisfying.js
+var require_min_satisfying = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/min-satisfying.js"(exports2, module2) {
+    var SemVer = require_semver();
+    var Range10 = require_range();
+    var minSatisfying = (versions, range, options) => {
+      let min = null;
+      let minSV = null;
+      let rangeObj = null;
+      try {
+        rangeObj = new Range10(range, options);
+      } catch (er) {
+        return null;
+      }
+      versions.forEach((v) => {
+        if (rangeObj.test(v)) {
+          if (!min || minSV.compare(v) === 1) {
+            min = v;
+            minSV = new SemVer(min, options);
+          }
+        }
+      });
+      return min;
+    };
+    module2.exports = minSatisfying;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/min-version.js
+var require_min_version = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/min-version.js"(exports2, module2) {
+    var SemVer = require_semver();
+    var Range10 = require_range();
+    var gt2 = require_gt();
+    var minVersion2 = (range, loose) => {
+      range = new Range10(range, loose);
+      let minver = new SemVer("0.0.0");
+      if (range.test(minver)) {
+        return minver;
+      }
+      minver = new SemVer("0.0.0-0");
+      if (range.test(minver)) {
+        return minver;
+      }
+      minver = null;
+      for (let i = 0; i < range.set.length; ++i) {
+        const comparators = range.set[i];
+        let setMin = null;
+        comparators.forEach((comparator) => {
+          const compver = new SemVer(comparator.semver.version);
+          switch (comparator.operator) {
+            case ">":
+              if (compver.prerelease.length === 0) {
+                compver.patch++;
+              } else {
+                compver.prerelease.push(0);
+              }
+              compver.raw = compver.format();
+            case "":
+            case ">=":
+              if (!setMin || gt2(compver, setMin)) {
+                setMin = compver;
+              }
+              break;
+            case "<":
+            case "<=":
+              break;
+            default:
+              throw new Error(`Unexpected operation: ${comparator.operator}`);
+          }
+        });
+        if (setMin && (!minver || gt2(minver, setMin))) {
+          minver = setMin;
+        }
+      }
+      if (minver && range.test(minver)) {
+        return minver;
+      }
+      return null;
+    };
+    module2.exports = minVersion2;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/valid.js
+var require_valid2 = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/valid.js"(exports2, module2) {
+    var Range10 = require_range();
+    var validRange2 = (range, options) => {
+      try {
+        return new Range10(range, options).range || "*";
+      } catch (er) {
+        return null;
+      }
+    };
+    module2.exports = validRange2;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/outside.js
+var require_outside = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/outside.js"(exports2, module2) {
+    var SemVer = require_semver();
+    var Comparator = require_comparator();
+    var { ANY } = Comparator;
+    var Range10 = require_range();
+    var satisfies5 = require_satisfies();
+    var gt2 = require_gt();
+    var lt = require_lt();
+    var lte = require_lte();
+    var gte = require_gte();
+    var outside = (version, range, hilo, options) => {
+      version = new SemVer(version, options);
+      range = new Range10(range, options);
+      let gtfn, ltefn, ltfn, comp, ecomp;
+      switch (hilo) {
+        case ">":
+          gtfn = gt2;
+          ltefn = lte;
+          ltfn = lt;
+          comp = ">";
+          ecomp = ">=";
+          break;
+        case "<":
+          gtfn = lt;
+          ltefn = gte;
+          ltfn = gt2;
+          comp = "<";
+          ecomp = "<=";
+          break;
+        default:
+          throw new TypeError('Must provide a hilo val of "<" or ">"');
+      }
+      if (satisfies5(version, range, options)) {
+        return false;
+      }
+      for (let i = 0; i < range.set.length; ++i) {
+        const comparators = range.set[i];
+        let high = null;
+        let low = null;
+        comparators.forEach((comparator) => {
+          if (comparator.semver === ANY) {
+            comparator = new Comparator(">=0.0.0");
+          }
+          high = high || comparator;
+          low = low || comparator;
+          if (gtfn(comparator.semver, high.semver, options)) {
+            high = comparator;
+          } else if (ltfn(comparator.semver, low.semver, options)) {
+            low = comparator;
+          }
+        });
+        if (high.operator === comp || high.operator === ecomp) {
+          return false;
+        }
+        if ((!low.operator || low.operator === comp) && ltefn(version, low.semver)) {
+          return false;
+        } else if (low.operator === ecomp && ltfn(version, low.semver)) {
+          return false;
+        }
+      }
+      return true;
+    };
+    module2.exports = outside;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/gtr.js
+var require_gtr = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/gtr.js"(exports2, module2) {
+    var outside = require_outside();
+    var gtr = (version, range, options) => outside(version, range, ">", options);
+    module2.exports = gtr;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/ltr.js
+var require_ltr = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/ltr.js"(exports2, module2) {
+    var outside = require_outside();
+    var ltr = (version, range, options) => outside(version, range, "<", options);
+    module2.exports = ltr;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/intersects.js
+var require_intersects = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/intersects.js"(exports2, module2) {
+    var Range10 = require_range();
+    var intersects = (r1, r2, options) => {
+      r1 = new Range10(r1, options);
+      r2 = new Range10(r2, options);
+      return r1.intersects(r2, options);
+    };
+    module2.exports = intersects;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/simplify.js
+var require_simplify = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/simplify.js"(exports2, module2) {
+    var satisfies5 = require_satisfies();
+    var compare = require_compare();
+    module2.exports = (versions, range, options) => {
+      const set = [];
+      let first = null;
+      let prev = null;
+      const v = versions.sort((a, b) => compare(a, b, options));
+      for (const version of v) {
+        const included = satisfies5(version, range, options);
+        if (included) {
+          prev = version;
+          if (!first) {
+            first = version;
+          }
+        } else {
+          if (prev) {
+            set.push([first, prev]);
+          }
+          prev = null;
+          first = null;
+        }
+      }
+      if (first) {
+        set.push([first, null]);
+      }
+      const ranges = [];
+      for (const [min, max] of set) {
+        if (min === max) {
+          ranges.push(min);
+        } else if (!max && min === v[0]) {
+          ranges.push("*");
+        } else if (!max) {
+          ranges.push(`>=${min}`);
+        } else if (min === v[0]) {
+          ranges.push(`<=${max}`);
+        } else {
+          ranges.push(`${min} - ${max}`);
+        }
+      }
+      const simplified = ranges.join(" || ");
+      const original = typeof range.raw === "string" ? range.raw : String(range);
+      return simplified.length < original.length ? simplified : range;
+    };
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/subset.js
+var require_subset = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/ranges/subset.js"(exports2, module2) {
+    var Range10 = require_range();
+    var Comparator = require_comparator();
+    var { ANY } = Comparator;
+    var satisfies5 = require_satisfies();
+    var compare = require_compare();
+    var subset = (sub, dom, options = {}) => {
+      if (sub === dom) {
+        return true;
+      }
+      sub = new Range10(sub, options);
+      dom = new Range10(dom, options);
+      let sawNonNull = false;
+      OUTER: for (const simpleSub of sub.set) {
+        for (const simpleDom of dom.set) {
+          const isSub = simpleSubset(simpleSub, simpleDom, options);
+          sawNonNull = sawNonNull || isSub !== null;
+          if (isSub) {
+            continue OUTER;
+          }
+        }
+        if (sawNonNull) {
+          return false;
+        }
+      }
+      return true;
+    };
+    var minimumVersionWithPreRelease = [new Comparator(">=0.0.0-0")];
+    var minimumVersion = [new Comparator(">=0.0.0")];
+    var simpleSubset = (sub, dom, options) => {
+      if (sub === dom) {
+        return true;
+      }
+      if (sub.length === 1 && sub[0].semver === ANY) {
+        if (dom.length === 1 && dom[0].semver === ANY) {
+          return true;
+        } else if (options.includePrerelease) {
+          sub = minimumVersionWithPreRelease;
+        } else {
+          sub = minimumVersion;
+        }
+      }
+      if (dom.length === 1 && dom[0].semver === ANY) {
+        if (options.includePrerelease) {
+          return true;
+        } else {
+          dom = minimumVersion;
+        }
+      }
+      const eqSet = /* @__PURE__ */ new Set();
+      let gt2, lt;
+      for (const c of sub) {
+        if (c.operator === ">" || c.operator === ">=") {
+          gt2 = higherGT(gt2, c, options);
+        } else if (c.operator === "<" || c.operator === "<=") {
+          lt = lowerLT(lt, c, options);
+        } else {
+          eqSet.add(c.semver);
+        }
+      }
+      if (eqSet.size > 1) {
+        return null;
+      }
+      let gtltComp;
+      if (gt2 && lt) {
+        gtltComp = compare(gt2.semver, lt.semver, options);
+        if (gtltComp > 0) {
+          return null;
+        } else if (gtltComp === 0 && (gt2.operator !== ">=" || lt.operator !== "<=")) {
+          return null;
+        }
+      }
+      for (const eq of eqSet) {
+        if (gt2 && !satisfies5(eq, String(gt2), options)) {
+          return null;
+        }
+        if (lt && !satisfies5(eq, String(lt), options)) {
+          return null;
+        }
+        for (const c of dom) {
+          if (!satisfies5(eq, String(c), options)) {
+            return false;
+          }
+        }
+        return true;
+      }
+      let higher, lower;
+      let hasDomLT, hasDomGT;
+      let needDomLTPre = lt && !options.includePrerelease && lt.semver.prerelease.length ? lt.semver : false;
+      let needDomGTPre = gt2 && !options.includePrerelease && gt2.semver.prerelease.length ? gt2.semver : false;
+      if (needDomLTPre && needDomLTPre.prerelease.length === 1 && lt.operator === "<" && needDomLTPre.prerelease[0] === 0) {
+        needDomLTPre = false;
+      }
+      for (const c of dom) {
+        hasDomGT = hasDomGT || c.operator === ">" || c.operator === ">=";
+        hasDomLT = hasDomLT || c.operator === "<" || c.operator === "<=";
+        if (gt2) {
+          if (needDomGTPre) {
+            if (c.semver.prerelease && c.semver.prerelease.length && c.semver.major === needDomGTPre.major && c.semver.minor === needDomGTPre.minor && c.semver.patch === needDomGTPre.patch) {
+              needDomGTPre = false;
+            }
+          }
+          if (c.operator === ">" || c.operator === ">=") {
+            higher = higherGT(gt2, c, options);
+            if (higher === c && higher !== gt2) {
+              return false;
+            }
+          } else if (gt2.operator === ">=" && !satisfies5(gt2.semver, String(c), options)) {
+            return false;
+          }
+        }
+        if (lt) {
+          if (needDomLTPre) {
+            if (c.semver.prerelease && c.semver.prerelease.length && c.semver.major === needDomLTPre.major && c.semver.minor === needDomLTPre.minor && c.semver.patch === needDomLTPre.patch) {
+              needDomLTPre = false;
+            }
+          }
+          if (c.operator === "<" || c.operator === "<=") {
+            lower = lowerLT(lt, c, options);
+            if (lower === c && lower !== lt) {
+              return false;
+            }
+          } else if (lt.operator === "<=" && !satisfies5(lt.semver, String(c), options)) {
+            return false;
+          }
+        }
+        if (!c.operator && (lt || gt2) && gtltComp !== 0) {
+          return false;
+        }
+      }
+      if (gt2 && hasDomLT && !lt && gtltComp !== 0) {
+        return false;
+      }
+      if (lt && hasDomGT && !gt2 && gtltComp !== 0) {
+        return false;
+      }
+      if (needDomGTPre || needDomLTPre) {
+        return false;
+      }
+      return true;
+    };
+    var higherGT = (a, b, options) => {
+      if (!a) {
+        return b;
+      }
+      const comp = compare(a.semver, b.semver, options);
+      return comp > 0 ? a : comp < 0 ? b : b.operator === ">" && a.operator === ">=" ? b : a;
+    };
+    var lowerLT = (a, b, options) => {
+      if (!a) {
+        return b;
+      }
+      const comp = compare(a.semver, b.semver, options);
+      return comp < 0 ? a : comp > 0 ? b : b.operator === "<" && a.operator === "<=" ? b : a;
+    };
+    module2.exports = subset;
+  }
+});
+
+// node_modules/.pnpm/semver@7.6.2/node_modules/semver/index.js
+var require_semver2 = __commonJS({
+  "node_modules/.pnpm/semver@7.6.2/node_modules/semver/index.js"(exports2, module2) {
+    var internalRe = require_re();
+    var constants = require_constants();
+    var SemVer = require_semver();
+    var identifiers = require_identifiers();
+    var parse = require_parse();
+    var valid = require_valid();
+    var clean = require_clean();
+    var inc = require_inc();
+    var diff = require_diff();
+    var major2 = require_major();
+    var minor = require_minor();
+    var patch = require_patch();
+    var prerelease4 = require_prerelease();
+    var compare = require_compare();
+    var rcompare = require_rcompare();
+    var compareLoose = require_compare_loose();
+    var compareBuild = require_compare_build();
+    var sort = require_sort();
+    var rsort = require_rsort();
+    var gt2 = require_gt();
+    var lt = require_lt();
+    var eq = require_eq();
+    var neq = require_neq();
+    var gte = require_gte();
+    var lte = require_lte();
+    var cmp = require_cmp();
+    var coerce = require_coerce();
+    var Comparator = require_comparator();
+    var Range10 = require_range();
+    var satisfies5 = require_satisfies();
+    var toComparators = require_to_comparators();
+    var maxSatisfying = require_max_satisfying();
+    var minSatisfying = require_min_satisfying();
+    var minVersion2 = require_min_version();
+    var validRange2 = require_valid2();
+    var outside = require_outside();
+    var gtr = require_gtr();
+    var ltr = require_ltr();
+    var intersects = require_intersects();
+    var simplifyRange = require_simplify();
+    var subset = require_subset();
+    module2.exports = {
+      parse,
+      valid,
+      clean,
+      inc,
+      diff,
+      major: major2,
+      minor,
+      patch,
+      prerelease: prerelease4,
+      compare,
+      rcompare,
+      compareLoose,
+      compareBuild,
+      sort,
+      rsort,
+      gt: gt2,
+      lt,
+      eq,
+      neq,
+      gte,
+      lte,
+      cmp,
+      coerce,
+      Comparator,
+      Range: Range10,
+      satisfies: satisfies5,
+      toComparators,
+      maxSatisfying,
+      minSatisfying,
+      minVersion: minVersion2,
+      validRange: validRange2,
+      outside,
+      gtr,
+      ltr,
+      intersects,
+      simplifyRange,
+      subset,
+      SemVer,
+      re: internalRe.re,
+      src: internalRe.src,
+      tokens: internalRe.t,
+      SEMVER_SPEC_VERSION: constants.SEMVER_SPEC_VERSION,
+      RELEASE_TYPES: constants.RELEASE_TYPES,
+      compareIdentifiers: identifiers.compareIdentifiers,
+      rcompareIdentifiers: identifiers.rcompareIdentifiers
+    };
+  }
+});
+
+// src/extension.ts
+var extension_exports = {};
+__export(extension_exports, {
+  activate: () => activate,
+  deactivate: () => deactivate
+});
+module.exports = __toCommonJS(extension_exports);
+var import_vscode15 = require("vscode");
+
+// src/util/addQuotes.ts
+function addQuotes(str) {
+  return '"' + str + '"';
+}
+
+// src/util/isEmpty.ts
+function isEmpty(value) {
+  if (value === void 0) {
+    return true;
+  } else if (typeof value === "string" || Array.isArray(value)) {
+    return value.length === 0;
+  } else if (typeof value === "object" && value !== null) {
+    return Object.keys(value).length === 0;
+  }
+  return false;
+}
+
+// src/util/sortText.ts
+var alphabet = "abcdefghijklmnopqrstuvwxyz";
+function sortString(i) {
+  if (i < 0 || !Number.isInteger(i)) {
+    throw new Error("Input must be a non-negative integer.");
+  }
+  const columns = Math.floor(i / alphabet.length);
+  const letter = alphabet[i % alphabet.length];
+  return "z".repeat(columns) + letter;
+}
+
+// src/util/execAsync.ts
+var import_child_process = require("child_process");
+function execAsync(command) {
+  return new Promise((resolve, reject) => {
+    const child = (0, import_child_process.exec)(command);
+    let stdoutBuffer = "";
+    let stderrBuffer = "";
+    child.stdout?.on("data", (data) => {
+      stdoutBuffer += data;
+    });
+    child.stderr?.on("data", (data) => {
+      stderrBuffer += data;
+    });
+    child.on("exit", (code) => {
+      if (code === 0) {
+        resolve(stdoutBuffer);
+      } else {
+        reject(new Error(stderrBuffer));
+      }
+    });
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve(stdoutBuffer);
+      } else {
+        reject(new Error(stderrBuffer || "Unknown error"));
+      }
+    });
+    child.on("error", (err) => {
+      console.error("Failed to start subprocess:", err);
+      reject(err);
+    });
+  });
+}
+
+// src/entity/semVer.ts
+function validRange(str) {
+  return /^[<>~=]/.test(str) && str.includes("*");
+}
+
+// src/entity/config.ts
+var import_vscode = require("vscode");
+var SECTION = "crates-cmp";
+var SPARSE_INDEX_CONFIG = "crates.sparse-index.url";
+var Config = class {
+  sparseIndexUrl = "https://index.crates.io";
+  constructor() {
+    this.updateSparseIndexUrl();
+  }
+  getSparseIndexUrl() {
+    return this.sparseIndexUrl;
+  }
+  updateSparseIndexUrl() {
+    const sparseIndexUrl = import_vscode.workspace.getConfiguration("crates-cmp").get(SPARSE_INDEX_CONFIG);
+    if (typeof sparseIndexUrl === "string") {
+      this.sparseIndexUrl = sparseIndexUrl;
+    }
+  }
+  onChange(e) {
+    if (e.affectsConfiguration(SECTION + "." + SPARSE_INDEX_CONFIG)) {
+      this.updateSparseIndexUrl();
+    }
+  }
+};
+var config = new Config();
+
+// node_modules/.pnpm/ky@1.4.0/node_modules/ky/distribution/errors/HTTPError.js
+var HTTPError = class extends Error {
+  constructor(response, request, options) {
+    const code = response.status || response.status === 0 ? response.status : "";
+    const title = response.statusText || "";
+    const status = `${code} ${title}`.trim();
+    const reason = status ? `status code ${status}` : "an unknown error";
+    super(`Request failed with ${reason}: ${request.method} ${request.url}`);
+    Object.defineProperty(this, "response", {
+      enumerable: true,
+      configurable: true,
+      writable: true,
+      value: void 0
+    });
+    Object.defineProperty(this, "request", {
+      enumerable: true,
+      configurable: true,
+      writable: true,
+      value: void 0
+    });
+    Object.defineProperty(this, "options", {
+      enumerable: true,
+      configurable: true,
+      writable: true,
+      value: void 0
+    });
+    this.name = "HTTPError";
+    this.response = response;
+    this.request = request;
+    this.options = options;
+  }
+};
+
+// node_modules/.pnpm/ky@1.4.0/node_modules/ky/distribution/errors/TimeoutError.js
+var TimeoutError = class extends Error {
+  constructor(request) {
+    super(`Request timed out: ${request.method} ${request.url}`);
+    Object.defineProperty(this, "request", {
+      enumerable: true,
+      configurable: true,
+      writable: true,
+      value: void 0
+    });
+    this.name = "TimeoutError";
+    this.request = request;
+  }
+};
+
+// node_modules/.pnpm/ky@1.4.0/node_modules/ky/distribution/utils/is.js
+var isObject = (value) => value !== null && typeof value === "object";
+
+// node_modules/.pnpm/ky@1.4.0/node_modules/ky/distribution/utils/merge.js
+var validateAndMerge = (...sources) => {
+  for (const source of sources) {
+    if ((!isObject(source) || Array.isArray(source)) && source !== void 0) {
+      throw new TypeError("The `options` argument must be an object");
+    }
+  }
+  return deepMerge({}, ...sources);
+};
+var mergeHeaders = (source1 = {}, source2 = {}) => {
+  const result = new globalThis.Headers(source1);
+  const isHeadersInstance = source2 instanceof globalThis.Headers;
+  const source = new globalThis.Headers(source2);
+  for (const [key, value] of source.entries()) {
+    if (isHeadersInstance && value === "undefined" || value === void 0) {
+      result.delete(key);
+    } else {
+      result.set(key, value);
+    }
+  }
+  return result;
+};
+var deepMerge = (...sources) => {
+  let returnValue = {};
+  let headers = {};
+  for (const source of sources) {
+    if (Array.isArray(source)) {
+      if (!Array.isArray(returnValue)) {
+        returnValue = [];
+      }
+      returnValue = [...returnValue, ...source];
+    } else if (isObject(source)) {
+      for (let [key, value] of Object.entries(source)) {
+        if (isObject(value) && key in returnValue) {
+          value = deepMerge(returnValue[key], value);
+        }
+        returnValue = { ...returnValue, [key]: value };
+      }
+      if (isObject(source.headers)) {
+        headers = mergeHeaders(headers, source.headers);
+        returnValue.headers = headers;
+      }
+    }
+  }
+  return returnValue;
+};
+
+// node_modules/.pnpm/ky@1.4.0/node_modules/ky/distribution/core/constants.js
+var supportsRequestStreams = (() => {
+  let duplexAccessed = false;
+  let hasContentType = false;
+  const supportsReadableStream = typeof globalThis.ReadableStream === "function";
+  const supportsRequest = typeof globalThis.Request === "function";
+  if (supportsReadableStream && supportsRequest) {
+    try {
+      hasContentType = new globalThis.Request("https://empty.invalid", {
+        body: new globalThis.ReadableStream(),
+        method: "POST",
+        // @ts-expect-error - Types are outdated.
+        get duplex() {
+          duplexAccessed = true;
+          return "half";
+        }
+      }).headers.has("Content-Type");
+    } catch (error) {
+      if (error instanceof Error && error.message === "unsupported BodyInit type") {
+        return false;
+      }
+      throw error;
+    }
+  }
+  return duplexAccessed && !hasContentType;
+})();
+var supportsAbortController = typeof globalThis.AbortController === "function";
+var supportsResponseStreams = typeof globalThis.ReadableStream === "function";
+var supportsFormData = typeof globalThis.FormData === "function";
+var requestMethods = ["get", "post", "put", "patch", "head", "delete"];
+var validate = () => void 0;
+validate();
+var responseTypes = {
+  json: "application/json",
+  text: "text/*",
+  formData: "multipart/form-data",
+  arrayBuffer: "*/*",
+  blob: "*/*"
+};
+var maxSafeTimeout = 2147483647;
+var stop = Symbol("stop");
+var kyOptionKeys = {
+  json: true,
+  parseJson: true,
+  stringifyJson: true,
+  searchParams: true,
+  prefixUrl: true,
+  retry: true,
+  timeout: true,
+  hooks: true,
+  throwHttpErrors: true,
+  onDownloadProgress: true,
+  fetch: true
+};
+var requestOptionsRegistry = {
+  method: true,
+  headers: true,
+  body: true,
+  mode: true,
+  credentials: true,
+  cache: true,
+  redirect: true,
+  referrer: true,
+  referrerPolicy: true,
+  integrity: true,
+  keepalive: true,
+  signal: true,
+  window: true,
+  dispatcher: true,
+  duplex: true,
+  priority: true
+};
+
+// node_modules/.pnpm/ky@1.4.0/node_modules/ky/distribution/utils/normalize.js
+var normalizeRequestMethod = (input) => requestMethods.includes(input) ? input.toUpperCase() : input;
+var retryMethods = ["get", "put", "head", "delete", "options", "trace"];
+var retryStatusCodes = [408, 413, 429, 500, 502, 503, 504];
+var retryAfterStatusCodes = [413, 429, 503];
+var defaultRetryOptions = {
+  limit: 2,
+  methods: retryMethods,
+  statusCodes: retryStatusCodes,
+  afterStatusCodes: retryAfterStatusCodes,
+  maxRetryAfter: Number.POSITIVE_INFINITY,
+  backoffLimit: Number.POSITIVE_INFINITY,
+  delay: (attemptCount) => 0.3 * 2 ** (attemptCount - 1) * 1e3
+};
+var normalizeRetryOptions = (retry = {}) => {
+  if (typeof retry === "number") {
+    return {
+      ...defaultRetryOptions,
+      limit: retry
+    };
+  }
+  if (retry.methods && !Array.isArray(retry.methods)) {
+    throw new Error("retry.methods must be an array");
+  }
+  if (retry.statusCodes && !Array.isArray(retry.statusCodes)) {
+    throw new Error("retry.statusCodes must be an array");
+  }
+  return {
+    ...defaultRetryOptions,
+    ...retry,
+    afterStatusCodes: retryAfterStatusCodes
+  };
+};
+
+// node_modules/.pnpm/ky@1.4.0/node_modules/ky/distribution/utils/timeout.js
+async function timeout(request, init, abortController, options) {
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      if (abortController) {
+        abortController.abort();
+      }
+      reject(new TimeoutError(request));
+    }, options.timeout);
+    void options.fetch(request, init).then(resolve).catch(reject).then(() => {
+      clearTimeout(timeoutId);
+    });
+  });
+}
+
+// node_modules/.pnpm/ky@1.4.0/node_modules/ky/distribution/utils/delay.js
+async function delay(ms, { signal }) {
+  return new Promise((resolve, reject) => {
+    if (signal) {
+      signal.throwIfAborted();
+      signal.addEventListener("abort", abortHandler, { once: true });
+    }
+    function abortHandler() {
+      clearTimeout(timeoutId);
+      reject(signal.reason);
+    }
+    const timeoutId = setTimeout(() => {
+      signal?.removeEventListener("abort", abortHandler);
+      resolve();
+    }, ms);
+  });
+}
+
+// node_modules/.pnpm/ky@1.4.0/node_modules/ky/distribution/utils/options.js
+var findUnknownOptions = (request, options) => {
+  const unknownOptions = {};
+  for (const key in options) {
+    if (!(key in requestOptionsRegistry) && !(key in kyOptionKeys) && !(key in request)) {
+      unknownOptions[key] = options[key];
+    }
+  }
+  return unknownOptions;
+};
+
+// node_modules/.pnpm/ky@1.4.0/node_modules/ky/distribution/core/Ky.js
+var Ky = class _Ky {
+  static create(input, options) {
+    const ky2 = new _Ky(input, options);
+    const function_ = async () => {
+      if (typeof ky2._options.timeout === "number" && ky2._options.timeout > maxSafeTimeout) {
+        throw new RangeError(`The \`timeout\` option cannot be greater than ${maxSafeTimeout}`);
+      }
+      await Promise.resolve();
+      let response = await ky2._fetch();
+      for (const hook of ky2._options.hooks.afterResponse) {
+        const modifiedResponse = await hook(ky2.request, ky2._options, ky2._decorateResponse(response.clone()));
+        if (modifiedResponse instanceof globalThis.Response) {
+          response = modifiedResponse;
+        }
+      }
+      ky2._decorateResponse(response);
+      if (!response.ok && ky2._options.throwHttpErrors) {
+        let error = new HTTPError(response, ky2.request, ky2._options);
+        for (const hook of ky2._options.hooks.beforeError) {
+          error = await hook(error);
+        }
+        throw error;
+      }
+      if (ky2._options.onDownloadProgress) {
+        if (typeof ky2._options.onDownloadProgress !== "function") {
+          throw new TypeError("The `onDownloadProgress` option must be a function");
+        }
+        if (!supportsResponseStreams) {
+          throw new Error("Streams are not supported in your environment. `ReadableStream` is missing.");
+        }
+        return ky2._stream(response.clone(), ky2._options.onDownloadProgress);
+      }
+      return response;
+    };
+    const isRetriableMethod = ky2._options.retry.methods.includes(ky2.request.method.toLowerCase());
+    const result = isRetriableMethod ? ky2._retry(function_) : function_();
+    for (const [type, mimeType] of Object.entries(responseTypes)) {
+      result[type] = async () => {
+        ky2.request.headers.set("accept", ky2.request.headers.get("accept") || mimeType);
+        const awaitedResult = await result;
+        const response = awaitedResult.clone();
+        if (type === "json") {
+          if (response.status === 204) {
+            return "";
+          }
+          const arrayBuffer = await response.clone().arrayBuffer();
+          const responseSize = arrayBuffer.byteLength;
+          if (responseSize === 0) {
+            return "";
+          }
+          if (options.parseJson) {
+            return options.parseJson(await response.text());
+          }
+        }
+        return response[type]();
+      };
+    }
+    return result;
+  }
+  // eslint-disable-next-line complexity
+  constructor(input, options = {}) {
+    Object.defineProperty(this, "request", {
+      enumerable: true,
+      configurable: true,
+      writable: true,
+      value: void 0
+    });
+    Object.defineProperty(this, "abortController", {
+      enumerable: true,
+      configurable: true,
+      writable: true,
+      value: void 0
+    });
+    Object.defineProperty(this, "_retryCount", {
+      enumerable: true,
+      configurable: true,
+      writable: true,
+      value: 0
+    });
+    Object.defineProperty(this, "_input", {
+      enumerable: true,
+      configurable: true,
+      writable: true,
+      value: void 0
+    });
+    Object.defineProperty(this, "_options", {
+      enumerable: true,
+      configurable: true,
+      writable: true,
+      value: void 0
+    });
+    this._input = input;
+    const credentials = this._input instanceof Request && "credentials" in Request.prototype ? this._input.credentials : void 0;
+    this._options = {
+      ...credentials && { credentials },
+      // For exactOptionalPropertyTypes
+      ...options,
+      headers: mergeHeaders(this._input.headers, options.headers),
+      hooks: deepMerge({
+        beforeRequest: [],
+        beforeRetry: [],
+        beforeError: [],
+        afterResponse: []
+      }, options.hooks),
+      method: normalizeRequestMethod(options.method ?? this._input.method),
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+      prefixUrl: String(options.prefixUrl || ""),
+      retry: normalizeRetryOptions(options.retry),
+      throwHttpErrors: options.throwHttpErrors !== false,
+      timeout: options.timeout ?? 1e4,
+      fetch: options.fetch ?? globalThis.fetch.bind(globalThis)
+    };
+    if (typeof this._input !== "string" && !(this._input instanceof URL || this._input instanceof globalThis.Request)) {
+      throw new TypeError("`input` must be a string, URL, or Request");
+    }
+    if (this._options.prefixUrl && typeof this._input === "string") {
+      if (this._input.startsWith("/")) {
+        throw new Error("`input` must not begin with a slash when using `prefixUrl`");
+      }
+      if (!this._options.prefixUrl.endsWith("/")) {
+        this._options.prefixUrl += "/";
+      }
+      this._input = this._options.prefixUrl + this._input;
+    }
+    if (supportsAbortController) {
+      this.abortController = new globalThis.AbortController();
+      if (this._options.signal) {
+        const originalSignal = this._options.signal;
+        this._options.signal.addEventListener("abort", () => {
+          this.abortController.abort(originalSignal.reason);
+        });
+      }
+      this._options.signal = this.abortController.signal;
+    }
+    if (supportsRequestStreams) {
+      this._options.duplex = "half";
+    }
+    if (this._options.json !== void 0) {
+      this._options.body = this._options.stringifyJson?.(this._options.json) ?? JSON.stringify(this._options.json);
+      this._options.headers.set("content-type", this._options.headers.get("content-type") ?? "application/json");
+    }
+    this.request = new globalThis.Request(this._input, this._options);
+    if (this._options.searchParams) {
+      const textSearchParams = typeof this._options.searchParams === "string" ? this._options.searchParams.replace(/^\?/, "") : new URLSearchParams(this._options.searchParams).toString();
+      const searchParams = "?" + textSearchParams;
+      const url = this.request.url.replace(/(?:\?.*?)?(?=#|$)/, searchParams);
+      if ((supportsFormData && this._options.body instanceof globalThis.FormData || this._options.body instanceof URLSearchParams) && !(this._options.headers && this._options.headers["content-type"])) {
+        this.request.headers.delete("content-type");
+      }
+      this.request = new globalThis.Request(new globalThis.Request(url, { ...this.request }), this._options);
+    }
+  }
+  _calculateRetryDelay(error) {
+    this._retryCount++;
+    if (this._retryCount <= this._options.retry.limit && !(error instanceof TimeoutError)) {
+      if (error instanceof HTTPError) {
+        if (!this._options.retry.statusCodes.includes(error.response.status)) {
+          return 0;
+        }
+        const retryAfter = error.response.headers.get("Retry-After");
+        if (retryAfter && this._options.retry.afterStatusCodes.includes(error.response.status)) {
+          let after = Number(retryAfter) * 1e3;
+          if (Number.isNaN(after)) {
+            after = Date.parse(retryAfter) - Date.now();
+          }
+          const max = this._options.retry.maxRetryAfter ?? after;
+          return after < max ? after : max;
+        }
+        if (error.response.status === 413) {
+          return 0;
+        }
+      }
+      const retryDelay = this._options.retry.delay(this._retryCount);
+      return Math.min(this._options.retry.backoffLimit, retryDelay);
+    }
+    return 0;
+  }
+  _decorateResponse(response) {
+    if (this._options.parseJson) {
+      response.json = async () => this._options.parseJson(await response.text());
+    }
+    return response;
+  }
+  async _retry(function_) {
+    try {
+      return await function_();
+    } catch (error) {
+      const ms = Math.min(this._calculateRetryDelay(error), maxSafeTimeout);
+      if (ms !== 0 && this._retryCount > 0) {
+        await delay(ms, { signal: this._options.signal });
+        for (const hook of this._options.hooks.beforeRetry) {
+          const hookResult = await hook({
+            request: this.request,
+            options: this._options,
+            error,
+            retryCount: this._retryCount
+          });
+          if (hookResult === stop) {
+            return;
+          }
+        }
+        return this._retry(function_);
+      }
+      throw error;
+    }
+  }
+  async _fetch() {
+    for (const hook of this._options.hooks.beforeRequest) {
+      const result = await hook(this.request, this._options);
+      if (result instanceof Request) {
+        this.request = result;
+        break;
+      }
+      if (result instanceof Response) {
+        return result;
+      }
+    }
+    const nonRequestOptions = findUnknownOptions(this.request, this._options);
+    const mainRequest = this.request;
+    this.request = mainRequest.clone();
+    if (this._options.timeout === false) {
+      return this._options.fetch(mainRequest, nonRequestOptions);
+    }
+    return timeout(mainRequest, nonRequestOptions, this.abortController, this._options);
+  }
+  /* istanbul ignore next */
+  _stream(response, onDownloadProgress) {
+    const totalBytes = Number(response.headers.get("content-length")) || 0;
+    let transferredBytes = 0;
+    if (response.status === 204) {
+      if (onDownloadProgress) {
+        onDownloadProgress({ percent: 1, totalBytes, transferredBytes }, new Uint8Array());
+      }
+      return new globalThis.Response(null, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers
+      });
+    }
+    return new globalThis.Response(new globalThis.ReadableStream({
+      async start(controller) {
+        const reader = response.body.getReader();
+        if (onDownloadProgress) {
+          onDownloadProgress({ percent: 0, transferredBytes: 0, totalBytes }, new Uint8Array());
+        }
+        async function read() {
+          const { done, value } = await reader.read();
+          if (done) {
+            controller.close();
+            return;
+          }
+          if (onDownloadProgress) {
+            transferredBytes += value.byteLength;
+            const percent = totalBytes === 0 ? 0 : transferredBytes / totalBytes;
+            onDownloadProgress({ percent, transferredBytes, totalBytes }, value);
+          }
+          controller.enqueue(value);
+          await read();
+        }
+        await read();
+      }
+    }), {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers
+    });
+  }
+};
+
+// node_modules/.pnpm/ky@1.4.0/node_modules/ky/distribution/index.js
+var createInstance = (defaults) => {
+  const ky2 = (input, options) => Ky.create(input, validateAndMerge(defaults, options));
+  for (const method of requestMethods) {
+    ky2[method] = (input, options) => Ky.create(input, validateAndMerge(defaults, options, { method }));
+  }
+  ky2.create = (newDefaults) => createInstance(validateAndMerge(newDefaults));
+  ky2.extend = (newDefaults) => createInstance(validateAndMerge(defaults, newDefaults));
+  ky2.stop = stop;
+  return ky2;
+};
+var ky = createInstance();
+var distribution_default = ky;
+
+// src/repository/crates.ts
+var import_semver = __toESM(require_semver2());
+async function sparseIndexMetadata(name) {
+  const url = config.getSparseIndexUrl();
+  let lowerName = name.replace(/"/g, "").toLocaleLowerCase();
+  let prefix = "";
+  if (lowerName.length <= 2) {
+    prefix = lowerName.length.toString();
+  } else if (lowerName.length === 3) {
+    prefix = "3/" + lowerName.substring(0, 1);
+  } else {
+    prefix = lowerName.substring(0, 2) + "/" + lowerName.substring(2, 4);
+  }
+  const response = await distribution_default.get(`${url}/${prefix}/${lowerName}`);
+  if (response.status !== 200) {
+    throw new Error(`get crates metadata error: statusCode=${response.status} ${await response.text()}`);
+  }
+  const jsonLinesArr = (await response.text()).split("\n").filter((n) => n);
+  let versions = [];
+  let features = {};
+  let rustVersion = {};
+  let defaultFeatures = [];
+  let stable = null;
+  let pre = null;
+  for (let i = jsonLinesArr.length - 1; i >= 0; i--) {
+    let j = JSON.parse(jsonLinesArr[i]);
+    if (j.yanked === false) {
+      versions.push(j.vers);
+      if (stable === null && (0, import_semver.prerelease)(j.vers) === null) {
+        stable = j.vers;
+      } else if (pre === null && (0, import_semver.prerelease)(j.vers) !== null) {
+        pre = j.vers;
+      }
+      if (j.rust_version) {
+        rustVersion[j.vers] = j.rust_version;
+      }
+      const f1 = Object.keys(j.features).filter((f) => {
+        if (f === "default") {
+          defaultFeatures = j.features["default"];
+          return false;
+        }
+        return true;
+      });
+      let f2 = [];
+      if (j.features2) {
+        f2 = Object.keys(j.features2);
+      }
+      features[j.vers] = [...f1, ...f2];
+      for (let dep of j.deps) {
+        if (dep.optional && (0, import_semver.satisfies)(j.vers, dep.req)) {
+          features[j.vers].push(dep.name);
+        }
+      }
+    }
+  }
+  return {
+    name,
+    versions,
+    features,
+    defaultFeatures,
+    rustVersion,
+    createdAt: (/* @__PURE__ */ new Date()).getUTCMilliseconds(),
+    latestStable: stable,
+    latestPrerelease: pre
+  };
+}
+async function crates(query) {
+  if (query === "") {
+    return [];
+  }
+  const res = await distribution_default.get(
+    "https://crates.io/api/v1/crates?page=1&per_page=30&q=" + query,
+    {
+      headers: { "User-Agent": "VSCodeExtension/crates-cmp" }
+    }
+  );
+  if (res.status !== 200) {
+    throw new Error(`search crate error: statusCode=${res.status} ${await res.text()}`);
+  }
+  const j = await res.json();
+  return j.crates;
+}
+
+// src/repository/store.ts
+async function metadata(ctx, crate, force = false) {
+  const key = getKey(crate);
+  if (force) {
+    const m2 = await sparseIndexMetadata(crate);
+    ctx.globalState.update(key, m2);
+    return m2;
+  }
+  const m = ctx.globalState.get(key);
+  if (!m || m.createdAt > (/* @__PURE__ */ new Date()).getUTCMilliseconds() - 1e3 * 60 * 10) {
+    const m2 = await sparseIndexMetadata(crate);
+    ctx.globalState.update(key, m2);
+    return m2;
+  }
+  return m;
+}
+function getKey(crate) {
+  return `crates-cmp:metadata:${crate}`;
+}
+
+// src/usecase/versionCmp.ts
+async function versionCmp(ctx, crateName) {
+  const res = await metadata(ctx, crateName);
+  return res.versions;
+}
+
+// node_modules/.pnpm/@washanhanzi+result-enum@2.0.3/node_modules/@washanhanzi/result-enum/dist/option.js
+var none = Symbol("None");
+var Option = class _Option {
+  val;
+  /**
+   * A constructor for an Option.
+   *
+   * _Note: Please use either `Some` or `None` to construct Options._
+   *
+   * @param {T | typeof none} input The value to wrap in an Option.
+   */
+  constructor(input) {
+    this.val = input;
+  }
+  /**
+   * Converts Option into a String for display purposes.
+   */
+  get [Symbol.toStringTag]() {
+    return `Option`;
+  }
+  /**
+   * Iterator support for Option.
+   *
+   * _Note: This method will only yeild if the Option is Some._
+   * @returns {IterableIterator<T>}
+   */
+  *[Symbol.iterator]() {
+    if (this.isSome())
+      yield this.val;
+  }
+  /**
+   * Returns true if contained value isnt None.
+   * @returns {boolean}
+   */
+  isSome() {
+    return this.val !== none;
+  }
+  /**
+   * Returns true if contained value is None.
+   *
+   * @returns {boolean}
+   */
+  isNone() {
+    return this.val === none;
+  }
+  /**
+   * Returns the contained Some value, consuming the Option.
+   * Throws an Error with a given message if the contained value is None.
+   *
+   * @param {string} msg An error message to throw if contained value is None.
+   * @returns {T}
+   */
+  expect(msg) {
+    if (this.isNone()) {
+      throw new Error(msg);
+    }
+    return this.val;
+  }
+  /**
+   * Returns the contained Some value, consuming the Option.
+   * Throws an Error if contained value is None.
+   *
+   * @returns {T}
+   */
+  unwrap() {
+    if (this.isNone()) {
+      throw new Error(`Unwrap called on None`);
+    }
+    return this.val;
+  }
+  /**
+   * Returns the contained Some value or a provided default.
+   *
+   * @param {T} fallback A default value to return if contained value is an Option.
+   * @returns {T}
+   */
+  unwrapOr(fallback) {
+    if (this.isNone()) {
+      return fallback;
+    }
+    return this.val;
+  }
+  /**
+   * Returns the contained Some value or computes it from a closure.
+   *
+   * @param {Function} fn A function that computes a new value.
+   * @returns {T}
+   */
+  unwrapOrElse(fn) {
+    if (this.isNone()) {
+      return fn();
+    }
+    return this.val;
+  }
+  /**
+   * Maps an Option<T> to Option<U> by applying a function to a contained Some value, leaving None values untouched.
+   *
+   * @param {Function} fn A mapping function.
+   * @returns {Option<U>}
+   */
+  map(fn) {
+    if (this.isSome()) {
+      return new _Option(fn(this.val));
+    }
+    return this;
+  }
+  /**
+   * Returns the provided fallback (if None), or applies a function to the contained value.
+   *
+   * @param {U} fallback A defualt value
+   * @param {Function} fn A mapping function.
+   * @returns {U}
+   */
+  mapOr(fallback, fn) {
+    if (this.isSome()) {
+      return fn(this.val);
+    }
+    return fallback;
+  }
+  /**
+   * Returns `or` if the Option is None, otherwise returns self.
+   *
+   * @param {Option<T>} or An alternative Option value
+   * @returns {Option<T>}
+   */
+  or(or) {
+    if (this.isSome()) {
+      return this;
+    }
+    return or;
+  }
+  /**
+   * Transforms the `Option<T>` into a `Result<T, E>`, mapping Some to Ok and None to Err.
+   *
+   * @param {E} err An error to return if the Option is None.
+   * @returns {Result<T, E>}
+   *
+   * @example
+   * ```
+   * const result = Some(2).okOr("Error"); // => Ok(2)
+   * ```
+   */
+  okOr(err) {
+    if (this.isSome()) {
+      return Ok(this.val);
+    } else {
+      return Err(err);
+    }
+  }
+  /**
+   * Returns contained value for use in matching.
+   *
+   * _Note: Please only use this to match against in `if` or `swtich` statments._
+   *
+   * @returns {T | typeof none}
+   * @example
+   * ```ts
+   * function coolOrNice(input: Option<string>): Option<void> {
+   *   switch (input.peek()) {
+   *     case "cool":
+   *       console.log("Input was the coolest!");
+   *       break;
+   *     case "nice":
+   *       console.log("Input was was the nicest!");
+   *       break
+   *     default:
+   *       return None();
+   *   }
+   *   return Some()
+   * }
+   * ```
+   */
+  peek() {
+    return this.val;
+  }
+  /**
+   * Converts from Option<Option<T> to Option<T>
+   * @returns Option<T>
+   */
+  flatten() {
+    if (this.val instanceof _Option) {
+      return this.val;
+    }
+    return this;
+  }
+  /**
+   * Run a closure and convert it into an Option.
+   * If the function returns `null` or `undefined`, an Option containing None will be reutrned.
+   *
+   * _Note: Please use `fromAsync` to capture the result of asynchronous closures._
+   * @param {Function} fn The closure to run.
+   * @returns {Option<T>} The result of the closure.
+   */
+  static from(fn) {
+    const result = fn();
+    if (result === null || result === void 0) {
+      return new _Option(none);
+    } else {
+      return new _Option(result);
+    }
+  }
+  /**
+   * Run an asynchronous closure and convert it into an Option.
+   * If the function returns `null` or `undefined`, an Option containing None will be reutrned.
+   *
+   * _Note: Please use `from` to capture the result of synchronous closures._
+   * @param {Function} fn The closure to run.
+   * @returns {Promise<Option<T>>} The result of the closure.
+   */
+  static async fromAsync(fn) {
+    const result = await fn();
+    if (result === null || result === void 0) {
+      return new _Option(none);
+    } else {
+      return new _Option(result);
+    }
+  }
+};
+function Some(input) {
+  return new Option(input);
+}
+Object.defineProperty(Some, Symbol.hasInstance, {
+  value: (instance) => {
+    if (typeof instance !== "object")
+      return false;
+    return instance?.isSome() || false;
+  }
+});
+function None() {
+  return new Option(none);
+}
+Object.defineProperty(None, Symbol.hasInstance, {
+  value: (instance) => {
+    if (typeof instance !== "object")
+      return false;
+    return instance?.isNone() || false;
+  }
+});
+
+// node_modules/.pnpm/@washanhanzi+result-enum@2.0.3/node_modules/@washanhanzi/result-enum/dist/result.js
+var Result = class _Result {
+  val;
+  /**
+   * A constructor for a Result.
+   *
+   * @param {T | E} input The Result value.
+   *
+   * _Note: Please use either `Ok` or `Err` to construct Results._
+   */
+  constructor(input) {
+    this.val = input;
+  }
+  /**
+   * Converts Result into a String for display purposes.
+   */
+  get [Symbol.toStringTag]() {
+    return `Result`;
+  }
+  /**
+   * Iterator support for Result.
+   *
+   * _Note: This method will only yeild if the Result is Ok._
+   * @returns {IterableIterator<T>}
+   */
+  *[Symbol.iterator]() {
+    if (this.isOk())
+      yield this.val;
+  }
+  /**
+   * Returns true if contained value isnt an error.
+   *
+   * @returns {boolean}
+   */
+  isOk() {
+    return !(this.val instanceof Error || this.val && typeof this.val === "object" && Error.isPrototypeOf(this.val));
+  }
+  /**
+   * Returns true if contained value is an error.
+   *
+   * @returns {boolean}
+   */
+  isErr() {
+    return this.val instanceof Error || this.val && typeof this.val === "object" && Error.isPrototypeOf(this.val);
+  }
+  formatError(err) {
+    err.stack = `${err.message}: ${this.val.stack ? "\n	" + this.val.stack.split("\n").join("\n	") : this.val.message}`;
+    throw err;
+  }
+  /**
+   * Returns the contained Ok value, consuming the Result.
+   * Throws an Error with a given message if contained value is not Ok.
+   *
+   * @param {string} msg An error message to throw if contained value is an Error.
+   * @returns {T}
+   */
+  expect(msg) {
+    if (this.isErr()) {
+      this.formatError(new Error(msg));
+    }
+    return this.val;
+  }
+  /**
+   * Returns the contained Err value, consuming the Result.
+   * Throws an Error with a given message if contained value is not an Err.
+   *
+   * @param {string} msg An error message to throw if contained value is Ok.
+   * @returns {T}
+   */
+  expectErr(msg) {
+    if (this.isOk()) {
+      this.formatError(new Error(msg));
+    }
+    return this.val;
+  }
+  /**
+   * Returns the contained Ok value, consuming the Result.
+   * Throws an Error if contained value is not Ok.
+   *
+   * @returns {T}
+   */
+  unwrap() {
+    if (this.isErr()) {
+      this.formatError(new Error(`Unwrap called on ${this.val.name}`));
+    }
+    return this.val;
+  }
+  /**
+   * Returns the contained Error value, consuming the Result.
+   * Throws an Error if contained value is not an Error.
+   *
+   * @returns {E}
+   */
+  unwrapErr() {
+    if (this.isOk()) {
+      throw new Error(`UnwrapError called on value - ${this.val}`);
+    }
+    return this.val;
+  }
+  /**
+   * Returns the contained Ok value or a provided default.
+   *
+   * @param {T} fallback A default value to return if contained value is an Error.
+   * @returns {T}
+   */
+  unwrapOr(fallback) {
+    if (this.isErr()) {
+      return fallback;
+    }
+    return this.val;
+  }
+  /**
+   * Returns the contained Ok value or computes it from a closure.
+   *
+   * @param {Function} fn A function that computes a new value.
+   * @returns {T}
+   */
+  unwrapOrElse(fn) {
+    if (this.isErr()) {
+      return fn(this.val);
+    }
+    return this.val;
+  }
+  /**
+   * Maps a Result<T, E> to Result<U, E> by applying a function to a contained Ok value, leaving an Error value untouched.
+   *
+   * @param {Function} fn A mapping function.
+   * @returns {Result<U, E>}
+   */
+  map(fn) {
+    if (this.isOk()) {
+      return new _Result(fn(this.val));
+    }
+    return this;
+  }
+  /**
+   * Maps a Result<T, E> to Result<T, U> by applying a function to a contained Error value, leaving an Ok value untouched.
+   *
+   * @param {Function} fn A mapping function.
+   * @returns {Result<T, U>}
+   */
+  mapErr(fn) {
+    if (this.isOk()) {
+      return this;
+    }
+    return new _Result(fn(this.val));
+  }
+  /**
+   * Returns the provided fallback (if Error), or applies a function to the contained value.
+   *
+   * @param {U} fallback A defualt value
+   * @param {Function} fn A mapping function.
+   * @returns {U}
+   */
+  mapOr(fallback, fn) {
+    if (this.isOk()) {
+      return fn(this.val);
+    }
+    return fallback;
+  }
+  /**
+   * Returns `or` if the result is Error, otherwise returns self.
+   *
+   * @param {Result<T, E>} or An alternative Result value
+   * @returns {Result<T, E>}
+   */
+  or(or) {
+    if (this.isOk()) {
+      return this;
+    }
+    return or;
+  }
+  /**
+   * Converts from `Result<T, E>` to `Option<T>`.
+   *
+   * @returns {Option<T>}
+   *
+   * @example
+   * ```ts
+   * const option = Err("Some Error").ok(); // => None()
+   * ```
+   */
+  ok() {
+    if (this.isOk()) {
+      return Some(this.val);
+    }
+    return None();
+  }
+  /**
+   * Returns contained value for use in matching.
+   *
+   * _Note: Please only use this to match against in `if` or `swtich` statments._
+   *
+   * @returns {T | E}
+   * @example
+   * ```ts
+   * function coolOrNice(input: Result<string, Error>): Result<void, Error> {
+   *   switch (input.peek()) {
+   *     case "cool":
+   *       console.log("Input was the coolest!");
+   *       break;
+   *     case "nice":
+   *       console.log("Input was was the nicest!");
+   *       break
+   *     default:
+   *       return Err("Input neither cool nor nice.");
+   *   }
+   *   return Ok()
+   * }
+   * ```
+   */
+  peek() {
+    return this.val;
+  }
+  /**
+   * Throws contained Errors, consuming the Result.
+   */
+  throw() {
+    if (this.isErr()) {
+      throw this.val;
+    }
+  }
+  /**
+   * Converts from Result<Result<T, E>, E> to Result<T, E>
+   * @returns Option<T>
+   */
+  flatten() {
+    if (this.val instanceof _Result) {
+      return this.val;
+    }
+    return this;
+  }
+  /**
+   * Run a closure in a `try`/`catch` and convert it into a Result.
+   *
+   * _Note: Please use `fromAsync` to capture the Result of asynchronous closures._
+   * @param {Function} fn The closure to run
+   * @returns {Result<T, Error>} The Result of the closure
+   */
+  static from(fn) {
+    try {
+      return new _Result(fn());
+    } catch (e) {
+      return new _Result(e);
+    }
+  }
+  /**
+   * Run an asynchronous closure in a `try`/`catch` and convert it into a Result.
+   *
+   * _Note: Please use `from` to capture the Result of synchronous closures._
+   * @param {Function} fn The synchronous closure to run
+   * @returns {Promise<Result<T, Error>>} The Result of the closure
+   */
+  static async fromAsync(fn) {
+    try {
+      return new _Result(await fn());
+    } catch (e) {
+      return new _Result(e);
+    }
+  }
+  /**
+   * Partition an array of Results into Ok values and Errors
+   *
+   * @param {Array<Result<T, E>>} input An array of Results
+   * @returns {{ok: Array<T>, err: Array<E>}}
+   *
+   * @example
+   * ```ts
+   * const results = [Ok(2), Ok(16), Err("Something went wrong!")]
+   *
+   * Result.partition(results) // { ok:[2, 16], err:[Error("Something went wrong!")]}
+   *
+   * ```
+   */
+  static partition(input) {
+    return input.reduce((acc, e) => {
+      if (e.isOk())
+        acc.ok.push(e.unwrap());
+      else
+        acc.err.push(e.unwrapErr());
+      return acc;
+    }, {
+      ok: [],
+      err: []
+    });
+  }
+};
+function Ok(input) {
+  return new Result(input);
+}
+Object.defineProperty(Ok, Symbol.hasInstance, {
+  value: (instance) => {
+    if (typeof instance !== "object")
+      return false;
+    return instance?.isOk() || false;
+  }
+});
+function Err(input) {
+  if (typeof input === "string") {
+    return new Result(new Error(input));
+  }
+  return new Result(input);
+}
+Object.defineProperty(Err, Symbol.hasInstance, {
+  value: (instance) => {
+    if (typeof instance !== "object")
+      return false;
+    return instance?.isErr() || false;
+  }
+});
+
+// node_modules/.pnpm/@washanhanzi+result-enum@2.0.3/node_modules/@washanhanzi/result-enum/dist/async.js
+async function async(fn) {
+  try {
+    const data = await fn;
+    return Ok(data);
+  } catch (error) {
+    return Err(error);
+  }
+}
+
+// src/usecase/featuresCmp.ts
+var import_semver2 = __toESM(require_semver2());
+async function featuresCmp(ctx, crateName, version, existedFeatures) {
+  if (crateName === "") {
+    return [];
+  }
+  const resResult = await async(metadata(ctx, crateName));
+  if (resResult.isErr()) {
+    throw resResult.unwrapErr();
+  }
+  const res = resResult.unwrap();
+  if (version === "") {
+    return res.features[res.latestStable] ?? [];
+  }
+  const features = matchingFeatures(res, version);
+  if (features.length === 0) {
+    return [];
+  }
+  if (existedFeatures && existedFeatures.length !== 0) {
+    const m = {};
+    for (let f of existedFeatures) {
+      m[f] = true;
+    }
+    return features.filter((f) => !m[f]);
+  }
+  return features;
+}
+function matchingFeatures(m, version) {
+  let features = m.features[version] ?? [];
+  if (features.length === 0) {
+    for (let v of m.versions) {
+      if ((0, import_semver2.satisfies)(v, version)) {
+        features = m.features[v] ?? [];
+        break;
+      }
+    }
+  }
+  return features;
+}
+
+// src/usecase/dependencyDecoration.ts
+var import_semver3 = __toESM(require_semver2());
+function dependenciesDecorations(ctx, input) {
+  if (input.length === 0) {
+    return [];
+  }
+  let res = [];
+  for (let d of input) {
+    res.push(versionDecorations(ctx, d));
+  }
+  return res;
+}
+async function versionDecorations(ctx, input) {
+  let m = await metadata(ctx.extensionContext, input.name);
+  if (!m[input.version.value]) {
+    m = await metadata(ctx.extensionContext, input.name, true);
+  }
+  let res = {
+    state: "Unknown" /* UNKNOWN */,
+    ...input.version
+  };
+  if ((0, import_semver3.prerelease)(res.installed) === null) {
+    if (res.installed !== m.latestStable) {
+      res.latest = m.latestStable;
+      if ((0, import_semver3.major)(res.installed) === (0, import_semver3.major)(m.latestStable)) {
+        res.state = "Outdated" /* OUTDATED */;
+        return { ctx, version: res };
+      } else {
+        for (let v of m.versions) {
+          if ((0, import_semver3.satisfies)(v, res.installed)) {
+            res.currentMax = v;
+            if (res.currentMax === res.installed) {
+              res.state = "Locked" /* LOCKED */;
+            } else {
+              res.state = "LockandNotOutdated" /* LOCK_AND_OUTDATED */;
+            }
+            return { ctx, version: res };
+          }
+        }
+      }
+    }
+    res.state = "Latest" /* LATEST */;
+    res.latest = m.latestStable;
+    return { ctx, version: res };
+  }
+  if (res.installed !== m.latestPrerelease) {
+    res.state = "Outdated" /* OUTDATED */;
+    res.latest = m.latestPrerelease;
+    if ((0, import_semver3.satisfies)(m.latestPrerelease, res.installed)) {
+      return { ctx, version: res };
+    } else {
+      for (let v of m.versions) {
+        if ((0, import_semver3.satisfies)(v, res.installed)) {
+          res.currentMax = v;
+          if (res.currentMax === res.installed) {
+            res.state = "Locked" /* LOCKED */;
+          } else {
+            res.state = "LockandNotOutdated" /* LOCK_AND_OUTDATED */;
+          }
+          return { ctx, version: res };
+        }
+      }
+    }
+    return { ctx, version: res };
+  }
+  res.state = "Latest" /* LATEST */;
+  res.latest = m.latestPrerelease;
+  return { ctx, version: res };
+}
+
+// src/usecase/searchCrate.ts
+async function searchCrate(query) {
+  return crates(query);
+}
+
+// src/usecase/dependencyDiagnostic.ts
+var import_semver4 = __toESM(require_semver2());
+var import_vscode2 = require("vscode");
+async function dependenciesDiagnostics(ctx, input) {
+  if (input.length === 0) {
+    return [];
+  }
+  let res = [];
+  for await (let d of input) {
+    const m = await metadata(ctx.extensionContext, d.name, false);
+    let satisfiedVersion = void 0;
+    const minSatisfiedVersion = (0, import_semver4.minVersion)(d.version.value);
+    if (!minSatisfiedVersion) {
+    }
+    let isPrerelease = false;
+    if ((0, import_semver4.prerelease)(minSatisfiedVersion) !== null) isPrerelease = true;
+    if (!isPrerelease && (0, import_semver4.gt)(minSatisfiedVersion, m.latestStable)) {
+      return [{
+        ctx,
+        version: {
+          latest: m.latestStable,
+          state: "NotExist" /* NOT_EXIST */,
+          diagnostic: {
+            severity: import_vscode2.DiagnosticSeverity.Error,
+            source: "extension/crates-cmp",
+            message: "Version not found, latest stable is " + m.latestStable
+          },
+          ...d.version
+        }
+      }];
+    } else if (isPrerelease && !m.latestPrerelease) {
+      return [{
+        ctx,
+        version: {
+          latest: m.latestStable,
+          state: "NotExist" /* NOT_EXIST */,
+          diagnostic: {
+            severity: import_vscode2.DiagnosticSeverity.Error,
+            source: "extension/crates-cmp",
+            message: "Prerelease not found, latest stable is " + m.latestStable
+          },
+          ...d.version
+        }
+      }];
+    } else if (isPrerelease && (0, import_semver4.gt)(minSatisfiedVersion, m.latestPrerelease)) {
+      return [{
+        ctx,
+        version: {
+          latest: m.latestPrerelease,
+          state: "NotExist" /* NOT_EXIST */,
+          diagnostic: {
+            severity: import_vscode2.DiagnosticSeverity.Error,
+            source: "extension/crates-cmp",
+            message: "Prerelease not found, latest prelease is " + m.latestStable
+          },
+          ...d.version
+        }
+      }];
+    } else {
+      for (let v of m.versions) {
+        let r = d.version.value;
+        if (!validRange(r)) {
+          r = "^" + r;
+        }
+        if (v === d.version.value || (0, import_semver4.satisfies)(v, r)) {
+          satisfiedVersion = v;
+          break;
+        }
+      }
+      if (!satisfiedVersion) {
+        return [{
+          ctx,
+          version: {
+            latest: m.latestStable,
+            state: "NotExist" /* NOT_EXIST */,
+            diagnostic: {
+              severity: import_vscode2.DiagnosticSeverity.Error,
+              source: "extension/crates-cmp",
+              message: "Version not found, latest stable is " + m.latestStable
+            },
+            ...d.version
+          }
+        }];
+      }
+    }
+    if (satisfiedVersion && d.features.length !== 0) {
+      for (let f of d.features) {
+        if (!m.features[satisfiedVersion].includes(f.value)) {
+          return [{
+            ctx,
+            feature: {
+              state: "NotExist" /* NOT_EXIST */,
+              diagnostic: {
+                severity: import_vscode2.DiagnosticSeverity.Error,
+                source: "extension/crates-cmp",
+                message: `Feature "${f.value}" not found, available features are ` + m.features[satisfiedVersion].join(", ")
+              },
+              ...f
+            }
+          }];
+        }
+      }
+    }
+  }
+  return res;
+}
+
+// src/usecase/cargo.ts
+async function cargoTree(path) {
+  const tree = await execAsync(`cargo tree --manifest-path ${path} --depth 1 --all-features`).catch((e) => {
+    throw e;
+  });
+  return parseCargoTreeOutput(tree);
+}
+function parseCargoTreeOutput(input) {
+  const lines = input.split("\n");
+  let result = {
+    ["dependencies" /* DEPENDENCIES */]: {},
+    ["build-dependencies" /* BUILD_DEPENDENCIES */]: {},
+    ["dev-dependencies" /* DEV_DEPENDENCIES */]: {},
+    duplicated: /* @__PURE__ */ new Map()
+  };
+  let currentSection = "dependencies" /* DEPENDENCIES */;
+  function determineSection(line) {
+    const trimmedLine = line.trim();
+    if (trimmedLine === "[build-dependencies]") {
+      currentSection = "build-dependencies" /* BUILD_DEPENDENCIES */;
+    } else if (trimmedLine === "[dev-dependencies]") {
+      currentSection = "dev-dependencies" /* DEV_DEPENDENCIES */;
+    }
+  }
+  function parseLine(line) {
+    let deduplicated = false;
+    let procMacro = false;
+    let path = void 0;
+    const parts = line.trim().split(/\s+/);
+    if (parts.length < 3) return null;
+    const name = parts[1];
+    const version = parts[2].startsWith("v") ? parts[2].substring(1) : parts[2];
+    for (let d of parts.slice(3)) {
+      if (d === "(*)") {
+        deduplicated = true;
+      } else if (d === "(proc-macro)") {
+        procMacro = true;
+      } else if (d.startsWith("(") && d.endsWith(")")) {
+        path = d.slice(1, -1);
+      }
+    }
+    return {
+      name,
+      version,
+      path,
+      procMacro,
+      deduplicated
+    };
+  }
+  let depVersion = /* @__PURE__ */ new Map();
+  lines.forEach((line) => {
+    determineSection(line);
+    if (currentSection && (line.trim().startsWith("\u251C\u2500\u2500") || line.trim().startsWith("\u2514\u2500\u2500"))) {
+      const parsedLine = parseLine(line);
+      if (parsedLine) {
+        result[currentSection][parsedLine.name] = parsedLine;
+        if (depVersion.has(parsedLine.name)) {
+          depVersion.get(parsedLine.name).add(parsedLine.version);
+        } else {
+          depVersion.set(parsedLine.name, /* @__PURE__ */ new Set([parsedLine.version]));
+        }
+      }
+    }
+  });
+  for (let [k, v] of depVersion) {
+    if (v.size > 1) {
+      result.duplicated.set(k, Array.from(v));
+    }
+  }
+  return result;
+}
+
+// src/usecase/dependencyTree.ts
+var DependencyTree = class {
+  path = void 0;
+  dependencies = /* @__PURE__ */ new Map();
+  dirtyNodes = /* @__PURE__ */ new Map();
+  // New map to track changed nodes and their revisions
+  notFoundNodes = /* @__PURE__ */ new Set();
+  isEmpty() {
+    return this.dependencies.size === 0;
+  }
+  checkAndDelDirty(id, rev) {
+    if (this.dirtyNodes.has(id) && this.dirtyNodes.get(id) <= rev) {
+      this.dirtyNodes.delete(id);
+      return true;
+    }
+    return false;
+  }
+  reset() {
+    this.dependencies.clear();
+    this.dirtyNodes.clear();
+    this.notFoundNodes.clear();
+  }
+  init(path, nodes) {
+    if (path !== this.path) {
+      this.dependencies.clear();
+      this.dirtyNodes.clear();
+      this.notFoundNodes.clear();
+    }
+  }
+  getDependencies() {
+    return this.dependencies;
+  }
+  populateUserInput(rev, nodes, changes) {
+    for (const id of [...changes.added, ...changes.valueUpdated]) {
+      const node = nodes[id];
+      if (node) {
+        this.dependencies.set(id, { ...node });
+        this.dirtyNodes.set(id, rev);
+      }
+    }
+    for (const id of changes.deleted) {
+      this.dependencies.delete(id);
+    }
+  }
+  //populate from cargo tree
+  populateCurrent(rev, currentDeps) {
+    for (let key of this.dirtyNodes.keys()) {
+      if (!this.dirtyNodes.get(key)) {
+        continue;
+      }
+      const dep = this.dependencies.get(key);
+      const crateName = dep.packageName ?? dep.name;
+      const cur = currentDeps[dep.table][crateName] ?? void 0;
+      if (!cur) {
+        this.notFoundNodes.add(key);
+        continue;
+      }
+      this.dependencies.set(key, { ...dep, version: { ...dep.version, installed: cur.version, dependencyId: key } });
+    }
+    let newDuplicated = [];
+    if (currentDeps.duplicated.size !== 0) {
+      for (let [k, v] of this.dependencies.entries()) {
+        const crateName = v.packageName ?? v.name;
+        if (currentDeps.duplicated.has(crateName)) {
+          newDuplicated.push({ rangeId: v.version.id, dependencyId: k, crates: currentDeps.duplicated.get(crateName) });
+        }
+      }
+    }
+    return newDuplicated;
+  }
+  populateCurrentWithoutDoc(rev, currentDeps) {
+    for (let dep of this.dependencies.values()) {
+      const crateName = dep.packageName ?? dep.name;
+      if (!currentDeps[dep.table][crateName]) continue;
+      if (dep.version.installed !== currentDeps[dep.table][crateName].version) {
+        this.dependencies.set(dep.id, { ...dep, version: { ...dep.version, installed: currentDeps[dep.table][crateName].version, dependencyId: dep.id } });
+        this.dirtyNodes.set(dep.id, rev);
+      }
+    }
+    let newDuplicated = [];
+    if (currentDeps.duplicated.size !== 0) {
+      for (let [k, v] of this.dependencies.entries()) {
+        const crateName = v.packageName ?? v.name;
+        if (currentDeps.duplicated.has(crateName)) {
+          newDuplicated.push({ rangeId: v.version.id, dependencyId: k, crates: currentDeps.duplicated.get(crateName) });
+        }
+      }
+    }
+    return newDuplicated;
+  }
+  dirtyIds() {
+    return Array.from(this.dirtyNodes.keys());
+  }
+  isClean() {
+    return this.dirtyNodes.size === 0;
+  }
+  notFoundIds() {
+    return Array.from(this.notFoundNodes);
+  }
+  dirtyDeps(rev = 0) {
+    let res = [];
+    for (let [id, v] of this.dirtyNodes.entries()) {
+      if (v > rev) {
+        return [];
+      }
+      const dep = this.dependencies.get(id);
+      res.push(dep);
+    }
+    return res;
+  }
+  dependency(id) {
+    return this.dependencies.get(id);
+  }
+  updateVersion(id, version) {
+    const dep = this.dependencies.get(id);
+    if (dep) {
+      this.dependencies.set(id, { ...dep, version });
+    }
+  }
+  updateFeature(id, features) {
+    const dep = this.dependencies.get(id);
+    if (dep) {
+      for (let i = 0; i < dep.features.length; i++) {
+        if (dep.features[i].id === features.id) {
+          dep.features[i] = features;
+          break;
+        }
+      }
+    }
+  }
+};
+var dependencyTree = new DependencyTree();
+
+// src/controller/versionsCompletionList.ts
+var import_vscode3 = require("vscode");
+async function versionsCompletionList(ctx, crateName, range) {
+  const versionsResult = await async(versionCmp(ctx, crateName));
+  if (versionsResult.isErr()) {
+    import_vscode3.window.showErrorMessage(versionsResult.unwrapErr().message);
+    return [];
+  }
+  const items = versionsResult.unwrap().map((version, i) => {
+    const item = new import_vscode3.CompletionItem(addQuotes(version), import_vscode3.CompletionItemKind.Constant);
+    item.insertText = addQuotes(version);
+    item.sortText = sortString(i++);
+    item.preselect = i === 0;
+    item.range = range;
+    return item;
+  });
+  return new import_vscode3.CompletionList(items);
+}
+
+// src/controller/featuresCompletionList.ts
+var import_vscode4 = require("vscode");
+async function featuresCompletionList(ctx, crateName, version, existedFeatures, range) {
+  const featuresResult = await async(featuresCmp(ctx, crateName, version, existedFeatures));
+  if (featuresResult.isErr()) {
+    import_vscode4.window.showErrorMessage(featuresResult.unwrapErr().message);
+    return [];
+  }
+  const items = featuresResult.unwrap().map((feature, i) => {
+    const item = new import_vscode4.CompletionItem(addQuotes(feature), import_vscode4.CompletionItemKind.Constant);
+    item.insertText = addQuotes(feature);
+    item.sortText = sortString(i++);
+    item.preselect = i === 0;
+    item.range = range;
+    return item;
+  });
+  return new import_vscode4.CompletionList(items);
+}
+
+// src/controller/crateNameCompletionList.ts
+var import_vscode5 = require("vscode");
+async function crateNameCompletionList(document, position) {
+  const lineText = getTextBeforeCursor(document, position);
+  const searchResult = await async(searchCrate(lineText));
+  if (searchResult.isErr()) {
+    import_vscode5.window.showErrorMessage(searchResult.unwrapErr().message);
+    return [];
+  }
+  const [firstNonEmptyIndex, lastNonEmptyIndex] = lineReplaceRange(lineText);
+  const items = searchResult.unwrap().map((crate, i) => {
+    const item = new import_vscode5.CompletionItem(crate.name, import_vscode5.CompletionItemKind.Constant);
+    item.insertText = crate.name;
+    item.documentation = crate.description;
+    item.detail = "max version: " + crate.max_version;
+    item.sortText = sortString(i++);
+    item.preselect = i === 0;
+    item.range = new import_vscode5.Range(position.line, firstNonEmptyIndex, position.line, lastNonEmptyIndex);
+    return item;
+  });
+  return items;
+}
+function getTextBeforeCursor(document, position) {
+  const range = new import_vscode5.Range(position.line, 0, position.line, position.character);
+  return document.getText(range);
+}
+function lineReplaceRange(lineText) {
+  let firstNonEmptyIndex = -1;
+  let lastNonEmptyIndex = -1;
+  for (let i = 0; i < lineText.length; i++) {
+    if (lineText[i].trim() !== "") {
+      if (firstNonEmptyIndex === -1) {
+        firstNonEmptyIndex = i;
+      }
+      lastNonEmptyIndex = i;
+    }
+  }
+  return [firstNonEmptyIndex, lastNonEmptyIndex];
+}
+
+// src/controller/command.ts
+var import_vscode6 = require("vscode");
+function executeCommand(command, uri) {
+  return new Promise((resolve, reject) => {
+    import_vscode6.commands.executeCommand(command, uri).then(
+      (res) => {
+        if (isEmpty(res)) reject("symbol provider unavailable");
+        resolve(res);
+      },
+      (err) => reject(err)
+    );
+  });
+}
+
+// src/controller/symbolTree.ts
+var import_vscode8 = require("vscode");
+
+// src/util/squzze.ts
+var import_vscode7 = require("vscode");
+function squezze(range) {
+  if (!range) {
+    return range;
+  }
+  return new import_vscode7.Range(
+    range.start.translate(0, 1),
+    range.end.translate(0, -1)
+  );
+}
+
+// src/util/delay.ts
+function delay2(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// src/controller/symbolTree.ts
+var CargoTomlWalker = class {
+  enterTable(node, table) {
+    return true;
+  }
+  enterDependencies(node, table) {
+    return true;
+  }
+  onPackage(id, node) {
+  }
+  onDependencies(id, node, table, platform) {
+  }
+  onFeatures(id, node) {
+  }
+  onWorkspace(id, node) {
+  }
+  onLib(id, node) {
+  }
+  onBin(id, node) {
+  }
+  onProfile(id, node) {
+  }
+  onBadges(id, node) {
+  }
+  onOther(id, node) {
+  }
+  tree;
+  constructor(tree) {
+    this.tree = tree;
+  }
+  walk() {
+    for (let node of this.tree) {
+      switch (node.name) {
+        case "package":
+          if (this.enterTable(node, "package" /* PACKAGE */)) {
+            this.onPackage(node.name, node);
+          }
+          break;
+        case "dependencies":
+          if (this.enterDependencies(node, "dependencies" /* DEPENDENCIES */)) {
+            this.onDependencies(node.name, node, "dependencies" /* DEPENDENCIES */);
+          }
+          break;
+        case "dev-dependencies":
+          if (this.enterDependencies(node, "dev-dependencies" /* DEV_DEPENDENCIES */)) {
+            this.onDependencies(node.name, node, "dev-dependencies" /* DEV_DEPENDENCIES */);
+          }
+          break;
+        case "build-dependencies":
+          if (this.enterDependencies(node, "build-dependencies" /* BUILD_DEPENDENCIES */)) {
+            this.onDependencies(node.name, node, "build-dependencies" /* BUILD_DEPENDENCIES */);
+          }
+          break;
+        case "target":
+          if (this.enterDependencies(node, "dependencies" /* DEPENDENCIES */)) {
+            for (let child of node.children) {
+              for (let grandChild of child.children) {
+                this.onDependencies(nodeId(node.name, child.name, grandChild.name), grandChild, "dependencies" /* DEPENDENCIES */, child.name);
+              }
+            }
+          }
+        case "features":
+          if (this.enterTable(node, "features" /* FEATURES */)) {
+            this.onFeatures(node.name, node);
+          }
+          break;
+        case "workspace":
+          if (this.enterTable(node, "workspace" /* WORKSPACE */)) {
+            this.onWorkspace(node.name, node);
+          }
+          break;
+        case "lib":
+          if (this.enterTable(node, "lib" /* LIB */)) {
+            this.onLib(node.name, node);
+          }
+          break;
+        case "bin":
+          if (this.enterTable(node, "bin" /* BIN */)) {
+            this.onBin(node.name, node);
+          }
+          break;
+        case "profile":
+          if (this.enterTable(node, "profile" /* PROFILE */)) {
+            this.onProfile(node.name, node);
+          }
+          break;
+        case "badges":
+          if (this.enterTable(node, "badges" /* BADGES */)) {
+            this.onBadges(node.name, node);
+          }
+          break;
+        default:
+          if (this.enterTable(node, "other" /* OTHER */)) {
+            this.onOther(node.name, node);
+          }
+          break;
+      }
+    }
+  }
+};
+var DependenciesWalker = class extends CargoTomlWalker {
+  enterCrate(node) {
+    return true;
+  }
+  onCrate(id, node, table, platform) {
+  }
+  onDependencies(id, node, table, platform) {
+    for (let crate of node.children) {
+      if (this.enterCrate(crate)) {
+        this.onCrate(nodeId(id, crate.name), crate, table, platform);
+      }
+    }
+  }
+};
+async function symbolTree(uri) {
+  for (let counter = 0; counter < 5; counter++) {
+    const tree = await async(executeCommand("vscode.executeDocumentSymbolProvider", uri));
+    console.log("waiting for Even better toml");
+    if (tree.isOk()) {
+      return tree.unwrap();
+    }
+    await delay2(500);
+  }
+  import_vscode8.window.showErrorMessage("Require `Even Better TOML` extension");
+  return [];
+}
+var DependenciesTraverser = class extends DependenciesWalker {
+  identifiers = [];
+  doc;
+  docTree;
+  constructor(tree, doc, docTree) {
+    super(tree);
+    this.doc = doc;
+    this.docTree = docTree;
+  }
+  //don't enter other tables
+  enterTable(node, table) {
+    return false;
+  }
+  //only enter dependencies
+  enterDependencies(node, table) {
+    return true;
+  }
+  //enter all crate
+  enterCrate(node) {
+    return true;
+  }
+  onCrate(id, node, table, platform) {
+    const crateName = node.name;
+    const input = {
+      id,
+      name: crateName,
+      version: { id: "", value: "", dependencyId: "" },
+      features: [],
+      table,
+      platform
+    };
+    const rangeIds = [];
+    const nodeV = this.doc.getText(node.range).replace(/(\r\n|\r|\n)/g, ">");
+    this.docTree.visitDependency(input.id, nodeV, node.range);
+    this.docTree.visitNode(input.id, { id, table, range: node.range, value: nodeV, dependency: { dependencyId: input.id, key: "crate" /* CRATE */ } });
+    rangeIds.push(input.id);
+    if (node.children.length === 0) {
+      const version = this.doc.getText(squezze(node.range));
+      input.version = { id, value: version, dependencyId: id };
+      this.docTree.visitNode(input.id, { id, table, range: node.range, value: nodeV, dependency: { dependencyId: input.id, key: "simpleVersion" /* SIMPLE_VERSION */ } });
+      this.docTree.addDependency(input);
+      this.docTree.setRnages(node.range, rangeIds);
+      return;
+    }
+    for (let child of node.children) {
+      if (child.name === "version") {
+        const version = this.doc.getText(squezze(child.range));
+        const id2 = nodeId(input.id, child.name);
+        input.version = { id: id2, value: version, dependencyId: input.id };
+        this.docTree.visitNode(id2, { id: id2, table, value: version, range: child.range, dependency: { dependencyId: input.id, key: "version" /* VERSION */ } });
+        rangeIds.push(id2);
+        continue;
+      }
+      if (child.name === "features") {
+        if (child.children.length !== 0) {
+          for (let grandChild of child.children) {
+            const f = this.doc.getText(squezze(grandChild.range));
+            const id2 = nodeId(input.id, child.name, grandChild.name);
+            this.docTree.visitNode(id2, { id: id2, table, value: f, range: grandChild.range, dependency: { dependencyId: input.id, key: "feature" /* FEATURE */ } });
+            input.features.push({ id: id2, value: f, dependencyId: input.id });
+            rangeIds.push(id2);
+          }
+        } else {
+          const f = this.doc.getText(squezze(child.range));
+          const id2 = nodeId(input.id, child.name);
+          this.docTree.visitNode(id2, { id: id2, table, value: f, range: child.range, dependency: { dependencyId: input.id, key: "feature" /* FEATURE */ } });
+          input.features.push({ id: id2, value: f, dependencyId: input.id });
+          rangeIds.push(id2);
+        }
+        continue;
+      }
+      if (child.name === "package") {
+        const id2 = nodeId(input.id, child.name);
+        const p = this.doc.getText(squezze(child.range));
+        input.packageName = p;
+        this.docTree.visitNode(id2, { id: id2, table, value: p, range: child.range, dependency: { dependencyId: input.id, key: "package" /* PACKAGE */ } });
+        rangeIds.push(id2);
+      }
+      if (child.name === "path") {
+        const id2 = nodeId(input.id, child.name);
+        const path = this.doc.getText(squezze(child.range));
+        input.path = { id: id2, dependencyId: input.id, value: path };
+        this.docTree.visitNode(id2, { id: id2, table, value: path, range: child.range, dependency: { dependencyId: input.id, key: "path" /* PATH */ } });
+        rangeIds.push(id2);
+      }
+    }
+    this.docTree.addDependency(input);
+    this.docTree.setRnages(node.range, rangeIds);
+  }
+};
+function nodeId(...params) {
+  return params.join(".");
+}
+
+// src/controller/cratesCompletionProvider.ts
+var CratesCompletionProvider = class {
+  context;
+  constructor(context) {
+    this.context = context;
+  }
+  provideCompletionItems(document, position, _token, context) {
+    return new Promise(async (resolve) => {
+      const res = await this.completionItems(document, position, _token, context);
+      resolve(res);
+    });
+  }
+  async completionItems(document, position, _token, _context) {
+    const tree = await symbolTree(document.uri);
+    if (tree.length === 0) {
+      return [];
+    }
+    const walker = new CratesCompletionWalker(tree, position);
+    walker.walk();
+    if (!walker.crateName) {
+      return await crateNameCompletionList(document, position);
+    }
+    if (walker.versionNode) {
+      if (walker.versionNode.range.contains(position)) {
+        return await versionsCompletionList(
+          this.context,
+          walker.crateName,
+          walker.versionNode.range
+        );
+      }
+    }
+    if (walker.featuresNode && walker.featuresNode.children.length !== 0) {
+      if (walker.featuresNode.range.contains(position)) {
+        const version = document.getText(squezze(walker.versionNode?.range));
+        let range;
+        let existedFeatures = [];
+        for (let f of walker.featuresNode.children) {
+          if (f.range.contains(position)) {
+            range = f.range;
+            continue;
+          }
+          existedFeatures.push(document.getText(squezze(f.range)));
+        }
+        return await featuresCompletionList(
+          this.context,
+          walker.crateName,
+          version,
+          existedFeatures,
+          range
+        );
+      }
+      return [];
+    }
+    if (!walker.isComplexDependencyBlock) {
+      return await versionsCompletionList(
+        this.context,
+        walker.crateName,
+        walker.crateRange
+      );
+    }
+    return [];
+  }
+};
+var CratesCompletionWalker = class extends DependenciesWalker {
+  isComplexDependencyBlock = false;
+  crateName;
+  crateRange;
+  versionNode;
+  featuresNode;
+  position;
+  constructor(tree, position) {
+    super(tree);
+    this.position = position;
+  }
+  enterTable(_node, _table) {
+    return false;
+  }
+  enterDependencies(node, table) {
+    if (node.range.contains(this.position)) {
+      return true;
+    }
+    return false;
+  }
+  enterCrate(node) {
+    if (node.range.contains(this.position)) {
+      return true;
+    }
+    return false;
+  }
+  onCrate(id, node) {
+    this.crateName = node.name;
+    this.crateRange = node.range;
+    if (node.children.length !== 0) {
+      this.isComplexDependencyBlock = true;
+      for (let child of node.children) {
+        if (child.name === "version") {
+          this.versionNode = child;
+          continue;
+        }
+        if (child.name === "features") {
+          this.featuresNode = child;
+          continue;
+        }
+      }
+    }
+    this.enterCrate = (n) => false;
+  }
+};
+
+// src/controller/listener.ts
+var import_vscode12 = require("vscode");
+
+// src/controller/documentState.ts
+var import_vscode11 = require("vscode");
+
+// src/controller/decoration.ts
+var import_vscode9 = require("vscode");
+var DecorationStore = class {
+  path;
+  state;
+  constructor() {
+    this.state = {};
+  }
+  init(path) {
+    if (this.path !== path) {
+      this.state = {};
+      this.path = path;
+      return;
+    }
+  }
+  reset() {
+    this.state = {};
+    this.path = void 0;
+  }
+  delete(id) {
+    if (this.state[id]) {
+      this.state[id].decoration.dispose();
+      delete this.state[id];
+    }
+  }
+  get(id) {
+    return this.state[id];
+  }
+  set(id, state) {
+    this.state[id] = state;
+  }
+  decorateDependency(id, range, deco) {
+    if (deco === void 0) {
+      const d2 = this.get(id);
+      if (d2) {
+        import_vscode9.window.activeTextEditor?.setDecorations(d2.decoration, [range]);
+      }
+      return;
+    }
+    const d = this.get(id);
+    if (d) {
+      d.decoration.dispose();
+    }
+    const dt = intoDecoration(deco);
+    this.set(id, { decoration: dt });
+    import_vscode9.window.activeTextEditor?.setDecorations(dt, [range]);
+  }
+  setLoading(id, range) {
+    if (range === void 0) return;
+    this.decorateDependency(id, range, { text: "Waiting...", color: "grey" });
+  }
+  setNotInstalled(id, range) {
+    if (range === void 0) return;
+    this.decorateDependency(id, range, { text: "Not Installed", color: "grey" });
+  }
+};
+var decorationStore = new DecorationStore();
+function intoDecoration(deco) {
+  return import_vscode9.window.createTextEditorDecorationType({
+    after: {
+      contentText: deco.text,
+      color: deco.color,
+      margin: "0 0 0 4em"
+      // Add some margin to the left
+    }
+  });
+}
+function intoDependencyDecoration(version) {
+  switch (version.state) {
+    case "Latest" /* LATEST */:
+      return {
+        text: "\u2705 " + version.latest,
+        color: "green"
+      };
+    case "Outdated" /* OUTDATED */:
+      return {
+        text: "\u2B06\uFE0F " + version.installed + "==>" + version.latest,
+        color: "yellow"
+      };
+    case "Locked" /* LOCKED */:
+      return {
+        text: "\u{1F512} " + version.installed + ", " + version.latest,
+        color: "orange"
+      };
+    case "LockandNotOutdated" /* LOCK_AND_OUTDATED */:
+      return {
+        text: "\u{1F512} " + version.installed + "==>" + version.currentMax + ", " + version.latest,
+        color: "orange"
+      };
+  }
+}
+
+// src/controller/diagnostic.ts
+var import_vscode10 = require("vscode");
+var DiagnosticStore = class {
+  collection;
+  //TODO track diagnostics by path and status enum
+  state = /* @__PURE__ */ new Map();
+  constructor() {
+    this.collection = import_vscode10.languages.createDiagnosticCollection("crates-cmp");
+  }
+  add(path, range, d) {
+    const m = this.state.get(path);
+    if (m) {
+      m.set(d.id, new import_vscode10.Diagnostic(range, d.message, d.severity));
+      return;
+    }
+    const nm = /* @__PURE__ */ new Map();
+    nm.set(d.id, new import_vscode10.Diagnostic(range, d.message, d.severity));
+    this.state.set(path, nm);
+  }
+  delete(uri, id) {
+    const m = this.state.get(uri.path);
+    if (m) {
+      const success = m.delete(id);
+      if (success) {
+        this.collection.set(uri, Array.from(m.values()));
+      }
+    }
+  }
+  render(uri) {
+    const m = this.state.get(uri.path);
+    if (m) {
+      this.collection.set(uri, Array.from(m.values()));
+    } else {
+      this.collection.set(uri, void 0);
+    }
+  }
+  clear(uri) {
+    const m = this.state.get(uri.path);
+    if (m) {
+      m.clear();
+    }
+  }
+};
+var diagnosticStore = new DiagnosticStore();
+
+// src/controller/documentTree.ts
+var DocumentTree = class {
+  path = "";
+  nodes = /* @__PURE__ */ new Map();
+  notVisitedNode = /* @__PURE__ */ new Set();
+  dependencyNodes = {};
+  rangeStore = new RangeStore();
+  added = /* @__PURE__ */ new Set();
+  valueUpdated = /* @__PURE__ */ new Set();
+  rangeUpdated = /* @__PURE__ */ new Set();
+  dependencyIds = [];
+  deleted = /* @__PURE__ */ new Set();
+  setRnages(range, ids) {
+    this.rangeStore.set(range.start.line, range.end.line, ids);
+  }
+  isEmpty() {
+    return this.nodes.size === 0;
+  }
+  reset() {
+    this.path = "";
+    this.nodes.clear();
+    this.notVisitedNode.clear();
+    this.dependencyNodes = {};
+    this.added.clear();
+    this.valueUpdated.clear();
+    this.rangeUpdated.clear();
+    this.dependencyIds.length = 0;
+    this.deleted.clear();
+  }
+  init(path) {
+    this.rangeStore.clear();
+    this.dependencyNodes = {};
+    if (this.path !== path) {
+      this.nodes.clear();
+      this.path = path;
+      this.added.clear();
+      this.valueUpdated.clear();
+      this.rangeUpdated.clear();
+      this.deleted.clear();
+      this.dependencyIds.length = 0;
+      return;
+    }
+    this.added.clear();
+    this.valueUpdated.clear();
+    this.rangeUpdated.clear();
+    this.deleted.clear();
+    for (let k of this.nodes.keys()) {
+      this.notVisitedNode.add(k);
+    }
+    for (let k of this.dependencyIds) {
+      this.deleted.add(k);
+    }
+    this.dependencyIds.length = 0;
+  }
+  visitDependency(id, value, range) {
+    this.dependencyIds.push(id);
+    this.deleted.delete(id);
+    const existingNode = this.nodes.get(id);
+    if (existingNode) {
+      if (existingNode.value !== value) {
+        this.valueUpdated.add(id);
+      }
+      if (!existingNode.range.isEqual(range)) {
+        this.rangeUpdated.add(id);
+      }
+    } else {
+      this.added.add(id);
+    }
+  }
+  addDependency(node) {
+    this.dependencyNodes[node.id] = node;
+  }
+  visitNode(id, node) {
+    this.notVisitedNode.delete(id);
+    this.nodes.set(id, node);
+  }
+  finalize() {
+    for (let k of this.notVisitedNode) {
+      this.nodes.delete(k);
+    }
+    return this.dependencyNodes;
+  }
+  deletedIds() {
+    return Array.from(this.deleted);
+  }
+  dirtyIds() {
+    return [...this.added, ...this.valueUpdated];
+  }
+  isClean() {
+    return this.dirtyIds().length === 0;
+  }
+  rangeUpdatedIds() {
+    return Array.from(this.rangeUpdated);
+  }
+  node(id) {
+    return this.nodes.get(id);
+  }
+  nodeFromRange(range) {
+    const ids = this.rangeStore.ids(range.start.line);
+    if (!ids) return;
+    for (let i = ids.length - 1; i >= 0; i--) {
+      const id = ids[i];
+      const node = this.node(id);
+      if (node && node.range.isSingleLine && node.range.start.line === range.start.line && node.range.start.isBefore(range.start) && node.range.end.isAfter(range.end)) {
+        return node;
+      }
+    }
+    return void 0;
+  }
+  range(id) {
+    const node = this.nodes.get(id);
+    return node ? node.range : void 0;
+  }
+  getAllChanges() {
+    return {
+      added: Array.from(this.added),
+      valueUpdated: Array.from(this.valueUpdated),
+      rangeUpdated: Array.from(this.rangeUpdated),
+      deleted: Array.from(this.deleted)
+    };
+  }
+};
+var RangeStore = class {
+  ranges = /* @__PURE__ */ new Map();
+  set(start, end, ids) {
+    for (let i = start; i <= end; i++) {
+      this.ranges.set(i, ids);
+    }
+  }
+  clear() {
+    this.ranges.clear();
+  }
+  ids(line) {
+    return this.ranges.get(line);
+  }
+};
+var documentTree = new DocumentTree();
+
+// src/controller/documentState.ts
+var DocumentState = class {
+  docTree = documentTree;
+  depTree = dependencyTree;
+  decorations = decorationStore;
+  diagnostic = diagnosticStore;
+  path;
+  version = 0;
+  rev = 0;
+  reset() {
+    this.path = void 0;
+    this.docTree.reset();
+    this.depTree.reset();
+    this.decorations.reset();
+  }
+  init(document) {
+    if (this.path !== document.uri.path) {
+      this.rev = 0;
+    }
+    this.path = document.uri.path;
+    this.docTree.init(this.path);
+    this.decorations.init(this.path);
+    this.version = document.version;
+  }
+  //TODO when there is a error diagnostic on this file, there is no need to parse again
+  async parseDocument(extensionCtx, document) {
+    const tree = await symbolTree(document.uri);
+    if (this.noResumeDocTree()) return;
+    const ctx = {
+      extensionContext: extensionCtx,
+      path: this.path,
+      rev: this.incRev(),
+      uri: document.uri
+    };
+    const walkerer = new DependenciesTraverser(tree, document, this.docTree);
+    walkerer.walk();
+    const nodes = this.docTree.finalize();
+    if (this.docTree.isEmpty()) return;
+    for (let id of this.docTree.dirtyIds()) {
+      this.decorations.setLoading(id, this.docTree.range(id));
+      this.diagnostic.delete(ctx.uri, id);
+    }
+    for (let id of this.docTree.deletedIds()) {
+      this.decorations.delete(id);
+      this.diagnostic.delete(ctx.uri, id);
+    }
+    for (let id of this.docTree.rangeUpdatedIds()) {
+      this.decorations.decorateDependency(id, this.docTree.range(id));
+    }
+    if (this.docTree.isClean()) return;
+    this.depTree.populateUserInput(ctx.rev, nodes, this.docTree.getAllChanges());
+    const currentDepsResult = await async(cargoTree(ctx.path));
+    if (this.noResumeDepTree()) return;
+    if (currentDepsResult.isErr()) {
+      return await this.afterCargoErr(ctx);
+    }
+    const currentDepts = currentDepsResult.unwrap();
+    const duplicated = this.depTree.populateCurrent(ctx.rev, currentDepts);
+    this.afterCargoOk(ctx, duplicated);
+  }
+  async afterCargoErr(ctx) {
+    const deps = this.depTree.dirtyDeps(this.rev);
+    if (deps.length === 0) return;
+    const diagnostics = await dependenciesDiagnostics(ctx, deps);
+    if (diagnostics.length === 0) {
+      return;
+    }
+    diagnostics.filter((d) => {
+      let id = "";
+      if ("version" in d) {
+        id = d.version.dependencyId;
+      }
+      if ("feature" in d) {
+        id = d.feature.dependencyId;
+      }
+      return this.depTree.checkAndDelDirty(id, d.ctx.rev);
+    }).forEach((d) => {
+      let depId = "";
+      let rangeId = "";
+      let message = "";
+      let severity = import_vscode11.DiagnosticSeverity.Hint;
+      if ("version" in d) {
+        depId = d.version.dependencyId;
+        rangeId = d.version.id;
+        message = d.version.diagnostic.message;
+        severity = d.version.diagnostic.severity;
+        this.depTree.updateVersion(d.version.dependencyId, d.version);
+      }
+      if ("feature" in d) {
+        depId = d.feature.dependencyId;
+        rangeId = d.feature.id;
+        message = d.feature.diagnostic.message;
+        severity = d.feature.diagnostic.severity;
+        this.depTree.updateFeature(d.feature.dependencyId, d.feature);
+      }
+      this.decorations.delete(depId);
+      this.diagnostic.add(d.ctx.path, this.docTree.range(rangeId), { id: depId, message, severity });
+    });
+    this.diagnostic.render(ctx.uri);
+    return;
+  }
+  afterCargoOk(ctx, duplicated) {
+    if (duplicated.length !== 0) {
+      for (let d of duplicated) {
+        this.diagnostic.add(
+          ctx.path,
+          this.docTree.range(d.rangeId),
+          {
+            id: d.dependencyId,
+            severity: import_vscode11.DiagnosticSeverity.Information,
+            message: `Found multiple versions: ${d.crates.join(", ")}`
+          }
+        );
+      }
+      this.diagnostic.render(ctx.uri);
+    } else {
+      this.diagnostic.clear(ctx.uri);
+      this.diagnostic.render(ctx.uri);
+    }
+    for (let key of this.depTree.notFoundIds()) {
+      if (this.depTree.checkAndDelDirty(key, ctx.rev)) {
+        this.decorations.setNotInstalled(key, this.docTree.range(key));
+      }
+    }
+    const deps = this.depTree.dirtyDeps(this.rev);
+    if (deps.length === 0) return;
+    const promises = dependenciesDecorations(ctx, deps);
+    promises.forEach((p) => p.then(this.outputPromiseHandler.bind(this)));
+  }
+  async parseDependencies(extensionContext, document) {
+    if (!this.depTree.isClean()) return;
+    const ctx = {
+      extensionContext,
+      path: this.path,
+      rev: this.incRev(),
+      uri: document.uri
+    };
+    const currentDepsResult = await async(cargoTree(ctx.path));
+    if (this.noResumeDepTree()) return;
+    if (currentDepsResult.isErr()) {
+      return await this.afterCargoErr(ctx);
+    }
+    const currentDepts = currentDepsResult.unwrap();
+    const duplicated = this.depTree.populateCurrentWithoutDoc(ctx.rev, currentDepts);
+    for (let id of this.depTree.dirtyIds()) {
+      this.decorations.setLoading(id, this.docTree.range(id));
+      this.diagnostic.delete(ctx.uri, id);
+    }
+    this.afterCargoOk(ctx, duplicated);
+  }
+  outputPromiseHandler(output) {
+    if (this.depTree.checkAndDelDirty(output.version.dependencyId, output.ctx.rev)) {
+      const deco = intoDependencyDecoration(output.version);
+      if (!deco) return;
+      this.depTree.updateVersion(output.version.dependencyId, output.version);
+      this.decorations.decorateDependency(
+        output.version.dependencyId,
+        this.docTree.range(output.version.dependencyId),
+        deco
+      );
+    }
+  }
+  incRev() {
+    this.rev = this.rev + 1;
+    return this.rev;
+  }
+  noResumeDocTree() {
+    if (!import_vscode11.window.activeTextEditor) return true;
+    if (!import_vscode11.window.activeTextEditor.document.fileName.endsWith("Cargo.toml")) true;
+    if (import_vscode11.window.activeTextEditor.document.uri.path !== this.path) return true;
+    if (import_vscode11.window.activeTextEditor.document.version < this.version) return true;
+  }
+  noResumeDepTree() {
+    if (!import_vscode11.window.activeTextEditor) return true;
+    if (!import_vscode11.window.activeTextEditor.document.fileName.endsWith("Cargo.toml")) true;
+    if (import_vscode11.window.activeTextEditor.document.uri.path !== this.path) return true;
+    if (this.depTree.isEmpty()) return true;
+  }
+  //method from doc tree
+  nodeFromRange(range) {
+    return this.docTree.nodeFromRange(range);
+  }
+  //method from dependency tree
+  dependency(id) {
+    return this.depTree.dependency(id);
+  }
+};
+var documentState = new DocumentState();
+
+// src/controller/listener.ts
+var Listener = class {
+  ctx;
+  state = documentState;
+  constructor(ctx) {
+    this.ctx = ctx;
+  }
+  async onDidSaveTextDocument(document) {
+    if (document.fileName.endsWith("Cargo.toml")) {
+      this.state.init(document);
+      await this.state.parseDocument(this.ctx, document);
+    }
+  }
+  async onDidChangeActiveEditor(editor) {
+    if (this.state.path !== void 0) {
+      this.state.reset();
+    }
+    if (!editor) return;
+    if (!editor.document.fileName.endsWith("Cargo.toml")) return;
+    this.state.init(editor.document);
+    await this.state.parseDocument(this.ctx, editor.document);
+  }
+  async onDidLockFileChange() {
+    if (this.state.noResumeDepTree()) return;
+    await this.state.parseDependencies(this.ctx, import_vscode12.window.activeTextEditor.document);
+  }
+  onDidCloseTextDocument(document) {
+    if (!document.fileName.endsWith("Cargo.toml")) return;
+    if (document.uri.path !== this.state.path) return;
+    this.state.reset();
+  }
+};
+
+// src/controller/rustAnalyzer.ts
+var import_vscode13 = require("vscode");
+var RustAnalyzer = class {
+  client = void 0;
+  dependencies = {};
+  async init() {
+    const extension = import_vscode13.extensions.getExtension("rust-lang.rust-analyzer");
+    if (!extension) {
+      throw new Error("Require Rust Analyzer");
+    }
+    const exports2 = await extension.activate();
+    if (!exports2.client) {
+      throw new Error("Require Rust Analyzer");
+    }
+    exports2.client.start();
+    this.client = exports2.client;
+  }
+  stop() {
+    if (this.client) {
+      return this.client.stop();
+    }
+  }
+  async dependencyList() {
+    const deps = await this.client?.sendRequest("rust-analyzer/fetchDependencyList", {});
+    for (let d of deps.crates) {
+      this.dependencies[d.name] = d;
+    }
+  }
+  dependency(name) {
+    return this.dependencies[name];
+  }
+  languageClient() {
+    return this.client;
+  }
+};
+var rustAnalyzer = new RustAnalyzer();
+
+// src/controller/codeAction.ts
+var import_vscode14 = require("vscode");
+var CargoTomlAction = class {
+  state = documentState;
+  constructor(state) {
+    this.state = state;
+  }
+  static providedCodeActionKinds = [
+    import_vscode14.CodeActionKind.RefactorRewrite
+  ];
+  provideCodeActions(document, range) {
+    const node = this.state.nodeFromRange(range);
+    if (!node) return;
+    if (node.dependency) {
+      const dep = this.state.dependency(node.dependency?.dependencyId);
+      const actions = [];
+      switch (node.dependency.key) {
+        case "simpleVersion" /* SIMPLE_VERSION */:
+        case "version" /* VERSION */:
+          const state = dep?.version.state ?? "Unknown" /* UNKNOWN */;
+          switch (state) {
+            case "NotExist" /* NOT_EXIST */:
+              const notExistAction = new import_vscode14.CodeAction(dep.version.latest, import_vscode14.CodeActionKind.QuickFix);
+              notExistAction.edit = new import_vscode14.WorkspaceEdit();
+              notExistAction.edit.replace(document.uri, node.range, '"' + dep.version.latest + '"');
+              actions.push(notExistAction);
+              break;
+            case "Outdated" /* OUTDATED */:
+              const outdatedAction = new import_vscode14.CodeAction(dep.version.latest, import_vscode14.CodeActionKind.RefactorRewrite);
+              outdatedAction.edit = new import_vscode14.WorkspaceEdit();
+              outdatedAction.edit.replace(document.uri, node.range, '"' + dep.version.latest + '"');
+              actions.push(outdatedAction);
+              break;
+          }
+      }
+      return actions;
+    }
+  }
+};
+var cargoTomlAction = new CargoTomlAction(documentState);
+
+// src/extension.ts
+async function activate(context) {
+  const documentSelector = { language: "toml", pattern: "**/Cargo.toml" };
+  import_vscode15.workspace.onDidChangeConfiguration(config.onChange, config);
+  const listener = new Listener(context);
+  context.subscriptions.push(
+    import_vscode15.window.onDidChangeActiveTextEditor(listener.onDidChangeActiveEditor, listener),
+    import_vscode15.workspace.onDidSaveTextDocument(listener.onDidSaveTextDocument, listener),
+    import_vscode15.workspace.onDidCloseTextDocument(listener.onDidCloseTextDocument, listener),
+    import_vscode15.workspace.createFileSystemWatcher("**/Cargo.lock").onDidChange(listener.onDidLockFileChange, listener),
+    import_vscode15.languages.registerCodeActionsProvider(documentSelector, cargoTomlAction),
+    // Register our versions completions provider
+    import_vscode15.languages.registerCompletionItemProvider(
+      documentSelector,
+      new CratesCompletionProvider(context),
+      '"',
+      ".",
+      "+",
+      "-",
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9"
+    )
+  );
+}
+function deactivate() {
+  return rustAnalyzer.stop();
+}
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  activate,
+  deactivate
+});
 /*! Bundled license information:
 
 ky/distribution/index.js:
   (*! MIT License © Sindre Sorhus *)
 */
+//# sourceMappingURL=extension.js.map

@@ -1,10 +1,9 @@
-import { Metadata, SearchCrateOutput } from '@/entity'
+import { Metadata, SearchCrateOutput, config } from '@/entity'
 import ky from "ky"
 import { prerelease, satisfies } from "semver"
 
-export const DEFAULT_SPARSE_INDEX_SERVER_URL = "https://index.crates.io"
-
-export async function sparseIndexMetadata(name: string, url: string = DEFAULT_SPARSE_INDEX_SERVER_URL): Promise<Metadata> {
+export async function sparseIndexMetadata(name: string,): Promise<Metadata> {
+	const url = config.getSparseIndexUrl()
 	// clean dirty names
 	// TODO is this neccessary?
 	let lowerName = name.replace(/"/g, "").toLocaleLowerCase()
