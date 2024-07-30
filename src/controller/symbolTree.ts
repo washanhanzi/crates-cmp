@@ -1,7 +1,7 @@
 import { async } from "@washanhanzi/result-enum"
 import { executeCommand } from "./command"
 import { Uri, window, Range, TextDocument } from "vscode"
-import { CargoTomlTable, DependencyItemType, DependencyNode } from "@/entity"
+import { CargoTable, DependencyKey, DependencyNode } from "@/entity"
 import { squezze } from "util/squzze"
 import { delay } from "util/delay"
 import { DocumentTree } from "./documentTree"
@@ -14,11 +14,11 @@ export type SymbolTreeNode = {
 }
 
 export class CargoTomlWalker {
-	enterTable(node: SymbolTreeNode, table: CargoTomlTable,): boolean { return true }
-	enterDependencies(node: SymbolTreeNode, table: CargoTomlTable): boolean { return true }
+	enterTable(node: SymbolTreeNode, table: CargoTable,): boolean { return true }
+	enterDependencies(node: SymbolTreeNode, table: CargoTable): boolean { return true }
 
 	onPackage(id: string, node: SymbolTreeNode): void { }
-	onDependencies(id: string, node: SymbolTreeNode, table: CargoTomlTable, platform?: string): void { }
+	onDependencies(id: string, node: SymbolTreeNode, table: CargoTable, platform?: string): void { }
 	onFeatures(id: string, node: SymbolTreeNode): void { }
 	onWorkspace(id: string, node: SymbolTreeNode): void { }
 	onLib(id: string, node: SymbolTreeNode): void { }
@@ -38,65 +38,65 @@ export class CargoTomlWalker {
 		for (let node of this.tree) {
 			switch (node.name) {
 				case 'package':
-					if (this.enterTable(node, CargoTomlTable.PACKAGE)) {
+					if (this.enterTable(node, CargoTable.PACKAGE)) {
 						this.onPackage(node.name, node)
 					}
 					break
 				case 'dependencies':
-					if (this.enterDependencies(node, CargoTomlTable.DEPENDENCIES)) {
-						this.onDependencies(node.name, node, CargoTomlTable.DEPENDENCIES)
+					if (this.enterDependencies(node, CargoTable.DEPENDENCIES)) {
+						this.onDependencies(node.name, node, CargoTable.DEPENDENCIES)
 					}
 					break
 				case 'dev-dependencies':
-					if (this.enterDependencies(node, CargoTomlTable.DEV_DEPENDENCIES)) {
-						this.onDependencies(node.name, node, CargoTomlTable.DEV_DEPENDENCIES)
+					if (this.enterDependencies(node, CargoTable.DEV_DEPENDENCIES)) {
+						this.onDependencies(node.name, node, CargoTable.DEV_DEPENDENCIES)
 					}
 					break
 				case 'build-dependencies':
-					if (this.enterDependencies(node, CargoTomlTable.BUILD_DEPENDENCIES)) {
-						this.onDependencies(node.name, node, CargoTomlTable.BUILD_DEPENDENCIES)
+					if (this.enterDependencies(node, CargoTable.BUILD_DEPENDENCIES)) {
+						this.onDependencies(node.name, node, CargoTable.BUILD_DEPENDENCIES)
 					}
 					break
 				case "target":
-					if (this.enterDependencies(node, CargoTomlTable.DEPENDENCIES)) {
+					if (this.enterDependencies(node, CargoTable.DEPENDENCIES)) {
 						for (let child of node.children) {
 							for (let grandChild of child.children) {
-								this.onDependencies(nodeId(node.name, child.name, grandChild.name), grandChild, CargoTomlTable.DEPENDENCIES, child.name)
+								this.onDependencies(nodeId(node.name, child.name, grandChild.name), grandChild, CargoTable.DEPENDENCIES, child.name)
 							}
 						}
 					}
 				case 'features':
-					if (this.enterTable(node, CargoTomlTable.FEATURES)) {
+					if (this.enterTable(node, CargoTable.FEATURES)) {
 						this.onFeatures(node.name, node)
 					}
 					break
 				case 'workspace':
-					if (this.enterTable(node, CargoTomlTable.WORKSPACE)) {
+					if (this.enterTable(node, CargoTable.WORKSPACE)) {
 						this.onWorkspace(node.name, node)
 					}
 					break
 				case 'lib':
-					if (this.enterTable(node, CargoTomlTable.LIB)) {
+					if (this.enterTable(node, CargoTable.LIB)) {
 						this.onLib(node.name, node)
 					}
 					break
 				case 'bin':
-					if (this.enterTable(node, CargoTomlTable.BIN)) {
+					if (this.enterTable(node, CargoTable.BIN)) {
 						this.onBin(node.name, node)
 					}
 					break
 				case 'profile':
-					if (this.enterTable(node, CargoTomlTable.PROFILE)) {
+					if (this.enterTable(node, CargoTable.PROFILE)) {
 						this.onProfile(node.name, node)
 					}
 					break
 				case 'badges':
-					if (this.enterTable(node, CargoTomlTable.BADGES)) {
+					if (this.enterTable(node, CargoTable.BADGES)) {
 						this.onBadges(node.name, node)
 					}
 					break
 				default:
-					if (this.enterTable(node, CargoTomlTable.OTHER)) {
+					if (this.enterTable(node, CargoTable.OTHER)) {
 						this.onOther(node.name, node)
 					}
 					break
@@ -107,9 +107,9 @@ export class CargoTomlWalker {
 
 export class DependenciesWalker extends CargoTomlWalker {
 	enterCrate(node: SymbolTreeNode): boolean { return true }
-	onCrate(id: string, node: SymbolTreeNode, table: CargoTomlTable, platform?: string) { }
+	onCrate(id: string, node: SymbolTreeNode, table: CargoTable, platform?: string) { }
 
-	onDependencies(id: string, node: SymbolTreeNode, table: CargoTomlTable, platform?: string) {
+	onDependencies(id: string, node: SymbolTreeNode, table: CargoTable, platform?: string) {
 		for (let crate of node.children) {
 			if (this.enterCrate(crate)) {
 				this.onCrate(nodeId(id, crate.name), crate, table, platform)
@@ -148,12 +148,12 @@ export class DependenciesTraverser extends DependenciesWalker {
 	}
 
 	//don't enter other tables
-	enterTable(node: SymbolTreeNode, table: CargoTomlTable): boolean {
+	enterTable(node: SymbolTreeNode, table: CargoTable): boolean {
 		return false
 	}
 
 	//only enter dependencies
-	enterDependencies(node: SymbolTreeNode, table: CargoTomlTable): boolean {
+	enterDependencies(node: SymbolTreeNode, table: CargoTable): boolean {
 		return true
 	}
 
@@ -162,26 +162,33 @@ export class DependenciesTraverser extends DependenciesWalker {
 		return true
 	}
 
-	onCrate(id: string, node: SymbolTreeNode, table: CargoTomlTable, platform?: string) {
+	onCrate(id: string, node: SymbolTreeNode, table: CargoTable, platform?: string) {
 		const crateName = node.name
 		const input: DependencyNode = {
 			id: id,
 			name: crateName,
-			inputVersion: "",
+			version: { id: "", value: "", dependencyId: "" },
 			features: [],
-			tableName: table,
+			table: table,
 			platform: platform
 		}
+		const rangeIds: string[] = []
+
 		//set crate
 		const nodeV = this.doc.getText(node.range).replace(/(\r\n|\r|\n)/g, '>')
+		//compare nodeV with exsit node
 		this.docTree.visitDependency(input.id, nodeV, node.range)
-		this.docTree.visitNode(input.id, { range: node.range, value: nodeV })
+		this.docTree.visitNode(input.id, { id, table, range: node.range, value: nodeV, dependency: { dependencyId: input.id, key: DependencyKey.CRATE } })
+		rangeIds.push(input.id)
 
-		//simple dependency
+		//simple dependency, early return
 		if (node.children.length === 0) {
 			const version = this.doc.getText(squezze(node.range))
-			input.inputVersion = version
+			input.version = { id, value: version, dependencyId: id }
+			//overide node
+			this.docTree.visitNode(input.id, { id, table, range: node.range, value: nodeV, dependency: { dependencyId: input.id, key: DependencyKey.SIMPLE_VERSION } })
 			this.docTree.addDependency(input)
+			this.docTree.setRnages(node.range, rangeIds)
 
 			return
 		}
@@ -190,30 +197,48 @@ export class DependenciesTraverser extends DependenciesWalker {
 		for (let child of node.children) {
 			if (child.name === "version") {
 				const version = this.doc.getText(squezze(child.range))
-				input.inputVersion = version
-				this.docTree.visitNode(nodeId(input.id, child.name), { value: version, range: child.range })
+				const id = nodeId(input.id, child.name)
+				input.version = { id, value: version, dependencyId: input.id }
+				this.docTree.visitNode(id, { id, table, value: version, range: child.range, dependency: { dependencyId: input.id, key: DependencyKey.VERSION } })
+				rangeIds.push(id)
 				continue
 			}
 			if (child.name === "features") {
 				if (child.children.length !== 0) {
 					for (let grandChild of child.children) {
 						const f = this.doc.getText(squezze(grandChild.range))
-						this.docTree.visitNode(nodeId(input.id, child.name, grandChild.name), { value: f, range: grandChild.range })
-						input.features.push(f)
+						const id = nodeId(input.id, child.name, grandChild.name)
+						this.docTree.visitNode(id, { id, table, value: f, range: grandChild.range, dependency: { dependencyId: input.id, key: DependencyKey.FEATURE } })
+						input.features.push({ id, value: f, dependencyId: input.id })
+						rangeIds.push(id)
 					}
 				} else {
 					const f = this.doc.getText(squezze(child.range))
-					this.docTree.visitNode(nodeId(input.id, child.name), { value: f, range: child.range })
-					input.features.push(f)
+					const id = nodeId(input.id, child.name)
+					this.docTree.visitNode(id, { id, table, value: f, range: child.range, dependency: { dependencyId: input.id, key: DependencyKey.FEATURE } })
+					input.features.push({ id, value: f, dependencyId: input.id })
+					rangeIds.push(id)
 				}
 				continue
 			}
 			if (child.name === "package") {
-				input.packageName = this.doc.getText(squezze(child.range))
+				const id = nodeId(input.id, child.name)
+				const p = this.doc.getText(squezze(child.range))
+				input.packageName = p
+				this.docTree.visitNode(id, { id, table, value: p, range: child.range, dependency: { dependencyId: input.id, key: DependencyKey.PACKAGE } })
+				rangeIds.push(id)
 			}
-			//TODO path, git
+			if (child.name === "path") {
+				const id = nodeId(input.id, child.name)
+				const path = this.doc.getText(squezze(child.range))
+				input.path = { id, dependencyId: input.id, value: path }
+				this.docTree.visitNode(id, { id, table, value: path, range: child.range, dependency: { dependencyId: input.id, key: DependencyKey.PATH } })
+				rangeIds.push(id)
+			}
+			//TODO  git
 		}
 		this.docTree.addDependency(input)
+		this.docTree.setRnages(node.range, rangeIds)
 	}
 }
 

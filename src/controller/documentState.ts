@@ -1,13 +1,11 @@
-import { DiagnosticSeverity, ExtensionContext, TextDocument, Uri, window } from "vscode"
-import { decorationStore } from "./decoration"
+import { DiagnosticSeverity, ExtensionContext, TextDocument, window, Range } from "vscode"
+import { decorationStore, intoDependencyDecoration } from "./decoration"
 import { diagnosticStore } from "./diagnostic"
 import { documentTree } from "./documentTree"
 import { DependenciesTraverser, symbolTree } from "./symbolTree"
-import { dependencyTree } from "./dependencyTree"
 import { async } from "@washanhanzi/result-enum"
-import { cargoTree } from "./cargo"
-import { dependenciesDecorations, dependenciesDiagnostics } from "@/usecase"
-import { DependencyDecorationWithCtx, DependencyItemType } from "@/entity"
+import { dependenciesDecorations, dependenciesDiagnostics, cargoTree, dependencyTree } from "@/usecase"
+import { Ctx, FeatureValueWithCtx, VersionState, VersionValueWithCtx } from "@/entity"
 
 class DocumentState {
     private docTree = documentTree
@@ -64,6 +62,7 @@ class DocumentState {
             this.diagnostic.delete(ctx.uri, id)
         }
 
+        //update decoration range
         for (let id of this.docTree.rangeUpdatedIds()) {
             this.decorations.decorateDependency(id, this.docTree.range(id)!)
         }
@@ -77,42 +76,75 @@ class DocumentState {
         const currentDepsResult = await async(cargoTree(ctx.path))
         if (this.noResumeDepTree()) return
         if (currentDepsResult.isErr()) {
-            const deps = this.depTree.dirtyDeps(this.rev)
-
-            //early exit
-            if (deps.length === 0) return
-
-            //suspend
-            const diagnostics = await dependenciesDiagnostics(ctx, deps)
-            //resume check
-            if (diagnostics.length === 0) { return }
-
-            diagnostics
-                .filter(d => this.depTree.checkAndDelDirty(d.diagnostic.id, d.ctx.rev))
-                .forEach(d => {
-                    this.decorations.delete(d.diagnostic.id)
-                    this.diagnostic.add(d.ctx.path, this.docTree.range(d.diagnostic.id)!, d.diagnostic)
-                })
-            this.diagnostic.render(ctx.uri)
-            return
+            return await this.afterCargoErr(ctx)
         }
         const currentDepts = currentDepsResult.unwrap()
 
         const duplicated = this.depTree.populateCurrent(ctx.rev, currentDepts)
-        if (duplicated.size !== 0) {
-            for (let [key, value] of duplicated) {
+
+        this.afterCargoOk(ctx, duplicated)
+    }
+
+    async afterCargoErr(ctx: Ctx) {
+        const deps = this.depTree.dirtyDeps(this.rev)
+
+        //early exit
+        if (deps.length === 0) return
+
+        //suspend
+        const diagnostics = await dependenciesDiagnostics(ctx, deps)
+        //resume check
+        if (diagnostics.length === 0) { return }
+
+        diagnostics
+            .filter(d => {
+                let id = ""
+                if ("version" in d) { id = d.version.dependencyId }
+                if ("feature" in d) { id = d.feature.dependencyId }
+                return this.depTree.checkAndDelDirty(id, d.ctx.rev)
+            })
+            .forEach(d => {
+                let depId = ""
+                let rangeId = ""
+                let message = ""
+                let severity = DiagnosticSeverity.Hint
+                if ("version" in d) {
+                    depId = d.version.dependencyId
+                    rangeId = d.version.id
+                    message = d.version.diagnostic!.message
+                    severity = d.version.diagnostic!.severity
+                    this.depTree.updateVersion(d.version.dependencyId, d.version)
+                }
+                if ("feature" in d) {
+                    depId = d.feature.dependencyId
+                    rangeId = d.feature.id
+                    message = d.feature.diagnostic!.message
+                    severity = d.feature.diagnostic!.severity
+                    this.depTree.updateFeature(d.feature.dependencyId, d.feature)
+                }
+                this.decorations.delete(depId)
+                this.diagnostic.add(d.ctx.path, this.docTree.range(rangeId)!, { id: depId, message, severity })
+            })
+        this.diagnostic.render(ctx.uri)
+        return
+    }
+
+    afterCargoOk(ctx: Ctx, duplicated) {
+        if (duplicated.length !== 0) {
+            for (let d of duplicated) {
                 this.diagnostic.add(
                     ctx.path,
-                    this.docTree.range(key)!,
+                    this.docTree.range(d.rangeId)!,
                     {
-                        id: key,
-                        type: DependencyItemType.CRATE,
+                        id: d.dependencyId,
                         severity: DiagnosticSeverity.Information,
-                        message: `Found multiple versions: ${value.join(", ")}`,
-                        source: "crates-cmp"
+                        message: `Found multiple versions: ${d.crates.join(", ")}`,
                     },
                 )
             }
+            this.diagnostic.render(ctx.uri)
+        } else {
+            this.diagnostic.clear(ctx.uri)
             this.diagnostic.render(ctx.uri)
         }
 
@@ -127,7 +159,6 @@ class DocumentState {
 
         const promises = dependenciesDecorations(ctx, deps)
         promises.forEach(p => p.then(this.outputPromiseHandler.bind(this)))
-
     }
 
     async parseDependencies(extensionContext: ExtensionContext, document: TextDocument) {
@@ -143,24 +174,7 @@ class DocumentState {
         const currentDepsResult = await async(cargoTree(ctx.path))
         if (this.noResumeDepTree()) return
         if (currentDepsResult.isErr()) {
-            const deps = this.depTree.dirtyDeps(this.rev)
-
-            //early exit
-            if (deps.length === 0) return
-
-            //suspend
-            const diagnostics = await dependenciesDiagnostics(ctx, deps)
-            //resume check
-            if (diagnostics.length === 0) { return }
-
-            diagnostics
-                .filter(d => this.depTree.checkAndDelDirty(d.diagnostic.id, d.ctx.rev))
-                .forEach(d => {
-                    this.decorations.delete(d.diagnostic.id)
-                    this.diagnostic.add(d.ctx.path, this.docTree.range(d.diagnostic.id)!, d.diagnostic)
-                })
-            this.diagnostic.render(ctx.uri)
-            return
+            return await this.afterCargoErr(ctx)
         }
         const currentDepts = currentDepsResult.unwrap()
 
@@ -171,39 +185,19 @@ class DocumentState {
             this.diagnostic.delete(ctx.uri, id)
         }
 
-        if (duplicated.size !== 0) {
-            for (let [key, value] of duplicated) {
-                this.diagnostic.add(
-                    ctx.path,
-                    this.docTree.range(key)!,
-                    {
-                        id: key,
-                        type: DependencyItemType.CRATE,
-                        severity: DiagnosticSeverity.Information,
-                        message: `Found multiple versions: ${value.join(", ")}`,
-                        source: "crates-cmp"
-                    },
-                )
-            }
-            this.diagnostic.render(ctx.uri)
-        }
-
-        for (let key of this.depTree.notFoundIds()) {
-            if (this.depTree.checkAndDelDirty(key, ctx.rev)) {
-                this.decorations.setNotInstalled(key, this.docTree.range(key))
-            }
-        }
-
-        const deps = this.depTree.dirtyDeps(this.rev)
-        if (deps.length === 0) return
-
-        const promises = dependenciesDecorations(ctx, deps)
-        promises.forEach(p => p.then(this.outputPromiseHandler.bind(this)))
+        this.afterCargoOk(ctx, duplicated)
     }
 
-    outputPromiseHandler(output: DependencyDecorationWithCtx) {
-        if (this.depTree.checkAndDelDirty(output.decoration.id, output.ctx.rev)) {
-            this.decorations.decorateDependency(output.decoration.id, this.docTree.range(output.decoration.id)!, output.decoration)
+    outputPromiseHandler(output: VersionValueWithCtx) {
+        if (this.depTree.checkAndDelDirty(output.version.dependencyId, output.ctx.rev)) {
+            const deco = intoDependencyDecoration(output.version)
+            if (!deco) return
+            this.depTree.updateVersion(output.version.dependencyId, output.version)
+            this.decorations.decorateDependency(
+                output.version.dependencyId,
+                this.docTree.range(output.version.dependencyId)!,
+                deco
+            )
         }
     }
 
@@ -224,6 +218,16 @@ class DocumentState {
         if (!window.activeTextEditor.document.fileName.endsWith("Cargo.toml")) true
         if (window.activeTextEditor.document.uri.path !== this.path) return true
         if (this.depTree.isEmpty()) return true
+    }
+
+    //method from doc tree
+    nodeFromRange(range: Range) {
+        return this.docTree.nodeFromRange(range)
+    }
+
+    //method from dependency tree
+    dependency(id: string) {
+        return this.depTree.dependency(id)
     }
 }
 

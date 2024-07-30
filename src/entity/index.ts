@@ -1,3 +1,5 @@
 export * from "./crates"
-export * from "./toml"
+export * from "./cargoToml"
 export * from "./ctx"
+export * from "./dependency"
+export * from "./semVer"

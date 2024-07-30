@@ -1,6 +1,6 @@
 # crates-cmp
 
-> Why I must write js in order to write Rust?
+> Why I write Rust tool in js and everyone else is writing js tool in Rust?
 
 > [!WARNING]
 > Alpha stage, if you have any suggestion or problems, please open an issue.
@@ -18,7 +18,7 @@
 - [x] Crate name code completion
 - [x] Version check (compare installed version and latest version, etc.)
 - [x] Diagnostic (version not exist, feature not exit, etc.)
-- [ ] Quick action
+- [x] Code action
 - [ ] Audit
 - [ ] Configuration
 

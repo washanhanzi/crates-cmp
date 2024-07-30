@@ -1,9 +1,9 @@
-import { async } from "@washanhanzi/result-enum"
 import { execAsync } from "@/util"
-import { CargoTomlTable, Ctx } from "@/entity"
+import { CargoTable } from "@/entity"
 
 export async function cargoTree(path: string) {
-	const tree = await execAsync(`cargo tree --manifest-path ${path} --depth 1 --all-features`).catch(e => { throw e })
+	const tree = await execAsync(`cargo tree --manifest-path ${path} --depth 1 --all-features`)
+		.catch(e => { throw e })
 
 	return parseCargoTreeOutput(tree as string)
 }
@@ -17,9 +17,9 @@ type CargoTreeOutputItem = {
 }
 
 export type ParsedCargoTreeOutput = {
-	[CargoTomlTable.DEPENDENCIES]: { [key: string]: CargoTreeOutputItem },
-	[CargoTomlTable.DEV_DEPENDENCIES]: { [key: string]: CargoTreeOutputItem },
-	[CargoTomlTable.BUILD_DEPENDENCIES]: { [key: string]: CargoTreeOutputItem },
+	[CargoTable.DEPENDENCIES]: { [key: string]: CargoTreeOutputItem },
+	[CargoTable.DEV_DEPENDENCIES]: { [key: string]: CargoTreeOutputItem },
+	[CargoTable.BUILD_DEPENDENCIES]: { [key: string]: CargoTreeOutputItem },
 	duplicated: Map<string, string[]>
 }
 
@@ -29,21 +29,21 @@ export function parseCargoTreeOutput(input: string): ParsedCargoTreeOutput {
 
 	// Initialize a map for the structured data
 	let result: ParsedCargoTreeOutput = {
-		[CargoTomlTable.DEPENDENCIES]: {},
-		[CargoTomlTable.BUILD_DEPENDENCIES]: {},
-		[CargoTomlTable.DEV_DEPENDENCIES]: {},
+		[CargoTable.DEPENDENCIES]: {},
+		[CargoTable.BUILD_DEPENDENCIES]: {},
+		[CargoTable.DEV_DEPENDENCIES]: {},
 		duplicated: new Map()
 	}
 
-	let currentSection: CargoTomlTable = CargoTomlTable.DEPENDENCIES// Start with 'dependencies' as default
+	let currentSection: CargoTable = CargoTable.DEPENDENCIES// Start with 'dependencies' as default
 
 	// Determine the section based on a header line
 	function determineSection(line: string) {
 		const trimmedLine = line.trim()
 		if (trimmedLine === "[build-dependencies]") {
-			currentSection = CargoTomlTable.BUILD_DEPENDENCIES
+			currentSection = CargoTable.BUILD_DEPENDENCIES
 		} else if (trimmedLine === "[dev-dependencies]") {
-			currentSection = CargoTomlTable.DEV_DEPENDENCIES
+			currentSection = CargoTable.DEV_DEPENDENCIES
 		}
 	}
 

@@ -1,12 +1,18 @@
-import { DependencyNode } from "@/entity"
+import { DependencyNode, FeatureValue, VersionValue } from "@/entity"
 import { ParsedCargoTreeOutput } from "./cargo"
-import { Diagnostic } from "vscode"
+
+type DuplicatedOoutput = {
+    dependencyId: string,
+    rangeId: string,
+    crates: string[]
+}
 
 class DependencyTree {
     private path: string | undefined = undefined
     private dependencies: Map<string, DependencyNode> = new Map()
     private dirtyNodes: Map<string, number> = new Map() // New map to track changed nodes and their revisions
     private notFoundNodes: Set<string> = new Set()
+
 
     isEmpty() {
         return this.dependencies.size === 0
@@ -59,7 +65,7 @@ class DependencyTree {
         }
     }
 
-    //populate from cargo tree, also include rev, only populate
+    //populate from cargo tree
     populateCurrent(rev: number, currentDeps: ParsedCargoTreeOutput) {
         for (let key of this.dirtyNodes.keys()) {
             //no update
@@ -68,19 +74,19 @@ class DependencyTree {
             }
             const dep = this.dependencies.get(key)
             const crateName = dep!.packageName ?? dep!.name
-            const cur = currentDeps[dep!.tableName][crateName] ?? undefined
+            const cur = currentDeps[dep!.table][crateName] ?? undefined
             if (!cur) {
                 this.notFoundNodes.add(key)
                 continue
             }
-            this.dependencies.set(key, { ...dep!, currentVersion: cur.version })
+            this.dependencies.set(key, { ...dep!, version: { ...dep!.version, installed: cur.version, dependencyId: key } })
         }
-        let newDuplicated = new Map<string, string[]>()
+        let newDuplicated: DuplicatedOoutput[] = []
         if (currentDeps.duplicated.size !== 0) {
             for (let [k, v] of this.dependencies.entries()) {
                 const crateName = v.packageName ?? v.name
                 if (currentDeps.duplicated.has(crateName)) {
-                    newDuplicated.set(k, currentDeps.duplicated.get(crateName)!)
+                    newDuplicated.push({ rangeId: v.version.id, dependencyId: k, crates: currentDeps.duplicated.get(crateName)! })
                 }
             }
         }
@@ -90,18 +96,18 @@ class DependencyTree {
     populateCurrentWithoutDoc(rev: number, currentDeps: ParsedCargoTreeOutput) {
         for (let dep of this.dependencies.values()) {
             const crateName = dep!.packageName ?? dep!.name
-            if (!currentDeps[dep.tableName][crateName]) continue
-            if (dep.currentVersion !== currentDeps[dep.tableName][crateName].version) {
-                this.dependencies.set(dep.id, { ...dep, currentVersion: currentDeps[dep.tableName][crateName].version })
+            if (!currentDeps[dep.table][crateName]) continue
+            if (dep.version.installed !== currentDeps[dep.table][crateName].version) {
+                this.dependencies.set(dep.id, { ...dep, version: { ...dep.version, installed: currentDeps[dep.table][crateName].version, dependencyId: dep.id } })
                 this.dirtyNodes.set(dep.id, rev)
             }
         }
-        let newDuplicated = new Map<string, string[]>()
+        let newDuplicated: DuplicatedOoutput[] = []
         if (currentDeps.duplicated.size !== 0) {
             for (let [k, v] of this.dependencies.entries()) {
                 const crateName = v.packageName ?? v.name
                 if (currentDeps.duplicated.has(crateName)) {
-                    newDuplicated.set(k, currentDeps.duplicated.get(crateName)!)
+                    newDuplicated.push({ rangeId: v.version.id, dependencyId: k, crates: currentDeps.duplicated.get(crateName)! })
                 }
             }
         }
@@ -130,6 +136,29 @@ class DependencyTree {
             res.push(dep!)
         }
         return res
+    }
+
+    dependency(id: string) {
+        return this.dependencies.get(id)
+    }
+
+    updateVersion(id: string, version: VersionValue) {
+        const dep = this.dependencies.get(id)
+        if (dep) {
+            this.dependencies.set(id, { ...dep, version })
+        }
+    }
+
+    updateFeature(id: string, features: FeatureValue) {
+        const dep = this.dependencies.get(id)
+        if (dep) {
+            for (let i = 0; i < dep.features.length; i++) {
+                if (dep.features[i].id === features.id) {
+                    dep.features[i] = features
+                    break
+                }
+            }
+        }
     }
 }
 

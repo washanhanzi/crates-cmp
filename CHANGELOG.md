@@ -1,5 +1,22 @@
 # Change Log
 
+## [0.0.44] - 2024-07-30
+
+### Fixed
+
+- fix: properly parse user input version in diagnostic
+
+### Added
+
+- code action to update to latest version
+- code action to fix not found version
+
+### Changed
+
+- code refactor
+- more accurate diagnostics ui indicator
+- return as soon as possible when a diagnostic is found
+
 ## [0.0.42] - 2024-07-23
 
 ### Fixed

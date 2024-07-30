@@ -1,4 +1,4 @@
-import { DependencyDecorationStatus, DependencyNode, DependencyDecoration, DependencyDecorationWithCtx } from "@/entity"
+import { DependencyNode, VersionValue, VersionValueWithCtx, VersionState } from "@/entity"
 import { metadata } from "@/repository"
 import { satisfies, prerelease, major } from "semver"
 import { Ctx } from "@/entity"
@@ -7,72 +7,80 @@ export function dependenciesDecorations(ctx: Ctx, input: DependencyNode[]) {
 	if (input.length === 0) {
 		return []
 	}
-	let res: Promise<DependencyDecorationWithCtx>[] = []
+	let res: Promise<VersionValueWithCtx>[] = []
 	for (let d of input) {
-		res.push(dependencyDecoration(ctx, d))
+		res.push(versionDecorations(ctx, d))
 	}
 	return res
 }
 
 //TODO input version start with =
-async function dependencyDecoration(ctx: Ctx, input: DependencyNode): Promise<DependencyDecorationWithCtx> {
+async function versionDecorations(ctx: Ctx, input: DependencyNode): Promise<VersionValueWithCtx> {
 	//get metadata
 	let m = await metadata(ctx.extensionContext, input.name)
 
-	if (!m[input.inputVersion]) {
+	if (!m[input.version.value]) {
 		m = await metadata(ctx.extensionContext, input.name, true)
 	}
 
-	let res: DependencyDecoration = {
-		id: input.id,
-		//current won't be undefined
-		current: input.currentVersion,
-		latest: "",
-		status: DependencyDecorationStatus.UNKOWN
+	let res: VersionValue = {
+		state: VersionState.UNKNOWN,
+		...input.version,
+
 	}
 
 	//stable
-	if (prerelease(res.current!) === null) {
+	if (prerelease(res.installed!) === null) {
 		//outdated
-		if (input.currentVersion !== m.latestStable) {
-			res.status = DependencyDecorationStatus.OUTDATED
+		if (res.installed !== m.latestStable) {
 			res.latest = m.latestStable
 			//return latest stable
-			if (major(res.current!) === major(m.latestStable)) {
-				return { ctx: ctx, decoration: res }
+			if (major(res.installed!) === major(m.latestStable)) {
+				res.state = VersionState.OUTDATED
+				return { ctx: ctx, version: res }
 			} else {
 				//return the max version that satisfy the input version
 				for (let v of m.versions) {
-					if (satisfies(v, res.current!)) {
+					if (satisfies(v, res.installed!)) {
 						res.currentMax = v
-						return { ctx: ctx, decoration: res }
+						if (res.currentMax === res.installed) {
+							res.state = VersionState.LOCKED
+						} else {
+							res.state = VersionState.LOCK_AND_OUTDATED
+						}
+						return { ctx: ctx, version: res }
 					}
 				}
 			}
 		}
-		res.status = DependencyDecorationStatus.LATEST
+		res.state = VersionState.LATEST
 		res.latest = m.latestStable
-		return { ctx: ctx, decoration: res }
+		return { ctx: ctx, version: res }
 	}
 	//pre release
-	if (input.currentVersion !== m.latestPrerelease) {
-		res.status = DependencyDecorationStatus.OUTDATED
+	if (res.installed !== m.latestPrerelease) {
+		res.state = VersionState.OUTDATED
 		res.latest = m.latestPrerelease!
 		//return latest prerelease
-		if (satisfies(m.latestPrerelease!, res.current!)) {
-			return { ctx: ctx, decoration: res }
+		if (satisfies(m.latestPrerelease!, res.installed!)) {
+			return { ctx: ctx, version: res }
 		} else {
 			//return the max version that satisfy the input version
 			for (let v of m.versions) {
-				if (satisfies(v, res.current!)) {
+				if (satisfies(v, res.installed!)) {
 					res.currentMax = v
-					return { ctx: ctx, decoration: res }
+					if (res.currentMax === res.installed) {
+						res.state = VersionState.LOCKED
+					} else {
+						res.state = VersionState.LOCK_AND_OUTDATED
+					}
+					return { ctx: ctx, version: res }
 				}
 			}
 		}
-		return { ctx: ctx, decoration: res }
+		return { ctx: ctx, version: res }
 	}
-	res.status = DependencyDecorationStatus.LATEST
+	res.state = VersionState.LATEST
 	res.latest = m.latestPrerelease
-	return { ctx: ctx, decoration: res }
+	return { ctx: ctx, version: res }
 }

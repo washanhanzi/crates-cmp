@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { parseCargoTreeOutput } from './cargo'
+import { parseCargoTreeOutput } from '../usecase/cargo'
 
 test('normal one', () => {
 	const input = `

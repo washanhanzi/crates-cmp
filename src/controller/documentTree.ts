@@ -1,22 +1,23 @@
 import { Range } from "vscode"
-import { DependencyNode } from "@/entity"
+import { DependencyNode, DocumentNode } from "@/entity"
 
-type DocumentTreeNode = {
-    value: string,
-    range: Range
-}
 
 export class DocumentTree {
     private path: string = ""
-    private nodes: Map<string, DocumentTreeNode> = new Map()
+    private nodes: Map<string, DocumentNode> = new Map()
     private notVisitedNode: Set<string> = new Set()
     private dependencyNodes: { [key: string]: DependencyNode } = {}
+    private rangeStore = new RangeStore()
 
     added: Set<string> = new Set()
     valueUpdated: Set<string> = new Set()
     rangeUpdated: Set<string> = new Set()
     dependencyIds: string[] = []
     deleted: Set<string> = new Set()
+
+    setRnages(range: Range, ids: string[]) {
+        this.rangeStore.set(range.start.line, range.end.line, ids)
+    }
 
     isEmpty() {
         return this.nodes.size === 0
@@ -35,6 +36,7 @@ export class DocumentTree {
     }
 
     init(path: string) {
+        this.rangeStore.clear()
         this.dependencyNodes = {}
         if (this.path !== path) {
             this.nodes.clear()
@@ -74,14 +76,15 @@ export class DocumentTree {
         } else {
             this.added.add(id)
         }
-        this.nodes.set(id, { value, range })
+        // this.notVisitedNode.delete(id)
+        // this.nodes.set(id, { id, value, range, table, dependency: { dependencyId, key } })
     }
 
     addDependency(node: DependencyNode) {
         this.dependencyNodes[node.id] = node
     }
 
-    visitNode(id: string, node: DocumentTreeNode) {
+    visitNode(id: string, node: DocumentNode) {
         this.notVisitedNode.delete(id)
         this.nodes.set(id, node)
     }
@@ -113,6 +116,25 @@ export class DocumentTree {
         return this.nodes.get(id)
     }
 
+    nodeFromRange(range: Range) {
+        const ids = this.rangeStore.ids(range.start.line)
+        if (!ids) return
+        //reverse loop to check smaller range first
+        for (let i = ids.length - 1; i >= 0; i--) {
+            const id = ids[i]
+            const node = this.node(id)
+            if (node
+                && node.range.isSingleLine
+                && node.range.start.line === range.start.line
+                && node.range.start.isBefore(range.start)
+                && node.range.end.isAfter(range.end)
+            ) {
+                return node
+            }
+        }
+        return undefined
+    }
+
     range(id: string) {
         const node = this.nodes.get(id)
         return node ? node.range : undefined
@@ -125,6 +147,24 @@ export class DocumentTree {
             rangeUpdated: Array.from(this.rangeUpdated),
             deleted: Array.from(this.deleted)
         }
+    }
+}
+
+class RangeStore {
+    private ranges: Map<number, string[]> = new Map()
+
+    set(start: number, end: number, ids: string[]) {
+        for (let i = start; i <= end; i++) {
+            this.ranges.set(i, ids)
+        }
+    }
+
+    clear() {
+        this.ranges.clear()
+    }
+
+    ids(line: number) {
+        return this.ranges.get(line)
     }
 }
 

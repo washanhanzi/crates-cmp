@@ -3,6 +3,7 @@ import { Diagnostic, DiagnosticCollection, DiagnosticSeverity, languages, Range,
 
 class DiagnosticStore {
 	private collection: DiagnosticCollection
+	//TODO track diagnostics by path and status enum
 	private state: Map<string, Map<string, Diagnostic>> = new Map()
 
 	constructor() {
@@ -34,12 +35,15 @@ class DiagnosticStore {
 		const m = this.state.get(uri.path)
 		if (m) {
 			this.collection.set(uri, Array.from(m.values()))
+		} else {
+			this.collection.set(uri, undefined)
 		}
 	}
 
 	clear(uri: Uri) {
-		if (this.state[uri.path]) {
-			this.state[uri.path].length = 0
+		const m = this.state.get(uri.path)
+		if (m) {
+			m.clear()
 		}
 	}
 }
