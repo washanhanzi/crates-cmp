@@ -1,17 +1,20 @@
-import { DocumentSelector, ExtensionContext, languages, ShellExecution, Task, TaskDefinition, tasks, TaskScope, window, workspace } from 'vscode'
+import { commands, DocumentSelector, ExtensionContext, languages, ShellExecution, Task, TaskDefinition, tasks, TaskScope, window, workspace } from 'vscode'
 import { CratesCompletionProvider, Listener, rustAnalyzer } from '@/controller'
 import { config } from "@/entity"
 import { cargoTomlAction } from './controller/codeAction'
+import { async } from '@washanhanzi/result-enum'
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: ExtensionContext) {
 	const documentSelector: DocumentSelector = { language: "toml", pattern: "**/Cargo.toml" }
 
-	// const client = await async(rustAnalyzer.init())
-	// if (client.isErr()) {
-	// 	window.showErrorMessage(client.unwrapErr().message)
-	// }
+	const client = await async(rustAnalyzer.init())
+	if (client.isErr()) {
+		window.showErrorMessage(client.unwrapErr().message)
+	}
+	const response: any = await commands.executeCommand('rust-analyzer.analyzerStatus')
+	console.log(response)
 
 	workspace.onDidChangeConfiguration(config.onChange, config)
 

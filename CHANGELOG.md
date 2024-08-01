@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.46] - 2024-08-01
+
+### Added
+
+- dynamic get cargo executable path
+
 ## [0.0.45] - 2024-07-30
 
 ### Added

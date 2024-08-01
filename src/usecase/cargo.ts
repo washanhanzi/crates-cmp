@@ -1,12 +1,6 @@
 import { execAsync } from "@/util"
 import { CargoTable } from "@/entity"
 
-export async function cargoTree(path: string) {
-	const tree = await execAsync(`cargo tree --manifest-path ${path} --depth 1 --all-features`)
-		.catch(e => { throw e })
-
-	return parseCargoTreeOutput(tree as string)
-}
 
 type CargoTreeOutputItem = {
 	name: string

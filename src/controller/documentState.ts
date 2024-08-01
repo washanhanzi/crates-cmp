@@ -4,8 +4,9 @@ import { diagnosticStore } from "./diagnostic"
 import { documentTree } from "./documentTree"
 import { DependenciesTraverser, symbolTree } from "./symbolTree"
 import { async } from "@washanhanzi/result-enum"
-import { dependenciesDecorations, dependenciesDiagnostics, cargoTree, dependencyTree } from "@/usecase"
+import { dependenciesDecorations, dependenciesDiagnostics, dependencyTree } from "@/usecase"
 import { Ctx, FeatureValueWithCtx, VersionState, VersionValueWithCtx } from "@/entity"
+import { cargoTree } from "./cargo"
 
 class DocumentState {
     private docTree = documentTree
