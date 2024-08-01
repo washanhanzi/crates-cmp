@@ -9,16 +9,16 @@ import { async } from '@washanhanzi/result-enum'
 export async function activate(context: ExtensionContext) {
 	const documentSelector: DocumentSelector = { language: "toml", pattern: "**/Cargo.toml" }
 
-	const client = await async(rustAnalyzer.init())
-	if (client.isErr()) {
-		window.showErrorMessage(client.unwrapErr().message)
-	}
-	const response: any = await commands.executeCommand('rust-analyzer.analyzerStatus')
-	console.log(response)
+	// const client = await async(rustAnalyzer.init())
+	// if (client.isErr()) {
+	// 	window.showErrorMessage(client.unwrapErr().message)
+	// }
 
 	workspace.onDidChangeConfiguration(config.onChange, config)
 
 	const listener = new Listener(context)
+
+	// const lockFileList = await workspace.findFiles("**/Cargo.lock")
 
 	context.subscriptions.push(
 		window.onDidChangeActiveTextEditor(listener.onDidChangeActiveEditor, listener),
