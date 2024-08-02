@@ -3,7 +3,9 @@
 > Why I write Rust tool in js and everyone else is writing js tool in Rust?
 
 > [!WARNING]
-> Alpha stage, if you have any suggestion or problems, please open an issue.
+> Alpha stage
+
+[Demo video](https://youtu.be/7r6ksOqbKN0?si=GdUwNwe4tPGssgEH)
 
 ## Usage
 
