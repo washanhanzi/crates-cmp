@@ -1,22 +1,48 @@
-import { DependencyNode, FeatureState, FeatureValueWithCtx, validRange, VersionState, VersionValueWithCtx } from "@/entity"
+import { DependencyNode, FeatureState, Diagnostic, FeatureValue, validRange, Value, VersionState, VersionValue, VersionValueWithCtx } from "@/entity"
 import { Ctx } from "@/entity"
 import { metadata } from "@/repository"
+import { async } from "@washanhanzi/result-enum"
 import { gt, minVersion, prerelease, satisfies } from "semver"
 import { DiagnosticSeverity, ExtensionContext } from "vscode"
 
-//TODO features specified dependency not exist
-export async function dependenciesDiagnostics(ctx: Ctx, input: DependencyNode[]): Promise<Array<VersionValueWithCtx | FeatureValueWithCtx>> {
+type dependencisDiagnosticsOutput = {
+	ctx: Ctx,
+	version?: VersionValue
+	feature?: FeatureValue
+	crate?: Value & Diagnostic
+}
+
+export async function dependenciesDiagnostics(ctx: Ctx, input: DependencyNode[]): Promise<Array<dependencisDiagnosticsOutput>> {
 	if (input.length === 0) {
 		return []
 	}
 	let res: VersionValueWithCtx[] = []
 	for await (let d of input) {
-		const m = await metadata(ctx.extensionContext, d.name, false)
+		const mResult = await async(metadata(ctx.extensionContext, d.name, false))
+		if (mResult.isErr()) {
+			//crate not found
+			if (mResult.unwrapErr().message.startsWith("Request failed with status code 404 Not Found:")) {
+				return [{
+					ctx: ctx,
+					crate: {
+						id: d.id,
+						dependencyId: d.id,
+						value: d.name,
+						severity: DiagnosticSeverity.Error,
+						message: "Crate not found",
+						source: "extension/crates-cmp"
+					},
+				}]
+			}
+			console.log("Sparse index request err: ", mResult.unwrapErr())
+			return []
+		}
+		const m = mResult.unwrap()
 		let satisfiedVersion: string | undefined = undefined
 		//minimum version that satisfies the input version
 		const minSatisfiedVersion = minVersion(d.version.value)
 		//TODO no minimum version?
-		if (!minSatisfiedVersion) { }
+		if (!minSatisfiedVersion) { return [] }
 
 		//check prerelease
 		let isPrerelease = false
@@ -36,7 +62,7 @@ export async function dependenciesDiagnostics(ctx: Ctx, input: DependencyNode[])
 						message: "Version not found, latest stable is " + m.latestStable
 					},
 					...d.version,
-				},
+				}
 			}]
 		} else if (isPrerelease && !m.latestPrerelease) {
 			//prerelease does not exist
@@ -51,7 +77,7 @@ export async function dependenciesDiagnostics(ctx: Ctx, input: DependencyNode[])
 						message: "Prerelease not found, latest stable is " + m.latestStable
 					},
 					...d.version,
-				},
+				}
 			}]
 		} else if (isPrerelease && gt(minSatisfiedVersion!, m.latestPrerelease!)) {
 			//latest prerelease not satisfied
@@ -66,7 +92,7 @@ export async function dependenciesDiagnostics(ctx: Ctx, input: DependencyNode[])
 						message: "Prerelease not found, latest prelease is " + m.latestStable
 					},
 					...d.version,
-				},
+				}
 			}]
 		}
 		else {
@@ -107,11 +133,11 @@ export async function dependenciesDiagnostics(ctx: Ctx, input: DependencyNode[])
 								message: `Feature \"${f.value}\" not found, available features are ` + m.features[satisfiedVersion].join(", ")
 							},
 							...f
-						},
+						}
 					}]
 				}
 			}
 		}
 	}
-	return res
+	return []
 }

@@ -160,6 +160,13 @@ class DependencyTree {
             }
         }
     }
+
+    invalidCrate(id: string) {
+        const dep = this.dependencies.get(id)
+        if (dep) {
+            this.dependencies.set(id, { ...dep, invalid: true })
+        }
+    }
 }
 
 export const dependencyTree = new DependencyTree()

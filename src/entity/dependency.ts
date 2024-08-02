@@ -3,7 +3,7 @@ import { Ctx } from "./ctx"
 import { CargoTable, DependencyKey } from "./cargoToml"
 import { E } from "vitest/dist/reporters-yx5ZTtEV.js"
 
-type Value = {
+export type Value = {
     id: string,
     //refer to the id in DependencyNode
     dependencyId: string,
@@ -58,6 +58,7 @@ export type FeatureValueWithCtx = {
 export type DependencyNode = {
     id: string,
     name: string,
+    invalid?: boolean
     //icns = { package = "tauri-icns", version = "0.1" }
     packageName?: string,
     //user input version

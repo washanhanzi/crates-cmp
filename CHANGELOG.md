@@ -1,5 +1,15 @@
 # Change Log
 
+## [0.0.48] - 2024-08-02
+
+### Added
+
+- audit
+
+### Fixed
+
+- invalid package name
+
 ## [0.0.46] - 2024-08-01
 
 ### Added

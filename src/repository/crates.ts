@@ -19,7 +19,7 @@ export async function sparseIndexMetadata(name: string,): Promise<Metadata> {
 
 	const response = await ky.get(`${url}/${prefix}/${lowerName}`)
 	if (response.status !== 200) {
-		throw new Error(`get crates metadata error: statusCode=${response.status} ${await response.text()}`)
+		throw new Error(`${response.status}`)
 	}
 
 	const jsonLinesArr = (await response.text()).split('\n').filter(n => n)

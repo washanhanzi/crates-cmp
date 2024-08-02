@@ -99,9 +99,8 @@ class DocumentState {
 
         diagnostics
             .filter(d => {
-                let id = ""
-                if ("version" in d) { id = d.version.dependencyId }
-                if ("feature" in d) { id = d.feature.dependencyId }
+                //todo crate
+                let id = d.version?.dependencyId ?? d.feature?.dependencyId ?? d.crate!.dependencyId
                 return this.depTree.checkAndDelDirty(id, d.ctx.rev)
             })
             .forEach(d => {
@@ -109,20 +108,30 @@ class DocumentState {
                 let rangeId = ""
                 let message = ""
                 let severity = DiagnosticSeverity.Hint
-                if ("version" in d) {
+
+                if (d.crate) {
+                    depId = d.crate.id
+                    rangeId = d.crate.id
+                    message = d.crate.message
+                    severity = d.crate.severity
+                    this.depTree.invalidCrate(depId)
+                }
+                if (d.version) {
                     depId = d.version.dependencyId
                     rangeId = d.version.id
                     message = d.version.diagnostic!.message
                     severity = d.version.diagnostic!.severity
                     this.depTree.updateVersion(d.version.dependencyId, d.version)
                 }
-                if ("feature" in d) {
+
+                if (d.feature) {
                     depId = d.feature.dependencyId
                     rangeId = d.feature.id
                     message = d.feature.diagnostic!.message
                     severity = d.feature.diagnostic!.severity
                     this.depTree.updateFeature(d.feature.dependencyId, d.feature)
                 }
+
                 this.decorations.delete(depId)
                 this.diagnostic.add(
                     d.ctx.path,
