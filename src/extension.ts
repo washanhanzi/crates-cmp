@@ -1,4 +1,4 @@
-import { commands, DocumentSelector, ExtensionContext, languages, ShellExecution, Task, TaskDefinition, tasks, TaskScope, window, workspace } from 'vscode'
+import { DocumentSelector, ExtensionContext, languages, window, workspace } from 'vscode'
 import { CratesCompletionProvider, Listener, rustAnalyzer } from '@/controller'
 import { config } from "@/entity"
 import { cargoTomlAction } from './controller/codeAction'

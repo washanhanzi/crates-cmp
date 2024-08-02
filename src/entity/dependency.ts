@@ -1,7 +1,6 @@
 import { DiagnosticSeverity } from "vscode"
 import { Ctx } from "./ctx"
-import { CargoTable, DependencyKey } from "./cargoToml"
-import { E } from "vitest/dist/reporters-yx5ZTtEV.js"
+import { CargoTable } from "./cargoToml"
 
 export type Value = {
     id: string,

@@ -1,4 +1,4 @@
-import { ExtensionContext, window, TextDocument, TextEditor, DiagnosticCollection, Diagnostic, Uri, DiagnosticSeverity } from "vscode"
+import { ExtensionContext, window, TextDocument, TextEditor, Uri } from "vscode"
 import { documentState } from "./documentState"
 import { audit } from "./audit"
 

@@ -105,8 +105,6 @@ class Audit {
         })
         this.diagnostic.render(window.activeTextEditor.document.uri)
     }
-
-    hoverText() { }
 }
 
 export const audit = new Audit(diagnosticStore)

@@ -1,6 +1,4 @@
-import path from "path"
-import os from "os"
-import { ConfigurationChangeEvent, FileType, Uri, workspace } from "vscode"
+import { ConfigurationChangeEvent, workspace } from "vscode"
 
 const SECTION = "crates-cmp"
 const SPARSE_INDEX_CONFIG = "crates.sparse-index.url"

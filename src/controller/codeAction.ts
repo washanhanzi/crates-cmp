@@ -3,11 +3,8 @@ import { documentState } from "./documentState"
 import { DependencyKey, VersionState } from "@/entity"
 
 export class CargoTomlAction implements CodeActionProvider {
+    //TODO why not interface
     private state = documentState
-
-    constructor(state) {
-        this.state = state
-    }
 
     public static readonly providedCodeActionKinds = [
         CodeActionKind.RefactorRewrite
@@ -56,4 +53,4 @@ export class CargoTomlAction implements CodeActionProvider {
     }
 }
 
-export const cargoTomlAction = new CargoTomlAction(documentState)
+export const cargoTomlAction = new CargoTomlAction()

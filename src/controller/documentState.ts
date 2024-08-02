@@ -8,7 +8,7 @@ import { dependenciesDecorations, dependenciesDiagnostics, dependencyTree } from
 import { Ctx, VersionValueWithCtx } from "@/entity"
 import { cargoTree } from "./cargo"
 
-class DocumentState {
+export class DocumentState {
     private docTree = documentTree
     private depTree = dependencyTree
     private decorations = decorationStore

@@ -1,5 +1,4 @@
-import { DependencyDiagnostic } from "@/entity"
-import { Diagnostic, DiagnosticCollection, DiagnosticSeverity, languages, Range, Uri } from "vscode"
+import { Diagnostic, DiagnosticCollection, languages, Uri } from "vscode"
 
 interface IDiagnosticState {
 	equal(s: IDiagnosticState): boolean
