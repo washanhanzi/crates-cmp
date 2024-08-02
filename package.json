@@ -2,7 +2,7 @@
   "name": "crates-cmp",
   "displayName": "crates-cmp",
   "description": "Code completion for Cargo.toml",
-  "version": "0.0.46",
+  "version": "0.0.47",
   "icon": "image/icon.webp",
   "publisher": "washan",
   "license": "SEE LICENSE IN LICENSE",
@@ -52,6 +52,11 @@
             "type": "string",
             "description": "url for crates sparse index",
             "default": "https://index.crates.io"
+          },
+          "crates-cmp.cargo.audit.enable": {
+            "type": "boolean",
+            "description": "enable cargo audit",
+            "default": false
           }
         }
       }

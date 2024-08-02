@@ -15,7 +15,9 @@
 
 ```json
 {
-    "crates-cmp.crates.sparse-index.url": "https://index.crates.io"
+    "crates-cmp.crates.sparse-index.url": "https://index.crates.io",
+    // This feature require [cargo-audit](https://crates.io/crates/cargo-audit)
+    "crates-cmp.cargo.audit.enable": false
 }
 ```
 
@@ -27,8 +29,8 @@
 - [x] Version check (compare installed version and latest version, etc.)
 - [x] Diagnostic (version not exist, feature not exit, etc.)
 - [x] Code action
-- [ ] Audit
-- [ ] Configuration
+- [x] Audit
+- [x] Configuration
 
 ## Copied from
 

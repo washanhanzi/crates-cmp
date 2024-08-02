@@ -4,16 +4,23 @@ import { ConfigurationChangeEvent, FileType, Uri, workspace } from "vscode"
 
 const SECTION = "crates-cmp"
 const SPARSE_INDEX_CONFIG = "crates.sparse-index.url"
+const ENABLE_CARGO_AUDIT = "cargo.audit.enable"
 
 class Config {
     private sparseIndexUrl: string = "https://index.crates.io"
+    private enableAudit: boolean = false
 
     constructor() {
         this.updateSparseIndexUrl()
+        this.updateCargoAudit()
     }
 
     getSparseIndexUrl() {
         return this.sparseIndexUrl
+    }
+
+    getEnableAudit() {
+        return this.enableAudit
     }
 
     updateSparseIndexUrl() {
@@ -23,38 +30,20 @@ class Config {
         }
     }
 
+    updateCargoAudit() {
+        const enableAudit = workspace.getConfiguration("crates-cmp").get(ENABLE_CARGO_AUDIT)
+        if (typeof enableAudit === "boolean") {
+            this.enableAudit = enableAudit
+        }
+    }
+
     onChange(e: ConfigurationChangeEvent) {
         if (e.affectsConfiguration(SECTION + "." + SPARSE_INDEX_CONFIG)) {
             this.updateSparseIndexUrl()
         }
-    }
-}
-
-async function lookupInPath(exec: string): Promise<boolean> {
-    const paths = process.env["PATH"] ?? ""
-
-    const candidates = paths.split(path.delimiter).flatMap((dirInPath) => {
-        const candidate = path.join(dirInPath, exec)
-        return os.type() === "Windows_NT" ? [candidate, `${candidate}.exe`] : [candidate]
-    })
-
-    for await (const isFile of candidates.map(isFileAtPath)) {
-        if (isFile) {
-            return true
+        if (e.affectsConfiguration(SECTION + "." + ENABLE_CARGO_AUDIT)) {
+            this.updateCargoAudit()
         }
-    }
-    return false
-}
-
-function isFileAtPath(path: string): Promise<boolean> {
-    return isFileAtUri(Uri.file(path))
-}
-
-async function isFileAtUri(uri: Uri): Promise<boolean> {
-    try {
-        return ((await workspace.fs.stat(uri)).type & FileType.File) !== 0
-    } catch {
-        return false
     }
 }
 

@@ -2,7 +2,7 @@ import { commands, DocumentSelector, ExtensionContext, languages, ShellExecution
 import { CratesCompletionProvider, Listener, rustAnalyzer } from '@/controller'
 import { config } from "@/entity"
 import { cargoTomlAction } from './controller/codeAction'
-import { async } from '@washanhanzi/result-enum'
+import { audit } from './controller/audit'
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -18,7 +18,9 @@ export async function activate(context: ExtensionContext) {
 
 	const listener = new Listener(context)
 
-	// const lockFileList = await workspace.findFiles("**/Cargo.lock")
+	audit.initialize()
+
+	const watcher = workspace.createFileSystemWatcher("**/Cargo.lock")
 
 	context.subscriptions.push(
 		window.onDidChangeActiveTextEditor(listener.onDidChangeActiveEditor, listener),
@@ -27,7 +29,9 @@ export async function activate(context: ExtensionContext) {
 
 		workspace.onDidCloseTextDocument(listener.onDidCloseTextDocument, listener),
 
-		workspace.createFileSystemWatcher("**/Cargo.lock").onDidChange(listener.onDidLockFileChange, listener),
+		watcher.onDidChange(listener.onDidLockFileChange, listener),
+		watcher.onDidCreate(audit.onLockFileCreate, audit),
+		watcher.onDidDelete(audit.onLockFileDelete, audit),
 
 		languages.registerCodeActionsProvider(documentSelector, cargoTomlAction),
 

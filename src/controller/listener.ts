@@ -1,5 +1,6 @@
 import { ExtensionContext, window, TextDocument, TextEditor, DiagnosticCollection, Diagnostic, Uri, DiagnosticSeverity } from "vscode"
 import { documentState } from "./documentState"
+import { audit } from "./audit"
 
 
 export class Listener {
@@ -28,7 +29,10 @@ export class Listener {
 		await this.state.parseDocument(this.ctx, editor.document)
 	}
 
-	async onDidLockFileChange() {
+	async onDidLockFileChange(e: Uri) {
+
+		audit.onLockFileChange(e)
+
 		if (this.state.noResumeDepTree()) return
 
 		await this.state.parseDependencies(this.ctx, window.activeTextEditor!.document)

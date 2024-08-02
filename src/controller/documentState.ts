@@ -1,11 +1,11 @@
-import { DiagnosticSeverity, ExtensionContext, TextDocument, window, Range } from "vscode"
+import { DiagnosticSeverity, ExtensionContext, TextDocument, window, Range, Diagnostic } from "vscode"
 import { decorationStore, intoDependencyDecoration } from "./decoration"
-import { diagnosticStore } from "./diagnostic"
+import { diagnosticStore, DiagnosticType, MyDiag } from "./diagnostic"
 import { documentTree } from "./documentTree"
 import { DependenciesTraverser, symbolTree } from "./symbolTree"
 import { async } from "@washanhanzi/result-enum"
 import { dependenciesDecorations, dependenciesDiagnostics, dependencyTree } from "@/usecase"
-import { Ctx, FeatureValueWithCtx, VersionState, VersionValueWithCtx } from "@/entity"
+import { Ctx, VersionValueWithCtx } from "@/entity"
 import { cargoTree } from "./cargo"
 
 class DocumentState {
@@ -124,7 +124,13 @@ class DocumentState {
                     this.depTree.updateFeature(d.feature.dependencyId, d.feature)
                 }
                 this.decorations.delete(depId)
-                this.diagnostic.add(d.ctx.path, this.docTree.range(rangeId)!, { id: depId, message, severity })
+                this.diagnostic.add(
+                    d.ctx.path,
+                    {
+                        id: depId,
+                        state: new MyDiag(DiagnosticType.DEPENDENCY),
+                        diagnostic: new Diagnostic(this.docTree.range(rangeId)!, message, severity)
+                    })
             })
         this.diagnostic.render(ctx.uri)
         return
@@ -135,18 +141,16 @@ class DocumentState {
             for (let d of duplicated) {
                 this.diagnostic.add(
                     ctx.path,
-                    this.docTree.range(d.rangeId)!,
                     {
                         id: d.dependencyId,
-                        severity: DiagnosticSeverity.Information,
-                        message: `Found multiple versions: ${d.crates.join(", ")}`,
-                    },
+                        state: new MyDiag(DiagnosticType.DEPENDENCY),
+                        diagnostic: new Diagnostic(this.docTree.range(d.rangeId)!, `Found multiple versions: ${d.crates.join(", ")}`, DiagnosticSeverity.Information)
+                    }
                 )
             }
             this.diagnostic.render(ctx.uri)
         } else {
-            this.diagnostic.clear(ctx.uri)
-            this.diagnostic.render(ctx.uri)
+            this.diagnostic.clear(ctx.uri, new MyDiag(DiagnosticType.DEPENDENCY))
         }
 
         for (let key of this.depTree.notFoundIds()) {
