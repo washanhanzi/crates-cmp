@@ -55,8 +55,8 @@ class Audit {
     }
 
     updateDiagnostic() {
-        if (!window.activeTextEditor) return true
-        if (!window.activeTextEditor.document.fileName.endsWith("Cargo.toml")) true
+        if (!window.activeTextEditor) return
+        if (!window.activeTextEditor.document.fileName.endsWith("Cargo.toml")) return
         const path = window.activeTextEditor.document.uri.path
         let severity = DiagnosticSeverity.Hint
         let message = ""

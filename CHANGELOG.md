@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.51] - 2024-08-06
+
+### Fixed
+
+- fix cargo audit diagnostic showed in wrong file
+
 ## [0.0.49] - 2024-08-02
 
 ### Added
@@ -8,7 +14,7 @@
 
 ### Fixed
 
-- invalid package name
+- diagnostic for invalid package name
 
 ## [0.0.46] - 2024-08-01
 
