@@ -12,6 +12,7 @@ class DependencyTree {
     private dependencies: Map<string, DependencyNode> = new Map()
     private dirtyNodes: Map<string, number> = new Map() // New map to track changed nodes and their revisions
     private notFoundNodes: Set<string> = new Set()
+    private clearWaitingNodes: Set<string> = new Set()
 
 
     isEmpty() {
@@ -30,6 +31,7 @@ class DependencyTree {
         this.dependencies.clear()
         this.dirtyNodes.clear()
         this.notFoundNodes.clear()
+        this.clearWaitingNodes.clear()
     }
 
 
@@ -75,6 +77,11 @@ class DependencyTree {
             const dep = this.dependencies.get(key)
             const crateName = dep!.packageName ?? dep!.name
             const cur = currentDeps[dep!.table][crateName] ?? undefined
+            if (cur.path) {
+                this.clearWaitingNodes.add(key)
+                this.checkAndDelDirty(key, rev)
+                continue
+            }
             if (!cur) {
                 this.notFoundNodes.add(key)
                 continue
@@ -96,8 +103,10 @@ class DependencyTree {
     populateCurrentWithoutDoc(rev: number, currentDeps: ParsedCargoTreeOutput) {
         for (let dep of this.dependencies.values()) {
             const crateName = dep!.packageName ?? dep!.name
-            if (!currentDeps[dep.table][crateName]) continue
-            if (dep.version.installed !== currentDeps[dep.table][crateName].version) {
+            const cur = currentDeps[dep.table][crateName] ?? undefined
+            if (!cur) continue
+            if (cur.path) continue
+            if (dep.version.installed !== cur.version) {
                 this.dependencies.set(dep.id, { ...dep, version: { ...dep.version, installed: currentDeps[dep.table][crateName].version, dependencyId: dep.id } })
                 this.dirtyNodes.set(dep.id, rev)
             }
@@ -124,6 +133,10 @@ class DependencyTree {
 
     notFoundIds() {
         return Array.from(this.notFoundNodes)
+    }
+
+    clearWaitingIds() {
+        return Array.from(this.clearWaitingNodes)
     }
 
     dirtyDeps(rev: number = 0) {

@@ -168,6 +168,10 @@ export class DocumentState {
             }
         }
 
+        for (let key of this.depTree.clearWaitingIds()) {
+            this.decorations.delete(key)
+        }
+
         const deps = this.depTree.dirtyDeps(this.rev)
         if (deps.length === 0) return
 

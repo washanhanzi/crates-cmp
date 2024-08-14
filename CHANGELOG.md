@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.53] - 2024-08-06
+
+### Fixed
+
+- don't mess with local dependencies
+
 ## [0.0.52] - 2024-08-06
 
 ### Fixed
