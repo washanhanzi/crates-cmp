@@ -23,6 +23,7 @@ export async function activate(context: ExtensionContext) {
 	const watcher = workspace.createFileSystemWatcher("**/Cargo.lock")
 
 	context.subscriptions.push(
+		window.onDidChangeActiveColorTheme(config.onThemeChange, config),
 		window.onDidChangeActiveTextEditor(listener.onDidChangeActiveEditor, listener),
 
 		workspace.onDidSaveTextDocument(listener.onDidSaveTextDocument, listener),

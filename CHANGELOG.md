@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.52] - 2024-08-06
+
+### Fixed
+
+- proper decoration color for light theme
+
 ## [0.0.51] - 2024-08-06
 
 ### Fixed
@@ -133,7 +139,8 @@
 
 ### Changed
 
-- nothing changed. Code refactor, deal with async. Maybe I can use RxJS, but I'm not familiar with it.
+- nothing changed. Code refactor, deal with async. Maybe I can use RxJS, but I'm
+  not familiar with it.
 
 ## [0.0.25] - 2024-07-09
 

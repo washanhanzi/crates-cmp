@@ -1,5 +1,5 @@
-import { DependencyDecoration, VersionState, VersionValue } from "@/entity"
-import { Range, TextEditorDecorationType, window } from "vscode"
+import { config, DependencyDecoration, VersionState, VersionValue } from "@/entity"
+import { ColorThemeKind, Range, TextEditorDecorationType, window } from "vscode"
 
 type DecorationState = {
 	decoration: TextEditorDecorationType
@@ -85,22 +85,61 @@ export function intoDependencyDecoration(version: VersionValue) {
 		case VersionState.LATEST:
 			return {
 				text: '✅ ' + version.latest,
-				color: "green"
+				color: latestColor()
 			}
 		case VersionState.OUTDATED:
 			return {
 				text: '⬆️ ' + version.installed + "==>" + version.latest,
-				color: 'yellow'
+				color: outdatedColor()
 			}
 		case VersionState.LOCKED:
 			return {
 				text: '🔒 ' + version.installed + ", " + version.latest,
-				color: 'orange'
+				color: lockColor()
 			}
 		case VersionState.LOCK_AND_OUTDATED:
 			return {
 				text: '🔒 ' + version.installed + "==>" + version.currentMax + ", " + version.latest,
-				color: 'orange'
+				color: lockColor()
 			}
+	}
+}
+
+function latestColor() {
+	switch (config.getCurrentTheme()) {
+		case ColorThemeKind.Light:
+			return "#006400"
+		case ColorThemeKind.HighContrastLight:
+			return "#006400"
+		case ColorThemeKind.Dark:
+			return "green"
+		case ColorThemeKind.HighContrast:
+			return "green"
+	}
+}
+
+function outdatedColor() {
+	switch (config.getCurrentTheme()) {
+		case ColorThemeKind.Light:
+			return "#FF8C00"
+		case ColorThemeKind.HighContrastLight:
+			return "#FF8C00"
+		case ColorThemeKind.Dark:
+			return "yellow"
+		case ColorThemeKind.HighContrast:
+			return "yellow"
+	}
+}
+
+function lockColor() {
+	switch (config.getCurrentTheme()) {
+		case ColorThemeKind.Light:
+			return "#B8860B"
+		case ColorThemeKind.HighContrastLight:
+			return "#B8860B"
+		case ColorThemeKind.Dark:
+			return "orange"
+		case ColorThemeKind.HighContrast:
+			return "orange"
 	}
 }
