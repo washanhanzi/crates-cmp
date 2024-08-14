@@ -12,7 +12,7 @@ class DependencyTree {
     private dependencies: Map<string, DependencyNode> = new Map()
     private dirtyNodes: Map<string, number> = new Map() // New map to track changed nodes and their revisions
     private notFoundNodes: Set<string> = new Set()
-    private clearWaitingNodes: Set<string> = new Set()
+    private localDepNodes: Set<string> = new Set()
 
 
     isEmpty() {
@@ -31,7 +31,7 @@ class DependencyTree {
         this.dependencies.clear()
         this.dirtyNodes.clear()
         this.notFoundNodes.clear()
-        this.clearWaitingNodes.clear()
+        this.localDepNodes.clear()
     }
 
 
@@ -78,8 +78,7 @@ class DependencyTree {
             const crateName = dep!.packageName ?? dep!.name
             const cur = currentDeps[dep!.table][crateName] ?? undefined
             if (cur.path) {
-                this.clearWaitingNodes.add(key)
-                this.checkAndDelDirty(key, rev)
+                this.localDepNodes.add(key)
                 continue
             }
             if (!cur) {
@@ -135,8 +134,8 @@ class DependencyTree {
         return Array.from(this.notFoundNodes)
     }
 
-    clearWaitingIds() {
-        return Array.from(this.clearWaitingNodes)
+    localDepIds() {
+        return Array.from(this.localDepNodes)
     }
 
     dirtyDeps(rev: number = 0) {

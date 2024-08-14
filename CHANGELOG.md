@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.54] - 2024-08-06
+
+## Changed
+
+- show local dependency
+
 ## [0.0.53] - 2024-08-06
 
 ### Fixed

@@ -66,6 +66,11 @@ class DecorationStore {
 		if (range === undefined) return
 		this.decorateDependency(id, range, { text: "Not Installed", color: "grey" })
 	}
+
+	setLocalDep(id: string, range?: Range) {
+		if (range === undefined) return
+		this.decorateDependency(id, range, { text: "Local", color: "grey" })
+	}
 }
 
 export const decorationStore = new DecorationStore()
