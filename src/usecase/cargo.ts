@@ -1,4 +1,3 @@
-import { execAsync } from "@/util"
 import { CargoTable } from "@/entity"
 
 

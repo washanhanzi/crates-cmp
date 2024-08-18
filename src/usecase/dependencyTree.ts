@@ -77,12 +77,12 @@ class DependencyTree {
             const dep = this.dependencies.get(key)
             const crateName = dep!.packageName ?? dep!.name
             const cur = currentDeps[dep!.table][crateName] ?? undefined
-            if (cur.path) {
-                this.localDepNodes.add(key)
-                continue
-            }
             if (!cur) {
                 this.notFoundNodes.add(key)
+                continue
+            }
+            if (cur.path) {
+                this.localDepNodes.add(key)
                 continue
             }
             this.dependencies.set(key, { ...dep!, version: { ...dep!.version, installed: cur.version, dependencyId: key } })

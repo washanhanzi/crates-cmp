@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.55] - 2024-08-18
+
+### Fixed
+
+- correctly parse local dependency
+
 ## [0.0.54] - 2024-08-06
 
 ## Changed

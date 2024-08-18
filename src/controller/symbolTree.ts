@@ -71,6 +71,21 @@ export class CargoTomlWalker {
 					}
 					break
 				case 'workspace':
+					//TODO to support workspace cargo.toml
+					//we need to parse the dependency->child workspace relation
+					//and the current symbol tree rely on dependency table key, we should remove that
+
+					// for (let child of node.children) {
+					// 	if (child.name === "dependencies") {
+					// 		this.onDependencies(nodeId(node.name, child.name), child, CargoTable.DEPENDENCIES)
+					// 	}
+					// 	else if (child.name === "dev-dependencies") {
+					// 		this.onDependencies(nodeId(node.name, child.name), child, CargoTable.DEV_DEPENDENCIES)
+					// 	}
+					// 	else if (child.name === "build-dependencies") {
+					// 		this.onDependencies(nodeId(node.name, child.name), child, CargoTable.BUILD_DEPENDENCIES)
+					// 	}
+					// }
 					if (this.enterTable(node, CargoTable.WORKSPACE)) {
 						this.onWorkspace(node.name, node)
 					}
