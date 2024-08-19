@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.56] - 2024-08-18
+
+### Fixed
+
+- correctly check dependency's local path or remote path
+
 ## [0.0.55] - 2024-08-18
 
 ### Fixed

@@ -81,7 +81,7 @@ class DependencyTree {
                 this.notFoundNodes.add(key)
                 continue
             }
-            if (cur.path) {
+            if (cur.path && !cur.path.startsWith("http")) {
                 this.localDepNodes.add(key)
                 continue
             }
@@ -104,7 +104,7 @@ class DependencyTree {
             const crateName = dep!.packageName ?? dep!.name
             const cur = currentDeps[dep.table][crateName] ?? undefined
             if (!cur) continue
-            if (cur.path) continue
+            if (cur.path && !cur.path.startsWith("http")) continue
             if (dep.version.installed !== cur.version) {
                 this.dependencies.set(dep.id, { ...dep, version: { ...dep.version, installed: currentDeps[dep.table][crateName].version, dependencyId: dep.id } })
                 this.dirtyNodes.set(dep.id, rev)
